@@ -1,9 +1,37 @@
-function [eta_to_template_vox, eta_subject_index] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, wb_command)
+function [eta_to_template_vox, eta_subject_index] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command)
+
+%subjectlist = subject (e.g. dconn.nii)
+%data_type = "parcellated" or "dense" connectivity matrix
+%template_path = path to .mat file that has th network templates.
+%transform_data =  if you want to convert you data before comparing to your template, use can use 1 of 2 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearons' or 'Convert_to_Zscores' or use no tranformation
+%output_cifti_name = output_cifti_name pretty clear
+%cifti_output_folder = your project directory
+%wb_command = path to run HCP workbench command.
+
+
 %%% load subjects, network info %%%
 %load /data/cn6/allyd/kelleyData/pnm_list_revised.mat
 %load /data/cn6/allyd/kelleyData/allSubjects.mat %%% allSubjects
 %load /data/cn6/allyd/kelleyData/subjectswith20min.mat %%% subs_25min 
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
+
+
+support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/support_files'];
+addpath(genpath(support_folder));
+settings=settings_comparematrices;%
+np=size(settings.path,2);
+
+warning('off') %supress addpath warnings to nonfolders.
+disp('Attempting to add neccesaary paths and functions.')
+for i=2:np % start at 2 to skip MSCcodebase
+    addpath(genpath(settings.path{i}));
+end
+rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+wb_command=settings.path_wb_c; %path to wb_command
+warning('on')
+
+
+
 
 %%% threshold template values @ min value %%%
 TEMPLATEMINIMUM = 0.37;
@@ -19,6 +47,11 @@ end
 
 
 for i = 1:length(subjectlist)
+        if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
+        disp('.mat file already reated.  loading...');
+        load([cifti_output_folder '/' output_cifti_name '.mat']);
+    new_subject_labels = eta_subject_index;
+        else
     %subnum = subjectlist(i);
     %index = find(allSubjects==subnum); %%% index of good subject in full subjects list %%%
     
@@ -171,7 +204,38 @@ for i = 1:length(subjectlist)
     %clear new_full_mat net_subject_ind_full_matrix network_subject_index y template eta_subject_index temp
     
     toc
+            save([cifti_output_folder '/' output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
+            new_subject_labels = eta_subject_index;
+        end
 end
-  
+
+% if make_cifi_from_results == 1; %DF: This variable was not defined, I changed to make a cifti if the mat file exists.
+
+if exist([cifti_output_folder '/' output_cifti_name '.mat'],'file') == 2
+    disp('saving file to cifti')
+    saving_template =ciftiopen(settings.path{8}, wb_command); % don't forget to load in a gifti object, or  else saving_template will be interpreted as a struct.
+    saving_template.cdata = single(new_subject_labels);
+    %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
+    disp('Saving new scalar')
+    save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary') %DF: This save not pointing to the right place fix!
+    %save(saving_template, output_cifti_scalar_name, wb_command) %RH sifti save fix.
+    switch data_type
+        case 'parcellated'
+            output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
+        case 'dense'
+            output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+    end
+    disp('Converting scalar .gii to .nii')
+    unix([wb_command ' -cifti-convert -from-gifti-ext ' cifti_output_folder '/' output_cifti_name '.gii ' output_cifti_scalar_name ]);
+    disp('Removing .gii')
+    unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.gii']);
+    unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.dat']);
+else
+    disp(['Something went wrong.' cifti_output_folder '/' output_cifti_name '.mat not found.  Data was not made into a cifti.' ]);
+end
+% cmd = ['mv ' cifti_output_folder '/' output_cifti_scalar_name];
+% unix(cmd)
+% clear cmd
+
 clear subs nets tmask i
 end

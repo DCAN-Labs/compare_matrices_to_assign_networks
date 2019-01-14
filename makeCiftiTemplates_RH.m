@@ -1,7 +1,17 @@
-function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,motion_file)
+function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,motion_file,Zscore_regions,power_motion,remove_outliers)
 %%% load consensus, subjects, networks
 %consen = ft_read_cifti_mod('/data/cn6/allyd/variants/120_colorassn_minsize400_manualconsensus.dtseries.nii');
 %consen = ft_read_cifti_mod('/mnt/max/shared/code/internal/utilities/community_detection/fair/120_colorassn_minsize400_manualconsensus.dtseries.nii');
+
+%some hardcodes:
+FD_threshold = 0.2;
+
+if Zscore_regions == 1
+    L_size = 29696; %hardcode - number of parcellations
+    R_size = 29716;
+    S_size = 31870;
+else
+end
 
 %% Adding paths for this function
 support_folder=[pwd '/support_files'];
@@ -93,8 +103,40 @@ else
         
         %tmask = dlmread(['/data/cn6/allyd/TRsurfaces/ciftiFiles_TR/' subs{i} '/total_tmask.txt']);
         %TR.data = TR.data(:,tmask>0);
-        tmask = load(B{i});
-        
+        if power_motion == 1
+            %use power method
+            load(B{i})
+            allFD = zeros(1,length(motion_data));
+            for j = 1:length(motion_data)
+                allFD(j) = motion_data{j}.FD_threshold;
+            end
+            FDidx = find(round(allFD,3) == round(FD_threshold,3));
+            FDvec = motion_data{FDidx}.frame_removal;
+            FDvec = abs(FDvec-1);
+            if exist('remove_outliers','var') == 0 || remove_outliers == 1
+                disp('Removal outliers not specified.  It will be performed by default.')
+                %% additional frame removal based on Outliers command: isoutlier with "median" method.
+                stdev_temp_filename =[file_root '_temp.txt'];
+                cmd = [wb_command ' -cifti-stats ' subs{i} ' -reduce STDEV > ' stdev_temp_filename];
+                system(cmd);
+                clear cmd
+                disp('waiting 10 seconds for writing of temp file before reading. Line:258 (not an error)')
+                pause(10);  % to give time to write temp file, failed to load with pause(1)
+                STDEV_file=load(stdev_temp_filename); % load stdev of .nii file.
+                system(['rm -f ' stdev_temp_filename]); %clean up                
+                FDvec_keep_idx = find(FDvec==1); %find the kept frames from the FD mask
+                Outlier_file=isthisanoutlier(STDEV_file(FDvec_keep_idx),'median'); %find outlier
+                Outlier_idx=find(Outlier_file==1); %find outlier indices
+                FDvec(FDvec_keep_idx(Outlier_idx))=0; %set outliers to zero within FDvec
+                clear STDEV_file FDvec_keep_idx Outlier_file Outlier_idx
+                
+            else exist('remove_outliers','var') == 1 && remove_outliers == 0;
+                disp('Motion censoring performed on FD alone. Frames with outliers in BOLD std dev not removed');
+            end
+            tmask = FDvec;
+        else
+            tmask = load(B{i});
+        end     
         
         for j=1:length(network_names)
             if j==4 || j==6
@@ -104,7 +146,7 @@ else
             inds = consen.data==j;
             subNetAvg= nanmean(TR.data(inds,:),1);
             for voxel=1:length(TR.data);
-                goodvox= ~isnan(TR.data(voxel,:));
+                goodvox= ~isnan(TR.data(voxel,:));           
                 corrs(voxel,j)=paircorr_mod(subNetAvg(goodvox)', TR.data(voxel,goodvox)')';
             end
             clear inds
@@ -114,6 +156,19 @@ else
         clear corrs subNetAvg cii
     end
     save(['seedmaps_' file_root_no_ext '.mat'],'seedmapsTR','-v7.3')
+end
+
+if Zscore_regions == 1
+    disp('Converting to Zscores')
+    for i=1:length(seedmapsTR)
+        for j=1:size(corrs)
+            seedmaps{i}(1:29696,j) = zscore(seedmaps{i}(1:29696,j));
+            seedmaps{i}(29697:59412,j) = zscore(seedmaps{i}(29697:59412,j));
+            seedmaps{i}(59413:91282,j) = zscore(seedmaps{i}(59413:91282,j));
+        end
+    end
+save(['seedmaps_withinregionZscores' file_root_no_ext '.mat'],'seedmapsTR','-v7.3')
+else
 end
 
 %%% average within networks across subjects

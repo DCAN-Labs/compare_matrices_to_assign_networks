@@ -2,6 +2,8 @@ function mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_
 %% This code is designed to make correlation matrix from a subject's dtseries, and motion, and surface files (if smoothing is desired) See documentation for cifti_conn_matrix.
 %This code then runs template matching on subjects.  It adds
 
+%load('/mnt/max/shared/code/internal/analyses/compare_matrices/minutes_vector.mat') %[1,2,3,4,5,10,15,20];
+
 if isnumeric(minutes_vector)==1
 else
     if strcmp(minutes_vector,'none') == 1      
@@ -63,13 +65,16 @@ for i=1:length(minutes_vector)
             else
                 output_cifti_scalar_name  = [output_cifti_name minutes_name '_method_' method '.dscalar.nii'];
             end
-            
+        otherwise
+            disp('series type must either "ptseries" or "dtseries". check your inputs.')
+           return            
     end
     if exist(output_cifti_scalar_name) ==0
         disp([output_cifti_scalar_name ' not found. Making matrix prior to template matching.']);
         %% Step 1: make connectivity matrix
         addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien');
         temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector{i}, smoothing_kernal,left_surface_file, right_surface_file, bit8);
+        
         %% step 1b: refine matrix? reduce noise in matrix.
         if cifti_enhancement ==1
         enhanced_network_name = run_cifti_network(temp_name,data_type);
@@ -78,11 +83,12 @@ for i=1:length(minutes_vector)
         end
         
         %% Step 2: Do template matching to get network assingments
-        [new_subject_labels, output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name minutes_vector{i}],method,data_type,cifti_enhancement);
+        [new_subject_labels, output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name num2str(minutes_vector{i})],method,data_type,cifti_enhancement);
         %% Step 3: Remove dconn.
         %conn_dir = fileparts(dt_or_ptseries_conc_file);
         cmd = ['rm -f ' temp_name];
         disp(cmd);
+        system(cmd);
     else
         disp([output_cifti_scalar_name ' found. Loading scalar.']);
         current_cifti_labels = ciftiopen(output_cifti_scalar_name,wb_command);

@@ -388,8 +388,11 @@ switch method
             networks_template_path = settings.path{12};
             [eta_to_template_vox, eta_subject_index] = template_matching_RH(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,wb_command);
             new_subject_labels = eta_subject_index;
-            save([output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
-            saving_template =ciftiopen(settings.path{8}, wb_command);   
+            %save([output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
+            saving_template =ciftiopen(settings.path{8}, wb_command);
+            % Ciftis are made by default in template matching code used
+            % above.  So it is not necessary to remake them (i.e. not necessary to set "make_ciftis_from_results" to 1).
+            make_cifti_from_results = 0;
         else
             disp([output_cifti_name '.mat file (contains Eta_to_template_vox) found for this subject found. Template matching has alreday been run for subject. Loading data.'])
             networks_template_path = settings.path{12};
