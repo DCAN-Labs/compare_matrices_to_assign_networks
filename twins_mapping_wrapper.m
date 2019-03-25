@@ -20,7 +20,7 @@ transform_data = 'Convert_FisherZ_to_r';
 template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
 remove_dconn =1;
 make_dconn_conc = 0;
-
+output_file_name = 'alltwins';
 %% Start
 %import concs
 dtseries_file = importdata(dt_or_ptseries_conc_file);
@@ -34,7 +34,6 @@ else
     disp('Settings are set to save all dconns. Be mindful of space.')
 end
 
-
 for i = 1:num_sub %number of subjects
     
     %step 0: infer output cifti name based on dtseries\
@@ -47,23 +46,57 @@ for i = 1:num_sub %number of subjects
     [~,filename_short]= fileparts(filename_long);
     output_cifti_name =[filename_short '_template_matched'];
     
+    
+    switch data_type
+        case 'parcellated'
+            output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
+        case 'dense'
+            output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+    end
+    
     %Step 1: make matrix
     %BLV added additional path for template_matching_RH
     support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/'];
     addpath(genpath(support_folder));
     addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
-    subjectdconn = cifti_conn_matrix(conc,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8,make_dconn_conc);
     
-    %Step 2: get network assingments
-    [~, eta_subject_index{i}] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command);
-    
-    if remove_dconn ==1 % RH added in case filespace becomes an limited.
-        % Step 2.5: Remove dconn to save space.
-        cmd = ['rm -f ' subjectdconn];
-        disp(cmd);
-        system(cmd);
-    else
-        disp('Keeping dconn. Be mindful of space.')
+    if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2 
+        disp('.mat file already created.  loading...');
+        load([cifti_output_folder '/' output_cifti_name '.mat']);
+        new_subject_labels = eta_subject_index;
+        eta_net_assign{i} = eta_subject_index;
+        
+        if exist([output_cifti_scalar_name],'file') == 0
+            disp('saving file to cifti')
+            saving_template =ciftiopen(settings.path{8}, wb_command); % don't forget to load in a gifti object, or  else saving_template will be interpreted as a struct.
+            saving_template.cdata = single(new_subject_labels);
+            %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
+            disp('Saving new scalar')
+            save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary') %DF: This save not pointing to the right place fix!
+            %save(saving_template, output_cifti_scalar_name, wb_command) %RH sifti save fix.
+            disp('Converting scalar .gii to .nii')
+            unix([wb_command ' -cifti-convert -from-gifti-ext ' cifti_output_folder '/' output_cifti_name '.gii ' output_cifti_scalar_name ]);
+            disp('Removing .gii')
+            unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.gii']);
+            unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.dat']);
+        else
+            disp(['Cifti file already exists. Data was loaded from corresponding .mat file.' ]);
+        end
+        
+    else % start from beginning
+        subjectdconn = cifti_conn_matrix(conc,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8,make_dconn_conc);
+        
+        %Step 2: get network assingments
+        [~, eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command);
+        
+        if remove_dconn ==1 % RH added in case filespace becomes an limited.
+            % Step 2.5: Remove dconn to save space.
+            cmd = ['rm -f ' subjectdconn];
+            disp(cmd);
+            system(cmd);
+        else
+            disp('Keeping dconn. Be mindful of space.')
+        end
     end
 end
 
@@ -73,17 +106,22 @@ disp('Done calculating network assingments for all pairs. Proceeding to calculat
 
 for i = 1:2:num_sub %number of subjects
     %Step 3: calculate mutualinformation
-    muI(i,1) = MutualInformation(eta_subject_index{i},eta_subject_index{i+1}); %Mutual information
-    [VIn(i,1), MIn(i,1)] = partition_distance(eta_subject_index{i},eta_subject_index{i+1}); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+    %idx = 1:2:26;
+    %muI(i,1) = MutualInformation(eta_net_assign{i},eta_net_assign{i+1}); %Mutual information
+    %[VIn(i,1), MIn(i,1)] = partition_distance(eta_net_assign{i},eta_net_assign{i+1}); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+    muI(round(i/2),1) = MutualInformation(eta_net_assign{i},eta_net_assign{i+1}); %Mutual information
+    [VIn(round(i/2),1), MIn(round(i/2),1)] = partition_distance(eta_net_assign{i},eta_net_assign{i+1}); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+
+
 end
 
 %display summary
 MIn
-MuI
+muI
 VIn
 
-dlmwrite([cifti_output_folder '/' output_cifti_name '.txt'],MIn,muI,VIn,'roffset',1)
-
+%dlmwrite([cifti_output_folder '/' output_cifti_name '.txt'],MIn,muI,VIn,'roffset',1)
+save([cifti_output_folder '/' output_file_name '.mat'],'MIn','muI','VIn');
 disp('done calculating mutual information for all pairs')
 
 end

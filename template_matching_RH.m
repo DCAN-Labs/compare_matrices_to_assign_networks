@@ -1,4 +1,4 @@
-function [eta_to_template_vox, eta_subject_index] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command)
+function [eta_to_template_vox, eta_subject_index,output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results)
 
 %subjectlist = subject (e.g. dconn.nii)
 %data_type = "parcellated" or "dense" connectivity matrix
@@ -13,28 +13,75 @@ function [eta_to_template_vox, eta_subject_index] = template_matching_RH(subject
 %load /data/cn6/allyd/kelleyData/pnm_list_revised.mat
 %load /data/cn6/allyd/kelleyData/allSubjects.mat %%% allSubjects
 %load /data/cn6/allyd/kelleyData/subjectswith20min.mat %%% subs_25min 
-network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
-
-
-support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/support_files'];
+%% Adding paths for this function
+this_code = which('template_matching_RH');
+[code_dir,~] = fileparts(this_code);
+support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
 
-warning('off') %supress addpath warnings to nonfolders.
 disp('Attempting to add neccesaary paths and functions.')
-for i=2:np % start at 2 to skip MSCcodebase
+warning('off') %supress addpath warnings to nonfolders.
+for i=2:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-wb_command=settings.path_wb_c; %path to wb_command
+rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
 warning('on')
 
+wb_command=settings.path_wb_c; %path to wb_command
 
+network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
+%support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/support_files'];
+%addpath(genpath(support_folder));
+%settings=settings_comparematrices;%
+%np=size(settings.path,2);
 
+%warning('off') %supress addpath warnings to nonfolders.
+% disp('Attempting to add neccesaary paths and functions.')
+% for i=2:np % start at 2 to skip MSCcodebase
+%     addpath(genpath(settings.path{i}));
+% end
+% rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+% wb_command=settings.path_wb_c; %path to wb_command
+% warning('on')
+if isnumeric(make_cifti_from_results)==1
+else
+    if strcmp(make_cifti_from_results,'none') == 1
+    else
+        make_cifti_from_results = str2double(make_cifti_from_results);
+    end
+end
+
+    switch data_type
+        case 'parcellated'
+            disp('data_type is parcellated')
+        case 'dense'
+            disp('data_type is dense')
+        otherwise
+            disp('data_type must be parellated or dense')
+            return
+    end
+
+disp('NOTE: Your template-matching threshold should match the units of your template');
 %%% threshold template values @ min value %%%
-TEMPLATEMINIMUM = 0.37;
+switch transform_data
+    case 'Convert_FisherZ_to_r'
+        TEMPLATEMINIMUM = 0.37;
+    case 'Convert_r_to_Pearons'
+        TEMPLATEMINIMUM = 0.37;
+    case'Convert_to_Zscores'
+        TEMPLATEMINIMUM = 1.00;
+    otherwise
+        TEMPLATEMINIMUM = 0.37;
+end
+
+disp(['template minimum is set at ' num2str(TEMPLATEMINIMUM)]);
+
+
+
 %load('/data/cn6/allyd/TRsurfaces/templatemat_fullCortex.mat'); %template matrix
 load(template_path);
 cifti_template_mat_full =seed_matrix;
@@ -45,6 +92,11 @@ else
     subjectlist = {subjectlist};
 end
 
+%change name for Zscored data
+if strcmp(transform_data,'Convert_to_Zscores') ==1 
+output_cifti_name = [output_cifti_name '_Zscored'];
+else
+end
 
 for i = 1:length(subjectlist)
         if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
@@ -76,7 +128,6 @@ for i = 1:length(subjectlist)
 %     clear catTmask
 %     
 %     
-     tic
 %    
 %     %%% make correlation matrix %%%
 %     disp(['Processing subject ' num2str(subnum) '...']);
@@ -101,7 +152,7 @@ for i = 1:length(subjectlist)
 
     %cii=ciftiopen('/mnt/max/shared/projects/hcp_community_detection/Evan_test/Cifti_Community_Detection/distmat_creation/EUGEODistancematrix_XYZ_255interhem_unit8.pconn.nii',path_wb_c);
     %template_cii=ciftiopen('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii', wb_command);
-
+    tic 
     disp('opening subject dconn...')
     switch transform_data
         case 'Convert_FisherZ_to_r'
@@ -116,7 +167,7 @@ for i = 1:length(subjectlist)
             disp('Converting from Fisher Z to Person (tanh).')
             corr_mat_full = tanh(corr_mat_full);
             
-        case 'Convert_r_to_Pearons'
+        case 'Convert_r_to_Fisher'
             subject_cii=ciftiopen(char(subjectlist), wb_command); %dconn path
             corr_mat_full = single(subject_cii.cdata);
             if range(corr_mat_full)>2
@@ -127,12 +178,15 @@ for i = 1:length(subjectlist)
             disp('Converting from Person to Fisher Z(atanh).')
             corr_mat_full = atanh(corr_mat_full);
             
-        case'Convert_to_Zscores'
-            disp('Converting from to Z-scores region-wise.')
-            addpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/')
-            output_cifti_name = Zscore_dconn(char(subjectlist{i}),'inferred');
-            subject_cii=ciftiopen(char(output_cifti_name), wb_command); %dconn path
+        case 'Convert_to_Zscores'
+            disp('Converting from to Z-scores region-wise. Input dconn can either be pearson or fisherZ.')
+            %addpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/')
+            addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn')
+            Zdconn = Zscore_dconn(char(subjectlist{i}),'inferred');
+            subject_cii=ciftiopen(char(Zdconn) , wb_command); %dconn path
             corr_mat_full = single(subject_cii.cdata);
+            %[~,output_cifti_name] = fileparts(output_cifti_name);
+            %output_cifti_name = [B '.nii'];
             
         otherwise      
         disp('Data transformation method not found. No tranformation will be applied.  If tranformation is desired, please select: "Convert_FisherZ_to_r" or "Convert_r_to_Pearons" or "Convert_to_Zscores".')
@@ -233,7 +287,14 @@ if exist([cifti_output_folder '/' output_cifti_name '.mat'],'file') == 2
 else
     disp(['Something went wrong.' cifti_output_folder '/' output_cifti_name '.mat not found.  Data was not made into a cifti.' ]);
 end
+
+disp(['Cleaning: ' output_cifti_scalar_name]);
+[outname] = clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[]);
+disp(['Clean file: ' outname '.dscalar.nii'])
+
 % cmd = ['mv ' cifti_output_folder '/' output_cifti_scalar_name];
+
+
 % unix(cmd)
 % clear cmd
 
