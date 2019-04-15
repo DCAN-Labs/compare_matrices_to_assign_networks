@@ -386,7 +386,7 @@ switch method
         if exist([output_cifti_name '.mat']) == 0 % if the matrix already exists skip
             disp([output_cifti_name '.mat file (contains Eta_to_template_vox) Eta_to_template_vox .mat file not found for this subject found. Running template matching (~1-2 hrs).'])
             networks_template_path = settings.path{12};
-            [eta_to_template_vox, eta_subject_index] = template_matching_RH(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,wb_command);
+            [eta_subject_index, output_cifti_scalar_name] = template_matching_RH(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,wb_command);
             new_subject_labels = eta_subject_index;
             %save([output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
             saving_template =ciftiopen(settings.path{8}, wb_command);
