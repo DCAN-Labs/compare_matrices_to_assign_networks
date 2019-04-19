@@ -14,17 +14,25 @@ else
 end
 
 %% Adding paths for this function
-support_folder=[pwd '/support_files'];
+this_code = which('makeCiftiTemplates_RH');
+[code_dir,~] = fileparts(this_code);
+support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
 
+disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
-for i=1:np
+for i=2:np
     addpath(genpath(settings.path{i}));
 end
 
-rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+%addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio')
+%rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+%addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')
+addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_scripts')
+rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio/');
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
@@ -75,8 +83,8 @@ file_split = strsplit(file_dir,'/');
 file_name = char(file_split(end));
 file_root = strsplit(file_name,'.');
 file_root_no_ext = char(file_root(1));
- %template_cii=ciftiopen(settings.path{6}, wb_command); %parcellated networks labels path (pscalar).
- %template_labels = template_cii.cdata;
+%template_cii=ciftiopen(settings.path{6}, wb_command); %parcellated networks labels path (pscalar).
+%template_labels = template_cii.cdata;
 
 consen = ft_read_cifti_mod(settings.path{6}); %path to dscalar with template labels.
 %subs = textread('/data/cn6/allyd/TRsurfaces/allTRlist.txt','%s');
@@ -87,9 +95,9 @@ consen = ft_read_cifti_mod(settings.path{6}); %path to dscalar with template lab
 %%% load BOLD data from subjects
 %%% extract mean time series for all voxels labeled network j
 %%% compute corr between mean and all voxels in that subject
-if exist([pwd '/seedmaps_' file_root_no_ext '.mat'],'file') == 2
+if exist([code_dir '/seedmaps_' file_root_no_ext '.mat'],'file') == 2
     disp('loading previously generated data from each subject for template');
-    load([pwd '/seedmaps_' file_root_no_ext '.mat'])
+    load([code_dir '/seedmaps_' file_root_no_ext '.mat'])
 else
     for i=1:length(subs)
         disp(['subject ' subs{i}]);
@@ -99,7 +107,7 @@ else
         %cii=ciftiopen(subs{i},wb_command);
         %newcii=cii;
         TR = ft_read_cifti_mod(subs{i});
-        %TR=single(cii.data);      
+        %TR=single(cii.data);
         %tmask = dlmread(['/data/cn6/allyd/TRsurfaces/ciftiFiles_TR/' subs{i} '/total_tmask.txt']);
         
         if power_motion == 1
@@ -148,56 +156,147 @@ else
         end
         clear TR tmask
         seedmapsTR{i} = corrs;
-        clear corrs subNetAvg cii
+        clear subNetAvg cii
     end
     save(['seedmaps_' file_root_no_ext '.mat'],'seedmapsTR','allmasks_outliers_removed_FD02','allmasks_before_outliers_removed_FD02', '-v7.3')
 end
 
-if Zscore_regions == 1
-    disp('Converting to Zscores')
-    for i=1:length(seedmapsTR)
-        for j=1:size(corrs)
-            seedmaps{i}(1:29696,j) = zscore(seedmaps{i}(1:29696,j));
-            seedmaps{i}(29697:59412,j) = zscore(seedmaps{i}(29697:59412,j));
-            seedmaps{i}(59413:91282,j) = zscore(seedmaps{i}(59413:91282,j));
-        end 
+% if Zscore_regions == 1
+%     disp('Converting to Zscores')
+%     for i=1:length(seedmapsTR)
+%         if exist('corrs','var') == 1% if data is previously loaded corrs might be a variable in workspace
+%         else
+%             corrs = ones(91282,16); %build a dummy variable that is a 91282 by 16 matrix.
+%         end
+%         try
+%             for j=1:size(corrs,2)
+%                 seedmapsTR{i}(1:29696,j) = zscore(seedmapsTR{i}(1:29696,j));
+%                 seedmapsTR{i}(29697:59412,j) = zscore(seedmapsTR{i}(29697:59412,j));
+%                 seedmapsTR{i}(59413:91282,j) = zscore(seedmapsTR{i}(59413:91282,j));
+%             end
+%         catch
+%             disp(num2str(i))
+%             return
+%         end
+%     end
+%     save(['seedmaps_withinregionZscores' file_root_no_ext '.mat'],'seedmapsTR','-v7.3')
+% else
+% end
+%% There are two methods for averaging, depending on whether or nothe data is Zscored.
+
+%1) if your data is not Zscored, i.e. you want seedmaps based on
+%correlation, the process is as follows:
+
+%%% 1.1: Average within networks across subjects
+%%% 1.2: Fisher transform for each subject before making average
+%%% 1.3  Reverse fisher transform after average
+
+%2) If your data is Zscored, we simply average those Zscores together.
+
+%     if exist([code_dir '/support_files/seedmaps_' file_root_no_ext '_all_networks.mat'],'file') == 2
+%         disp('loading previously generated data for template');
+%         load([code_dir '/support_files/seedmaps_' file_root_no_ext '_all_networks.mat'])
+%     else
+%     end
+
+%% Check for nans
+disp('Checking for nans in seeds...')
+k=1; %counter for bad subjects
+cleansubs = subs;
+for i=1:length(subs)
+    for j=1:length(network_names)
+        if j==4 || j==6
+            continue
+        end
+        %seedmapsTR{i}(:,j)
+        if sum(isnan(seedmapsTR{i}(:,j))) > 0
+            disp(['This subject ' num2str(i) ' has Nans'])
+            disp(['File with nans is : ' subs{i} ])
+            disp(['number of greyordinates with nans = ' num2str(sum(isnan(seedmapsTR{i}(:,j))))])
+            badsubidx(k,1) = i; k = k+1;
+        else
+        end
     end
-save(['seedmaps_withinregionZscores' file_root_no_ext '.mat'],'seedmapsTR','-v7.3')
+end
+badsubidx = unique(badsubidx);
+cleansubs(badsubidx,:) = [];
+subs = cleansubs;
+cleanseedmapsTR = seedmapsTR;
+cleanseedmapsTR(badsubidx) = [];
+seedmapsTR = cleanseedmapsTR;
+if isempty(badsubidx)
+    disp('Congratulations, your data has no nans.')
 else
+disp([num2str(length(badsubidx)) ' subjects were removed from average for "Nans" in greyordinates.'])
 end
 
-%%% average within networks across subjects
-%%% fisher transform for each subject before making average
-%%% reverse fisher transform after average
-if exist([pwd '/support_files/seedmaps_' file_root_no_ext '_all_networks_fromsurfonly.mat'],'file') == 2
-    disp('loading previously generated data for template');
-    load([pwd '/support_files/seedmaps_' file_root_no_ext '_all_networks_fromsurfonly.mat'])
-else
+%% Start averaging
 for j=1:length(network_names)
     if j==4 || j==6
         continue
     end
-    
     grpNetAve= zeros(size(seedmapsTR{1},1),1);
     for i=1:length(subs)
         grpNetAve=grpNetAve + atanh(seedmapsTR{i}(:,j));
     end
-    grpNetAve=grpNetAve ./ length(subs);  
+    grpNetAve=grpNetAve ./ length(subs);
     %avgSeedmaps{j}=inverseFisherTransform(grpNetAve);
     avgSeedmaps{j}=tanh(grpNetAve);
     
-    temp=ft_read_cifti_mod(subs{i});
-    temp.data=avgSeedmaps{j};
-
-    surface=temp.data(1:59412); temp.data(consen.data==0)=0; temp.data(1:59412)=surface; %w subcortex
+    if Zscore_regions == 1
+        disp('Converting to Zscores')
+        %for i=1:length(seedmapsTR)
+        %         if exist('corrs','var') == 1% if data is previously loaded corrs might be a variable in workspace
+        %         else
+        %             corrs = ones(91282,16); %build a dummy variable that is a 91282 by 16 matrix.
+        %         end
+        try
+            %for j=1:size(corrs,2)
+            avgSeedmaps{j}(1:29696) = zscore(avgSeedmaps{j}(1:29696));
+            avgSeedmaps{j}(29697:59412) = zscore(avgSeedmaps{j}(29697:59412));
+            avgSeedmaps{j}(59413:91282) = zscore(avgSeedmaps{j}(59413:91282));
+            %end
+        catch
+            disp(num2str(i))
+            return
+        end
+        %end
+        %save(['seedmaps_withinregionZscores' file_root_no_ext '.mat'],'avgSeedmaps','-v7.3')
+    else
+    end
+    
+    
+    
+    %temp=ft_read_cifti_mod(subs{i});
+    %temp.data=avgSeedmaps{j};
+    
+    temp_file=ciftiopen(subs{i},wb_command);
+    temp_file.cdata=avgSeedmaps{j};
+    
+    
+    
+    %surface=temp.data(1:59412); temp.data(consen.data==0)=0; temp.data(1:59412)=surface; %w subcortex
     %RJH: not sure what the purpose is of ther pervious line.  Possibly
     %made for a tempalte that is mising data?
     %ft_write_cifti_mod(['/data/cn6/allyd/cifti_TEST_RevisedTemplate_' network_names{j} '_network_surfOnly.dtseries.nii'], temp);
-    ft_write_cifti_mod([pwd '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_network_surfOnly.dtseries.nii'], temp);
-    seed_matrix(:,j) =temp.data;
-    save([pwd '/support_files/seedmaps_' file_root_no_ext '_all_networks_fromsurfonly.mat'],'seed_matrix');
+    if Zscore_regions == 1
+        %ft_write_cifti_mod([code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_networkZscored.dtseries.nii'], temp);
+        ciftisave(temp_file,[code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_networkZscored.dtseries.nii'],wb_command);
+        seed_matrix(:,j) =avgSeedmaps{j};
+    else
+        %ft_write_cifti_mod([code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_network.dtseries.nii'], temp);
+        ciftisave(temp_file,[code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_network.dtseries.nii'],wb_command);
+        seed_matrix(:,j) =avgSeedmaps{j};
+    end
+    
     clear grpNetAve temp
 end
+%save all maps
+if Zscore_regions == 1
+    save([code_dir '/support_files/seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'seed_matrix');
+else
+    save([code_dir '/support_files/seedmaps_' file_root_no_ext '_all_networks.mat'],'seed_matrix');
 end
+
 disp('Done making network templates based on the subjects you provided.');
 end
