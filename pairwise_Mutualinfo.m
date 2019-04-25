@@ -1,8 +1,16 @@
 %load('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/surface_area/lucianov_test_cleaned.mat');%load surface and volume data
 %load('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/surface_area/ADHDsymptoms.mat')
-dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
-templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/bothhalvesdsclars.conc');
-infomap_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/bothhalvesdsclars.conc');
+
+%niggtwins
+%dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
+%HCP twins
+dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Data/HCP_data/monozygotic_twins_prelim_25pairs.conc');
+
+%MSC Halves
+%templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/bothhalvesdsclars.conc');
+%infomap_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/bothhalvesdsclars.conc');
+
+twins=1;
 
 %% Add necessary paths
 addpath ('/mnt/max/shared/code/internal/analyses/compare_matrices')
@@ -36,16 +44,16 @@ wb_command=settings.path_wb_c; %path to wb_command
 
 %check to make sure that surface files exist
 if exist('templ_match_dscalarwithassignments','var') == 1
-for i = 1:length(templ_match_dscalarwithassignments)
-    if exist(templ_match_dscalarwithassignments{i},'file') == 0
-        NOTE = ['Subject dscalar ' num2str(i) ' does not exist']
-        disp(templ_match_dscalarwithassignments{i});
-        return
-    else
+    for i = 1:length(templ_match_dscalarwithassignments)
+        if exist(templ_match_dscalarwithassignments{i},'file') == 0
+            NOTE = ['Subject dscalar ' num2str(i) ' does not exist']
+            disp(templ_match_dscalarwithassignments{i});
+            return
+        else
+        end
     end
+    disp('All template matching dscalars exist continuing ...')
 end
-disp('All template matching dscalars exist continuing ...')
-end 
 
 if exist('infomap_dscalarwithassignments','var') == 1
     for i = 1:length(infomap_dscalarwithassignments)
@@ -61,55 +69,61 @@ end
 
 
 
-Number_subjects = 26;
+Number_subjects = length(dscalarwithassignments);
 Number_network_surfarea = 16;
 
 disp('loading scalars')
 if twins == 1
-for i = 1:Number_subjects
-allscalars_templ_twins = ciftiopen(dscalarwithassignments{i},wb_command);
-allscalars_templ(:,i) = single(allscalars_templ_twins.cdata);
-end
+    for i = 1:Number_subjects
+        allscalars_templ_twins = ciftiopen(dscalarwithassignments{i},wb_command);
+        allscalars_templ(:,i) = single(allscalars_templ_twins.cdata);
+    end
 else
-Number_subjects = length(templ_match_dscalarwithassignments);
-Number_network_surfarea = 16;    
+    Number_subjects = length(templ_match_dscalarwithassignments);
+    Number_network_surfarea = 16;
+    
+    for i = 1:Number_subjects
+        allscalars_templ_temp = ciftiopen(templ_match_dscalarwithassignments{i},wb_command);
+        allscalars_templ(:,i) = single(allscalars_templ_temp.cdata);
+    end
+    
+    if exist('infomap_dscalarwithassignments','var') == 1
+        for i = 1:Number_subjects
+            allscalars_info_temp = ciftiopen(infomap_dscalarwithassignments{i},wb_command);
+            allscalars_info(:,i) = single(allscalars_info_temp.cdata);
+        end
+    else
+    end
 end
 
 
 
-for i = 1:Number_subjects
-allscalars_templ_temp = ciftiopen(templ_match_dscalarwithassignments{i},wb_command);
-allscalars_templ(:,i) = single(allscalars_templ_temp.cdata);
-end
 
-for i = 1:Number_subjects
-allscalars_info_temp = ciftiopen(infomap_dscalarwithassignments{i},wb_command);
-allscalars_info(:,i) = single(allscalars_info_temp.cdata);
-end
 
-% for i = 1:2:26 
+% for i = 1:2:26
 %     subject1 = network_surfarea (i,:);
 %     subject2 = network_surfarea (i+1,:);
 %     network_difference_surfarea(round(i/2),:) = subject1 - subject2;
 % end
-% 
-% 
+%
+%
 % Number_subjects = 26;
 % Number_network_surfarea = 16;
-% for i = 1:2:26 
+% for i = 1:2:26
 %     subject1 = network_volume (i,:);
 %     subject2 = network_volume (i+1,:);
 %     network_difference_volume(round(i/2),:) = subject1 - subject2;
 % end
 
 % all_network_difference_surfarea = zeros(26,26,16);
-% 
- twin1_indices = 1:2:length(templ_match_dscalarwithassignments);
- twin2_indices = 2:2:length(templ_match_dscalarwithassignments);
+%
+
 if twins == 1
-     twin1_indices = 1:2:length(dscalarwithassignments);
- twin2_indices = 2:2:length(dscalarwithassignments);
- else
+    twin1_indices = 1:2:length(dscalarwithassignments);
+    twin2_indices = 2:2:length(dscalarwithassignments);
+else
+   twin1_indices = 1:2:length(templ_match_dscalarwithassignments);
+twin2_indices = 2:2:length(templ_match_dscalarwithassignments); 
 end
 %  for j = 1:16 %go through every networks
 %      for i = 1:26 %go through every subject
@@ -138,24 +152,40 @@ end
 %calculate mutual information for real pairs
 disp('Calculating mutual information for real pairs')
 for i = 1:2:Number_subjects %number of subjects
-     muI_templ(round(i/2),1) = MutualInformation(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Mutual information
+    muI_templ(round(i/2),1) = MutualInformation(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Mutual information
     [VIn_templ(round(i/2),1), MIn_templ(round(i/2),1)] = partition_distance(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
 end
 
 
-%calculate mututal informatin to all possible combinations, except pairs
+%calculate mututal information to all possible combinations, except pairs
 disp('Calculating mutual information to all possible combinations, except pairs')
 for i = 1:Number_subjects %go through every subject
     for k = 1:Number_subjects %go through every other subject
         if i < k && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
             eta_net_assign1 = allscalars_templ(:,i);
             eta_net_assignk = allscalars_templ(:,k);
-                unpaired_muI(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
-                [unpaired_VIn(i,k), unpaired_MIn(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+            unpaired_muI(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
+            [unpaired_VIn(i,k), unpaired_MIn(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
         end
     end
 end
 
+% Calculate mututal information to from twin1 to all twin2s.  Just used for
+% graph.
+m = 1;n=1;
+disp('Calculating mutual information for twin groups for graph')
+for i = twin1_indices %go through every subject
+    for k = twin2_indices %go through every other subject
+        %if i < k && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
+            eta_net_assign1 = allscalars_templ(:,i);
+            eta_net_assignk = allscalars_templ(:,k);
+            block_muI(m,n) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
+            [block_VIn(m,n), block_MIn(m,n)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+        %end
+    n=n+1;
+    end
+    n=1;m=m+1;
+end
 
 
 %calculate mututal informatin to all possible combinations, including pairs
@@ -163,11 +193,11 @@ disp('Calculating mutual information to all possible combinations, including pai
 for i = 1:Number_subjects %go through every subject
     for k = 1:Number_subjects %go through every other subject
         %if i < k% && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
-            eta_net_assign1 = allscalars_templ(:,i);
-            eta_net_assignk = allscalars_templ(:,k);
-                allposs_muI_pairs(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
-                [allposs_w_pairs_VIn(i,k), allposs_w_pairs_MIn(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
-       %end
+        eta_net_assign1 = allscalars_templ(:,i);
+        eta_net_assignk = allscalars_templ(:,k);
+        allposs_muI_pairs(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
+        [allposs_w_pairs_VIn(i,k), allposs_w_pairs_MIn(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+        %end
     end
 end
 
@@ -202,76 +232,77 @@ diff_MIn_values = diff_MIn_matrix(diff_MIn_indices);
 %plot(muI)
 %plot(muI,'MarkerSize',10,'MarkerEdgeColor','b')
 %boxplot(info_muI')
-
-for i = 1:2:Number_subjects %number of subjects
-     muI_info(round(i/2),1) = MutualInformation(allscalars_info(:,i),allscalars_info(:,i+1)); %Mutual information
-    [VIn_info(round(i/2),1), MIn_info(round(i/2),1)] = partition_distance(allscalars_info(:,i),allscalars_info(:,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
-end
-
-disp('Calculating mutual information to all possible combinations, except pairs')
-
-for i = 1:Number_subjects %go through every subject
-    for k = 1:Number_subjects %go through every other subject
-        if i < k && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
-            eta_net_assign1 = allscalars_info(:,i);
-            eta_net_assignk = allscalars_info(:,k);
+if exist('infomap_dscalarwithassignments','var') == 1
+    for i = 1:2:Number_subjects %number of subjects
+        muI_info(round(i/2),1) = MutualInformation(allscalars_info(:,i),allscalars_info(:,i+1)); %Mutual information
+        [VIn_info(round(i/2),1), MIn_info(round(i/2),1)] = partition_distance(allscalars_info(:,i),allscalars_info(:,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+    end
+    
+    disp('Calculating mutual information to all possible combinations, except pairs')
+    
+    for i = 1:Number_subjects %go through every subject
+        for k = 1:Number_subjects %go through every other subject
+            if i < k && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
+                eta_net_assign1 = allscalars_info(:,i);
+                eta_net_assignk = allscalars_info(:,k);
                 unpaired_muI_info(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
                 [unpaired_VIn_info(i,k), unpaired_MIn_info(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+            end
         end
     end
-end
-
-disp('Calculating mutual information to all possible combinations, including pairs')
-for i = 1:Number_subjects %go through every subject
-    for k = 1:Number_subjects %go through every other subject
-        %if i < k% && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
+    
+    disp('Calculating mutual information to all possible combinations, including pairs')
+    for i = 1:Number_subjects %go through every subject
+        for k = 1:Number_subjects %go through every other subject
+            %if i < k% && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
             eta_net_assign1 = allscalars_info(:,i);
             eta_net_assignk = allscalars_info(:,k);
-                allposs_muI_pairs_info(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
-                [allposs_w_pairs_VIn_info(i,k), allposs_w_pairs_MIn_info(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
-       %end
+            allposs_muI_pairs_info(i,k) = MutualInformation(eta_net_assign1,eta_net_assignk); %Mutual information
+            [allposs_w_pairs_VIn_info(i,k), allposs_w_pairs_MIn_info(i,k)] = partition_distance(eta_net_assign1,eta_net_assignk); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+            %end
+        end
     end
+    
+    diff_muI_matrix_info = unpaired_muI_info;
+    %[diff_muI_indices_row,diff_muI_indices_colum] = find(allposs_muI~=0);
+    diff_muI_indices_info = find(unpaired_muI_info~=0);
+    diff_muI_values_info = diff_muI_matrix_info(diff_muI_indices_info);
+    %a = mean(abs(muI));b = mean(diff_muI_values); c = std(diff_muI_values);
+    %proportion_of_mu_I_diff_below_paired_average_diff = length(find(diff_muI_values<a))/length(diff_muI_indices);
+    
+    diff_VIn_matrix_info = unpaired_VIn_info;
+    %[diff_muI_indices_row,diff_muI_indices_colum] = find(allposs_muI~=0);
+    diff_VIn_indices_info = find(unpaired_VIn_info~=0);
+    diff_VIn_values_info = diff_VIn_matrix_info(diff_VIn_indices_info);
+    %a = mean(abs(VIn));b = mean(diff_VIn_values); c = std(diff_VIn_values);
+    %proportion_of_mu_I_diff_below_paired_average_diff = length(find(diff_VIn_values<a))/length(diff_VIn_indices);
+    
+    diff_MIn_matrix_info = unpaired_MIn_info;
+    %[diff_muI_indices_row,diff_muI_indices_colum] = find(allposs_muI~=0);
+    diff_MIn_indices_info = find(unpaired_MIn_info~=0);
+    diff_MIn_values_info = diff_MIn_matrix_info(diff_MIn_indices_info);
+    %a = mean(abs(MIn));b = mean(diff_MIn_values); c = std(diff_MIn_values);
+    %proportion_of_mu_I_diff_below_paired_average_diff =
+    %length(find(diff_MIn_values<a))/length(diff_MIn_indices);
+else
 end
-
-diff_muI_matrix_info = unpaired_muI_info;
-%[diff_muI_indices_row,diff_muI_indices_colum] = find(allposs_muI~=0);
-diff_muI_indices_info = find(unpaired_muI_info~=0);
-diff_muI_values_info = diff_muI_matrix_info(diff_muI_indices_info);
-%a = mean(abs(muI));b = mean(diff_muI_values); c = std(diff_muI_values);
-%proportion_of_mu_I_diff_below_paired_average_diff = length(find(diff_muI_values<a))/length(diff_muI_indices);
-
-diff_VIn_matrix_info = unpaired_VIn_info;
-%[diff_muI_indices_row,diff_muI_indices_colum] = find(allposs_muI~=0);
-diff_VIn_indices_info = find(unpaired_VIn_info~=0);
-diff_VIn_values_info = diff_VIn_matrix_info(diff_VIn_indices_info);
-%a = mean(abs(VIn));b = mean(diff_VIn_values); c = std(diff_VIn_values);
-%proportion_of_mu_I_diff_below_paired_average_diff = length(find(diff_VIn_values<a))/length(diff_VIn_indices);
-
-diff_MIn_matrix_info = unpaired_MIn_info;
-%[diff_muI_indices_row,diff_muI_indices_colum] = find(allposs_muI~=0);
-diff_MIn_indices_info = find(unpaired_MIn_info~=0);
-diff_MIn_values_info = diff_MIn_matrix_info(diff_MIn_indices_info);
-%a = mean(abs(MIn));b = mean(diff_MIn_values); c = std(diff_MIn_values);
-%proportion_of_mu_I_diff_below_paired_average_diff =
-%length(find(diff_MIn_values<a))/length(diff_MIn_indices);
-
 
 figure()
 
 if twins ==1
-
-subplot(2,4,1)
-imagesc(allposs_muI_pairs);title('Template matching mututal info matrix');
-subplot(2,4,2)
-%figure();
-histogram(diff_muI_values,30); hold on; histogram(muI_templ,30,'FaceColor','r');xlabel('Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real disc. twin pairs'},'Location','northeast'); title('Mutual info Shuffled pairs');
-subplot(2,4,3)
-%figure(); 
-histogram(diff_VIn_values,30); hold on; histogram(VIn_templ,30,'FaceColor','r');xlabel('Variation of Information (bits)');ylabel('count');legend({'All possible half pairs','Real disc. twin pairs'},'Location','northeast'); title('Variation of info Shuffled pairs');
-subplot(2,4,4)
-%figure(); 
-histogram(diff_MIn_values,30); hold on; histogram(MIn_templ,30,'FaceColor','r');xlabel('Normalized Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real disc. twin pairs'},'Location','northeast'); title('Norm. Mutual info Shuffled pairs');
-
+    
+    subplot(2,4,1)
+    imagesc(allposs_muI_pairs);title('Template matching mututal info matrix');
+    subplot(2,4,2)
+    %figure();
+    histogram(diff_muI_values,30); hold on; histogram(muI_templ,30,'FaceColor','r');xlabel('Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real disc. twin pairs'},'Location','northeast'); title('Mutual info Shuffled pairs');
+    subplot(2,4,3)
+    %figure();
+    histogram(diff_VIn_values,30); hold on; histogram(VIn_templ,30,'FaceColor','r');xlabel('Variation of Information (bits)');ylabel('count');legend({'All possible half pairs','Real disc. twin pairs'},'Location','northeast'); title('Variation of info Shuffled pairs');
+    subplot(2,4,4)
+    %figure();
+    histogram(diff_MIn_values,30); hold on; histogram(MIn_templ,30,'FaceColor','r');xlabel('Normalized Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real disc. twin pairs'},'Location','northeast'); title('Norm. Mutual info Shuffled pairs');
+    
 else
 end
 
@@ -282,24 +313,32 @@ subplot(2,4,2)
 %figure();
 histogram(diff_muI_values,30); hold on; histogram(muI_templ,30,'FaceColor','r');xlabel('Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Mutual info Shuffled pairs');
 subplot(2,4,3)
-%figure(); 
+%figure();
 histogram(diff_VIn_values,30); hold on; histogram(VIn_templ,30,'FaceColor','r');xlabel('Variation of Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Variation of info Shuffled pairs');
 subplot(2,4,4)
-%figure(); 
+%figure();
 histogram(diff_MIn_values,30); hold on; histogram(MIn_templ,30,'FaceColor','r');xlabel('Normalized Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Norm. Mutual info Shuffled pairs');
 
+if exist('infomap_dscalarwithassignments','var') == 1
+    subplot(2,4,5)
+    imagesc(allposs_muI_pairs_info);title('Infomap matching mututal info matrix');
+    subplot(2,4,6)
+    %figure();
+    histogram(diff_muI_values_info,30); hold on; histogram(muI_info,30,'FaceColor','r');xlabel('Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Mutual info Shuffled pairs');
+    subplot(2,4,7)
+    %figure();
+    histogram(diff_VIn_values_info,30); hold on; histogram(VIn_info,30,'FaceColor','r');xlabel('Variation of Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Variation of info Shuffled pairs');
+    subplot(2,4,8)
+    %figure();
+    histogram(diff_MIn_values_info,30); hold on; histogram(MIn_info,30,'FaceColor','r');xlabel('Normalized Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Norm. Mutual info Shuffled pairs');
+else
+end
 
-subplot(2,4,5)
-imagesc(allposs_muI_pairs_info);title('Infomap matching mututal info matrix');
-subplot(2,4,6)
-%figure();
-histogram(diff_muI_values_info,30); hold on; histogram(muI_info,30,'FaceColor','r');xlabel('Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Mutual info Shuffled pairs');
-subplot(2,4,7)
-%figure(); 
-histogram(diff_VIn_values_info,30); hold on; histogram(VIn_info,30,'FaceColor','r');xlabel('Variation of Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Variation of info Shuffled pairs');
-subplot(2,4,8)
-%figure(); 
-histogram(diff_MIn_values_info,30); hold on; histogram(MIn_info,30,'FaceColor','r');xlabel('Normalized Mutual Information (bits)');ylabel('count');legend({'All possible half pairs','Real half pairs'},'Location','northeast'); title('Norm. Mutual info Shuffled pairs');
+figure()
+imagesc(block_muI)
+title('Mutual information from twin 1 to twin 2')
+xlabel('Twin2')
+ylabel('Twins1')
 
 figure()
 subplot(1,2,1)
@@ -332,7 +371,7 @@ t = s + repmat(1:K,Number_subjects,1);
 t = mod(t-1,Number_subjects)+1;
 
 % Rewire the target node of each edge with probability beta
-for source=1:Number_subjects    
+for source=1:Number_subjects
     switchEdge = rand(K, 1) < beta;
     
     newTargets = rand(Number_subjects, 1);
