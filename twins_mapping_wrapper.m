@@ -21,10 +21,12 @@ transform_data = 'Convert_to_Zscores';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
 template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
 remove_dconn = 1;
-make_dconn_conc = 0;
 output_file_name = 'HCPtwins';
 calculate_mutual_info = 0;
 make_cifti_from_results = 1;
+make_dconn_conc = 0;
+remove_outliers =1 ;
+additional_mask = 'none';
 
 %% Start
 %import concs
@@ -118,8 +120,9 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
     else % start from beginning
-        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8,make_dconn_conc);
-        
+        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8,remove_outliers, additional_mask,make_dconn_conc);
+        %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file,bit8,remove_outliers, additional_mask, make_dconn_conc)
+
         %Step 2: get network assingments
         [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results);
         

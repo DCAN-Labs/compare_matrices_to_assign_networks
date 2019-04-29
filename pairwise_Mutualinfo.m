@@ -4,7 +4,7 @@
 %niggtwins
 %dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
 %HCP twins
-dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Data/HCP_data/monozygotic_twins_prelim_25pairs.conc');
+dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Data/HCP_data/monozygotic_twins_100pairs.conc');
 
 %MSC Halves
 %templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/bothhalvesdsclars.conc');
@@ -340,48 +340,48 @@ title('Mutual information from twin 1 to twin 2')
 xlabel('Twin2')
 ylabel('Twins1')
 
-figure()
-subplot(1,2,1)
-G = graph(allposs_muI_pairs,{'MSC1a','MSC1b','MSC2a','MSC2b','MSC3a','MSC3b','MSC4a','MSC4b','MSC5a','MSC5b','MSC6a','MSC6b','MSC7a','MSC7b','MSC8a','MSC8b','MSC9a','MSC9b','MS10a','MSC10b'},'upper','omitselfloops');
-LWidths = abs((zscore(G.Edges.Weight/mean(G.Edges.Weight))));
-plot(G,'LineWidth',LWidths);
-disp('Done running pairwise_mutalinfo.')
-title('Zscored edge weights')
-subplot(1,2,2)
-H = graph(allposs_muI_pairs_info,{'MSC1a','MSC1b','MSC2a','MSC2b','MSC3a','MSC3b','MSC4a','MSC4b','MSC5a','MSC5b','MSC6a','MSC6b','MSC7a','MSC7b','MSC8a','MSC8b','MSC9a','MSC9b','MS10a','MSC10b'},'upper','omitselfloops');
-LWidths = abs((zscore(H.Edges.Weight/mean(H.Edges.Weight))));
-plot(H,'LineWidth',LWidths);
-title('Zscored edge weights')
-
-
-disp('Done running pairwise_mutalinfo.')
-
-%try
-% H = WattsStrogatz(N,K,beta) returns a Watts-Strogatz model graph with N
-% nodes, N*K edges, mean node degree 2*K, and rewiring probability beta.
-%
-% beta = 0 is a ring lattice, and beta = 1 is a random graph.
-
-% Connect each node to its K next and previous neighbors. This constructs
-% indices for a ring lattice.
-K = 10;
-
-s = repelem((1:Number_subjects)',1,K);
-t = s + repmat(1:K,Number_subjects,1);
-t = mod(t-1,Number_subjects)+1;
-
-% Rewire the target node of each edge with probability beta
-for source=1:Number_subjects
-    switchEdge = rand(K, 1) < beta;
-    
-    newTargets = rand(Number_subjects, 1);
-    newTargets(source) = 0;
-    newTargets(s(t==source)) = 0;
-    newTargets(t(source, ~switchEdge)) = 0;
-    
-    [~, ind] = sort(newTargets, 'descend');
-    t(source, switchEdge) = ind(1:nnz(switchEdge));
-end
+% figure()
+% subplot(1,2,1)
+% G = graph(allposs_muI_pairs,{'MSC1a','MSC1b','MSC2a','MSC2b','MSC3a','MSC3b','MSC4a','MSC4b','MSC5a','MSC5b','MSC6a','MSC6b','MSC7a','MSC7b','MSC8a','MSC8b','MSC9a','MSC9b','MS10a','MSC10b'},'upper','omitselfloops');
+% LWidths = abs((zscore(G.Edges.Weight/mean(G.Edges.Weight))));
+% plot(G,'LineWidth',LWidths);
+% disp('Done running pairwise_mutalinfo.')
+% title('Zscored edge weights')
+% subplot(1,2,2)
+% H = graph(allposs_muI_pairs_info,{'MSC1a','MSC1b','MSC2a','MSC2b','MSC3a','MSC3b','MSC4a','MSC4b','MSC5a','MSC5b','MSC6a','MSC6b','MSC7a','MSC7b','MSC8a','MSC8b','MSC9a','MSC9b','MS10a','MSC10b'},'upper','omitselfloops');
+% LWidths = abs((zscore(H.Edges.Weight/mean(H.Edges.Weight))));
+% plot(H,'LineWidth',LWidths);
+% title('Zscored edge weights')
+% 
+% 
+ disp('Done running pairwise_mutalinfo.')
+% 
+% %try
+% % H = WattsStrogatz(N,K,beta) returns a Watts-Strogatz model graph with N
+% % nodes, N*K edges, mean node degree 2*K, and rewiring probability beta.
+% %
+% % beta = 0 is a ring lattice, and beta = 1 is a random graph.
+% 
+% % Connect each node to its K next and previous neighbors. This constructs
+% % indices for a ring lattice.
+% K = 10;
+% 
+% s = repelem((1:Number_subjects)',1,K);
+% t = s + repmat(1:K,Number_subjects,1);
+% t = mod(t-1,Number_subjects)+1;
+% 
+% % Rewire the target node of each edge with probability beta
+% for source=1:Number_subjects
+%     switchEdge = rand(K, 1) < beta;
+%     
+%     newTargets = rand(Number_subjects, 1);
+%     newTargets(source) = 0;
+%     newTargets(s(t==source)) = 0;
+%     newTargets(t(source, ~switchEdge)) = 0;
+%     
+%     [~, ind] = sort(newTargets, 'descend');
+%     t(source, switchEdge) = ind(1:nnz(switchEdge));
+% end
 
 
 
