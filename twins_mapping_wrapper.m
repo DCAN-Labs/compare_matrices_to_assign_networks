@@ -1,4 +1,4 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, cifti_output_folder)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, cifti_output_folder,TR)
 %BLV  maxNumCompThreads=2
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
@@ -11,7 +11,7 @@ num_sub=length(dt_or_ptseries_conc_file);
 FD_threshold = 0.2;
 smoothing_kernal = 2.55;
 bit8 = 0;
-TR=0.8;
+%TR=0.8;
 minutes_limit = 'none';
 series = 'dtseries';
 data_type = 'dense';
