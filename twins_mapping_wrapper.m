@@ -1,41 +1,58 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, cifti_output_folder)
-%BLV  maxNumCompThreads=2
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder)
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
 %
+%BLV dt_or_ptseries_conc_file:
 
-maxNumCompThreads(4);
 %hardcodes:
 num_sub=length(dt_or_ptseries_conc_file);
 FD_threshold = 0.2;
-smoothing_kernal = 2.55;
+smoothing_kernal = 1.75;
 bit8 = 0;
 TR=0.8;
 minutes_limit = 'none';
 series = 'dtseries';
 data_type = 'dense';
-wb_command = 'LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 OMP_NUM_THREADS=2 /usr/local/bin/wb_command';
+%wb_command = 'LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 OMP_NUM_THREADS=2 /usr/local/bin/wb_command';
+wb_command = '/home/exacloud/lustre1/fnl_lab/code/external/utilities/workbench-1.2.3-HCP/bin_rh_linux64/wb_command';
 %transform_data = 'Convert_FisherZ_to_r';
 transform_data = 'Convert_to_Zscores';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
-template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored';
+%template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_dtseries_all_networksZscored.mat';
+template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored.mat';
 remove_dconn = 1;
-output_file_name = 'HCPtwins';
-calculate_mutual_info = 1;
-make_cifti_from_results = 1;
 make_dconn_conc = 0;
-allow_overlap = 1; 
-overlap_method = 'smooth_then_derivative';
-remove_outliers= 1; additional_mask = 'none';
+%output_file_name = 'ADHD315';
+calculate_mutual_info = 0;
+make_cifti_from_results = 1;
 
+remove_outliers= 1; additional_mask = 'none';
 %% Start
 %import concs
-dtseries_file = importdata(dt_or_ptseries_conc_file);
-motion_all = importdata(motion_file);
-all_L_surface = importdata(left_surface_file);
-all_R_surface = importdata(right_surface_file);
+
+conc = strsplit(dt_or_ptseries_conc_file, '.');
+conc = char(conc(end));
+if strcmp('conc',conc) == 1
+    dtseries_file = importdata(dt_or_ptseries_conc_file);
+    motion_all = importdata(motion_file);
+    all_L_surface = importdata(left_surface_file);
+    all_R_surface = importdata(right_surface_file);
+    
+else
+    dtseries_file = {dt_or_ptseries_conc_file};
+    motion_all = {motion_file};
+    all_L_surface = {left_surface_file};
+    all_R_surface = {right_surface_file};    
+end
+
+%dtseries_file = importdata(dt_or_ptseries_conc_file);
+%motion_all = importdata(motion_file);
+%all_L_surface = importdata(left_surface_file);
+%all_R_surface = importdata(right_surface_file);
+
+
 
 
 for i = 1:length(dtseries_file)
@@ -80,10 +97,14 @@ for i = 1:length(dtseries_file) %number of subjects
     else
     end
     %Step 1: make matrix
-    %BLV added additional path for template_matching_RH
-    support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/'];
+    %support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/'];
+    %addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
+    
+    support_folder=['/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices'];
+    addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien/');
     addpath(genpath(support_folder));
-    addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
+    
+    
     
     %     if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
     %         disp('.mat file already created.  loading...');
@@ -122,11 +143,12 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
     else % start from beginning
-        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8,remove_outliers, additional_mask,make_dconn_conc);
-        %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file,bit8,remove_outliers, additional_mask, make_dconn_conc)
+        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
+           %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
 
+        %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %Step 2: get network assingments
-        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results,allow_overlap,overlap_method);
+        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results);
         
         if remove_dconn ==1 % RH added in case filespace becomes an limited.
             % Step 2.5: Remove dconn to save space.
