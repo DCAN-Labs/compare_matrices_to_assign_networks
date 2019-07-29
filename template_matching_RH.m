@@ -296,7 +296,9 @@ for i = 1:length(subjectlist)
     if exist('allow_overlap','var') == 1
         %open example dtseries.nii
         if allow_overlap == 1
-            cii =ciftiopen('/mnt/max/shared/projects/uo_tds/data/113/113_rfMRI_REST_FNL_preproc_v2_Atlas.dtseries.nii','LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command');
+            cii =ciftiopen(settings.path{13}, wb_command);
+            %cii =ciftiopen('/mnt/max/shared/projects/uo_tds/data/113/113_rfMRI_REST_FNL_preproc_v2_Atlas.dtseries.nii','LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command');
+            
             switch 'overlap_method'
                 case'hist_localmin'
                     for j=1:length(network_names)

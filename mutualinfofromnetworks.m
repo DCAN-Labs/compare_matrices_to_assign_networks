@@ -60,17 +60,17 @@ end
 
 if isnumeric(num_interval_reps)==1
 else
-    num_interval_reps = str2num(num_interval_reps);
+    num_interval_reps = str2double(num_interval_reps);
 end
 
 if isnumeric(indepen_time_series)==1
 else
-    indepen_time_series = str2num(indepen_time_series);
+    indepen_time_series = str2double(indepen_time_series);
 end
 
 if isnumeric(cifti_enhancement)==1
 else
-    cifti_enhancement = str2num(cifti_enhancement);
+    cifti_enhancement = str2double(cifti_enhancement);
 end
 
 
@@ -124,7 +124,7 @@ if indepen_time_series == 1
 
                     
                     
-            if  exist([templ_dscalar_out_dir '/' template_output_cifti_scalar_name]) == 0
+            if  exist([templ_dscalar_out_dir '/' template_output_cifti_scalar_name],'file') == 0
                 disp([templ_dscalar_out_dir '/' template_output_cifti_scalar_name ' not found. Making matrix prior to template matching.']);
                 %% Step 1: make connectivity matrix
                 %%HARDCODE WARNING
@@ -170,7 +170,7 @@ if indepen_time_series == 1
                         
                      %case 'template_matching'
                         disp('Community detection method is template_matching')
-                        [new_subject_labels, templ_output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name minutes_andreps_name],method,data_type,cifti_enhancement);
+                        [new_subject_labels, template_output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name minutes_andreps_name],method,data_type,cifti_enhancement);
                        
                     %case 'bigclam'
 %                         disp('big clam not yet supported')
@@ -202,7 +202,7 @@ if indepen_time_series == 1
                 end
             else
                 disp([templ_dscalar_out_dir '/' template_output_cifti_scalar_name ' found. Loading scalar.']);
-                current_cifti_labels = ciftiopen(templ_output_cifti_scalar_name,wb_command);
+                current_cifti_labels = ciftiopen(template_output_cifti_scalar_name,wb_command);
                 new_subject_labels = current_cifti_labels.cdata;
             end
             %% Step 4: load template networks from 2nd half of data:
@@ -282,7 +282,7 @@ else %sample from the same dconn.
                 otherwise        
             end
             
-            if exist([dscalar_out_dir '/' output_cifti_scalar_name]) == 0
+            if exist([dscalar_out_dir '/' output_cifti_scalar_name],'file') == 0
                 disp([dscalar_out_dir '/' output_cifti_scalar_name ' not found. Making matrix prior to template matching.']);
                 %% step 1b: refine matrix? reduce noise in matrix.
                 if cifti_enhancement ==1
