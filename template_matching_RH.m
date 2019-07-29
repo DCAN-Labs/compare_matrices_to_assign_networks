@@ -183,8 +183,8 @@ for i = 1:length(subjectlist)
                 
             case 'Convert_to_Zscores'
                 disp('Converting from to Z-scores region-wise. Input dconn can either be pearson or fisherZ.')
-                addpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/')
-                %addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn')
+                addpath(genpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/'))
+                addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn'))
                 Zdconn = Zscore_dconn(char(subjectlist{i}),'inferred');
                 disp(['loading Zscored dconn: ' char(Zdconn) '.dconn.nii'])
                 subject_cii=ciftiopen([char(Zdconn) '.dconn.nii'], wb_command); %dconn path
