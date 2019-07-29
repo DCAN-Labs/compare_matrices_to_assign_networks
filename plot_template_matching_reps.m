@@ -9,13 +9,20 @@ template_matching = 1;
 if template_matching == 1
 A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
 B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
+%A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
+%B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
+
 else
 end
 
-infomap = 1;
+infomap = 0;
 if infomap == 1
-C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
+%C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
 D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
+
+C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
+
+
 else
 end
 
@@ -24,7 +31,6 @@ if infomap == 0 && template_matching == 0
     return
 else
 end
-
 %subject should be arranged in following way in the conc file:
 %subject1_time1_rep1
 %subject1_time1_rep2
@@ -36,7 +42,8 @@ end
 num_subjects = 10;
 num_time_intervals = 8;
 none_minuteslimit = 0;
-num_reps = 3;
+num_reps = 10;
+minutes = [1 2  3 4 5 10 15 20 ];
 
 %% Adding paths for this function
 this_code = which('plot_template_matching_reps');

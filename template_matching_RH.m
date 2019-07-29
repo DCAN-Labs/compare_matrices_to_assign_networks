@@ -1,4 +1,4 @@
-function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results)
+function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results,allow_overlap,overlap_method)
 
 %subjectlist = subject (e.g. dconn.nii)
 %data_type = "parcellated" or "dense" connectivity matrix
@@ -13,6 +13,11 @@ function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(s
 %load /data/cn6/allyd/kelleyData/pnm_list_revised.mat
 %load /data/cn6/allyd/kelleyData/allSubjects.mat %%% allSubjects
 %load /data/cn6/allyd/kelleyData/subjectswith20min.mat %%% subs_25min
+
+
+%allow_overlap = 1;
+%overlap_method = 'smooth_then_derivative';
+%thresholds = [1:0.25:3.5];
 %% Adding paths for this function
 this_code = which('template_matching_RH');
 [code_dir,~] = fileparts(this_code);
@@ -232,7 +237,15 @@ for i = 1:length(subjectlist)
         clear corr_mat_full goodvox i temp
         
         %%% winner-take-all: highest eta value is network that voxel will be assigned to %%%
-        [x, new_subject_labels] = max(eta_to_template_vox,[],2);
+        if exist('allow_overlap','var') == 1
+            if allow_overlap == 1
+                disp('Calculating overlap')
+               MuI_threshhold_all_networks = findoverlapthreshold(eta_to_template_vox,network_names,Zscore_eta, overlap_method);
+            else
+            end
+        else
+            [x, new_subject_labels] = max(eta_to_template_vox,[],2);
+        end
         %%% if requiring a minimum eta value for assignment %%%
         %     for j=1:size(eta_subject_index,1)
         %         if x(j)<0.15 | isnan(x(j))
@@ -266,8 +279,8 @@ for i = 1:length(subjectlist)
     saving_template.cdata = single(new_subject_labels);
     %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
     disp('Saving new scalar')
-    save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary') %DF: This save not pointing to the right place fix!
-    %save(saving_template, output_cifti_scalar_name, wb_command) %RH sifti save fix.
+    save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary') 
+    %save(saving_template, output_cifti_scalar_name, wb_command) 
     switch data_type
         case 'parcellated'
             output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
@@ -279,7 +292,53 @@ for i = 1:length(subjectlist)
     disp('Removing .gii')
     unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.gii']);
     unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.dat']);
-   
+    
+    if exist('allow_overlap','var') == 1
+        %open example dtseries.nii
+        if allow_overlap == 1
+            cii =ciftiopen('/mnt/max/shared/projects/uo_tds/data/113/113_rfMRI_REST_FNL_preproc_v2_Atlas.dtseries.nii','LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command');
+            switch 'overlap_method'
+                case'hist_localmin'
+                    for j=1:length(network_names)
+                        if j==4 || j ==6
+                            continue
+                        end
+                        
+                        %etaZ(:,j) = zscore(eta_to_template_vox(:,j));
+                        etaZabovethreshold = eta_to_template_vox(:,j) > MuI_threshhold_all_networks(j);
+                        overlapeta(:,j) = etaZabovethreshold*j;
+                    end     
+                       series = overlapeta;
+                        cii.cdata = uint8(series);
+                        ciftisave(cii,[cifti_output_folder '/' output_cifti_name '_overlap_' overlap_method '.dtseries.nii'],wb_command);
+                   
+                    
+                case 'smooth_then_derivative'
+                    for j=1:length(network_names)
+                        if j==4 || j ==6
+                            continue
+                        end
+                        
+                        %etaZ(:,j) = zscore(eta_to_template_vox(:,j));
+                        etaZabovethreshold = eta_to_template_vox(:,j) > MuI_threshhold_all_networks(j);
+                        overlapeta(:,j) = etaZabovethreshold*j;
+                    end
+                        series = overlapeta;
+                        cii.cdata = uint8(series);
+                        ciftisave(cii,[cifti_output_folder '/' output_cifti_name '_overlap_' overlap_method '.dtseries.nii'],wb_command);
+                    
+                case 'etaZ'
+                    for k =1:size(thresholds,2)
+                        series = squeeze(overlapetaZ(:,:,k));
+                        cii.cdata = uint8(series);
+                        ciftisave(cii,[cifti_output_folder '/' output_cifti_name '_overlap_threshold_' num2str(thresholds(k)) '.dtseries.nii'],wb_command);
+                    end
+            end
+        else
+        end
+    else
+    end
+    
     end
     % else
     %     disp(['Something went wrong.' cifti_output_folder '/' output_cifti_name '.mat not found.  Data was not made into a cifti.' ]);
@@ -288,7 +347,7 @@ for i = 1:length(subjectlist)
 end
 
 disp(['Cleaning: ' output_cifti_scalar_name]);
-[outname] = clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],1,1);
+[outname] = clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],0,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
 disp(['Clean file: ' outname '.dscalar.nii'])
 
 % cmd = ['mv ' cifti_output_folder '/' output_cifti_scalar_name];

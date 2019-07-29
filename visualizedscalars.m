@@ -1,13 +1,13 @@
-function visualizedscalars(dscalarwithassignments)
+function visualizedscalars(dscalarwithassignments, downsample_scalar, DS_factor, save_percentages)
 
 
 %This code loads in a conc of dcalars to visualize them for all subjects.
 
-DS_factor = 50; %downsample factor.  Reduce the 91282 vector by this factor to reduce the load on matlab visualiztion tools.
+%DS_factor = 50; %downsample factor.  Reduce the 91282 vector by this factor to reduce the load on matlab visualiztion tools.
 %(e.g. DS = 2, sample every other greyordinate.  visualizetion will have
 %45641 data points per subject).
-downsample_scalar =1;
-save_percentages =1;
+%downsample_scalar =1;
+%save_percentages =1;
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 
@@ -45,6 +45,7 @@ for i=1:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+
 wb_command=settings.path_wb_c; %path to wb_command
 warning('on')
 
@@ -71,7 +72,7 @@ disp('extract number of unique networks from subject 1.')
 num_networks=unique(scalar_array(:,1));
 
 %open a file to write for saving
-    temp_file=ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/Networks_template_cleaned.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/test_clean_91282.dscalar.nii',wb_command);
     for i=1:length(network_names)
         if i==4 || i==6
             continue
@@ -92,6 +93,8 @@ num_networks=unique(scalar_array(:,1));
         else
         end
     end
+ load('/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/PowerColorMap.mat') %load RGB values for colormap to match network colors.
+    colormap(mymap)
     
 large_scalar_array = scalar_array;   
 if downsample_scalar ==1
@@ -103,8 +106,7 @@ else
     colormap(mymap)
 end
 
-load('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/PowerColorMap.mat')
-    colormap(mymap)
+
     
 for i=1:length(dscalarwithassignments) 
     sorted_array(:,i) = sort(scalar_array(:,i)); 

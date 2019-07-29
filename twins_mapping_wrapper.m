@@ -4,12 +4,12 @@ function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
 %
-%BLV dt_or_ptseries_conc_file:
 
+maxNumCompThreads(4);
 %hardcodes:
 num_sub=length(dt_or_ptseries_conc_file);
 FD_threshold = 0.2;
-smoothing_kernal = 1.75;
+smoothing_kernal = 2.55;
 bit8 = 0;
 TR=0.8;
 minutes_limit = 'none';
@@ -19,14 +19,16 @@ wb_command = 'LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 OMP_NUM_THREAD
 %transform_data = 'Convert_FisherZ_to_r';
 transform_data = 'Convert_to_Zscores';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
-template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
+%template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
+template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored';
 remove_dconn = 1;
 output_file_name = 'HCPtwins';
-calculate_mutual_info = 0;
+calculate_mutual_info = 1;
 make_cifti_from_results = 1;
 make_dconn_conc = 0;
-remove_outliers =1 ;
-additional_mask = 'none';
+allow_overlap = 1; 
+overlap_method = 'smooth_then_derivative';
+remove_outliers= 1; additional_mask = 'none';
 
 %% Start
 %import concs
@@ -113,7 +115,7 @@ for i = 1:length(dtseries_file) %number of subjects
         
         if exist(recolored_name,'file') == 0
             disp('Cleaned file not found. cleaning...')
-            clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],1,1)
+            clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],0,1)
 
         else
              disp(['No cleaning necessary: Cleaned netwokrs file found: ' recolored_name])
@@ -124,7 +126,7 @@ for i = 1:length(dtseries_file) %number of subjects
         %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file,bit8,remove_outliers, additional_mask, make_dconn_conc)
 
         %Step 2: get network assingments
-        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results);
+        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results,allow_overlap,overlap_method);
         
         if remove_dconn ==1 % RH added in case filespace becomes an limited.
             % Step 2.5: Remove dconn to save space.
