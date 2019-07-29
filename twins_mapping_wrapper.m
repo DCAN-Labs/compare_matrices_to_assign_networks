@@ -23,6 +23,12 @@ transform_data = 'Convert_to_Zscores';
 %template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_dtseries_all_networksZscored.mat';
 template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored.mat';
 remove_dconn = 1;
+<<<<<<< HEAD
+=======
+output_file_name = 'NIGGtwins';
+calculate_mutual_info = 1;
+make_cifti_from_results = 1;
+>>>>>>> 93e9529632860fb81aa33b00e20d0957fdd62a03
 make_dconn_conc = 0;
 %output_file_name = 'ADHD315';
 calculate_mutual_info = 0;
