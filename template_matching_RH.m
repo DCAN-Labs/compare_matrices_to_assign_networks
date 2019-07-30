@@ -186,8 +186,8 @@ for i = 1:length(subjectlist)
                 addpath(genpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/'))
                 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn'))
                 Zdconn = Zscore_dconn(char(subjectlist{i}),'inferred');
-                disp(['loading Zscored dconn: ' char(Zdconn) '.dconn.nii'])
-                subject_cii=ciftiopen([char(Zdconn) '.dconn.nii'], wb_command); %dconn path
+                disp(['loading Zscored dconn: ' char(Zdconn)])
+                subject_cii=ciftiopen([char(Zdconn)], wb_command); %dconn path
                 corr_mat_full = single(subject_cii.cdata);
                 %[~,output_cifti_name] = fileparts(output_cifti_name);
                 %output_cifti_name = [B '.nii'];
@@ -266,7 +266,7 @@ for i = 1:length(subjectlist)
         
         switch transform_data
             case 'Convert_to_Zscores'
-                unix(['rm -f ' char(Zdconn) '.dconn.nii' ])
+                unix(['rm -f ' char(Zdconn) ])
             otherwise
         end
         
