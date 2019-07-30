@@ -91,16 +91,16 @@ end
 
 for i = 1:length(subjectlist)
     if exist([cifti_output_folder '/' output_cifti_name '.dscalar.nii' ], 'file') == 2
-        disp('Template_matching dscalar already found for this subject. loading...')
-        subject_cii =ciftiopen([cifti_output_folder '/' output_cifti_name '.dscalar.nii'], wb_command);
-        new_subject_labels = subject_cii.cdata;
-        
-        switch data_type
-            case 'parcellated'
-                output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
-            case 'dense'
-                output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
-        end
+            disp('Template_matching dscalar already found for this subject. loading...')
+            subject_cii =ciftiopen([cifti_output_folder '/' output_cifti_name '.dscalar.nii'], wb_command);
+            new_subject_labels = subject_cii.cdata;
+            
+            switch data_type
+                case 'parcellated'
+                    output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
+                case 'dense'
+                    output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+            end
         %if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
         %disp('.mat file already reated.  loading...');
         %load([cifti_output_folder '/' output_cifti_name '.mat']);
@@ -237,15 +237,18 @@ for i = 1:length(subjectlist)
         clear corr_mat_full goodvox i temp
         
         %%% winner-take-all: highest eta value is network that voxel will be assigned to %%%
-        if exist('allow_overlap','var') == 1
+        if exist('allow_overlap','var') == 1 && allow_overlap == 1
             if allow_overlap == 1
                 disp('Calculating overlap')
                MuI_threshhold_all_networks = findoverlapthreshold(eta_to_template_vox,network_names,0, overlap_method);
             else
             end
         else
-            [x, new_subject_labels] = max(eta_to_template_vox,[],2);
+            
         end
+        
+        [x, new_subject_labels] = max(eta_to_template_vox,[],2); %find max for template matching
+        
         %%% if requiring a minimum eta value for assignment %%%
         %     for j=1:size(eta_subject_index,1)
         %         if x(j)<0.15 | isnan(x(j))
@@ -293,13 +296,14 @@ for i = 1:length(subjectlist)
     unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.gii']);
     unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.dat']);
     
-    if exist('allow_overlap','var') == 1
+    if exist('allow_overlap','var') == 1 && allow_overlap == 1
         %open example dtseries.nii
-        if allow_overlap == 1
+        
+            disp('Saving overlap files as dtseries')
             cii =ciftiopen(settings.path{13}, wb_command);
             %cii =ciftiopen('/mnt/max/shared/projects/uo_tds/data/113/113_rfMRI_REST_FNL_preproc_v2_Atlas.dtseries.nii','LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command');
             
-            switch 'overlap_method'
+            switch overlap_method
                 case'hist_localmin'
                     for j=1:length(network_names)
                         if j==4 || j ==6
@@ -335,9 +339,9 @@ for i = 1:length(subjectlist)
                         cii.cdata = uint8(series);
                         ciftisave(cii,[cifti_output_folder '/' output_cifti_name '_overlap_threshold_' num2str(thresholds(k)) '.dtseries.nii'],wb_command);
                     end
+                otherwise
+                    disp('Overlap network method not specified.')
             end
-        else
-        end
     else
     end
     
