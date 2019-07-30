@@ -1,5 +1,5 @@
 function [MuI_threshhold_all_networks] = findoverlapthreshold(eta_to_template_vox,network_names,Zscore_eta, method)
-
+addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
 % This function works by taking in a matrix of network X voxtel  of eta squared
 % values and sets a threshold by finding the local minimum
 % input is matrix with the voxels as rows and
@@ -9,7 +9,7 @@ function [MuI_threshhold_all_networks] = findoverlapthreshold(eta_to_template_vo
 %method = 'hist_localmin';
 method = 'smooth_then_derivative';
 plot_data = 1;
-network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
+%network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 
 %etaZabove1 = etaZ(:,j) > thresholds(k);
@@ -96,7 +96,8 @@ for j=1:length(network_names)
             %resp_trace=yy;
             
             %x=filloutliers(resp_trace,'linear','movmedian',100);
-            smoothyy=smoothdata(yy,'sgolay',2000);
+            %smoothyy=smoothdata(yy,'sgolay',2000)
+            smoothyy=smooth(yy,2000,'sgolay');
             smoothdyy=diff(smoothyy);
             
             %[foo ix_peak]=min(abs(smoothdyy(4000:end));

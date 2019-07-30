@@ -240,7 +240,7 @@ for i = 1:length(subjectlist)
         if exist('allow_overlap','var') == 1
             if allow_overlap == 1
                 disp('Calculating overlap')
-               MuI_threshhold_all_networks = findoverlapthreshold(eta_to_template_vox,network_names,Zscore_eta, overlap_method);
+               MuI_threshhold_all_networks = findoverlapthreshold(eta_to_template_vox,network_names,0, overlap_method);
             else
             end
         else

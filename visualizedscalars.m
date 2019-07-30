@@ -1,13 +1,13 @@
-function visualizedscalars(dscalarwithassignments, downsample_scalar, DS_factor, save_percentages)
+function visualizedscalars(dscalarwithassignments)
 
 
 %This code loads in a conc of dcalars to visualize them for all subjects.
 
-%DS_factor = 50; %downsample factor.  Reduce the 91282 vector by this factor to reduce the load on matlab visualiztion tools.
+DS_factor = 50; %downsample factor.  Reduce the 91282 vector by this factor to reduce the load on matlab visualiztion tools.
 %(e.g. DS = 2, sample every other greyordinate.  visualizetion will have
 %45641 data points per subject).
-%downsample_scalar =1;
-%save_percentages =1;
+downsample_scalar =1;
+save_percentages =1;
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 
@@ -45,7 +45,6 @@ for i=1:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-
 wb_command=settings.path_wb_c; %path to wb_command
 warning('on')
 
@@ -72,7 +71,7 @@ disp('extract number of unique networks from subject 1.')
 num_networks=unique(scalar_array(:,1));
 
 %open a file to write for saving
-    temp_file=ciftiopen('/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/test_clean_91282.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/91282_Greyordinates.dscalar.nii',wb_command);
     for i=1:length(network_names)
         if i==4 || i==6
             continue
@@ -89,23 +88,27 @@ num_networks=unique(scalar_array(:,1));
         if save_percentages ==1
             temp_file.cdata=network_percentage(i,:)';
             disp('Saving percentages for each network.')
-            ciftisave(temp_file,[network_names{i} '_network.dscalar.nii'],wb_command);
+            ciftisave(temp_file,[network_names{i} '_network_percentage.dscalar.nii'],wb_command);
         else
         end
     end
- load('/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/PowerColorMap.mat') %load RGB values for colormap to match network colors.
-    colormap(mymap)
     
-large_scalar_array = scalar_array;   
+large_scalar_array = scalar_array;  
+
+%plot results
+load('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/PowerColorMap.mat')
+
+
 if downsample_scalar ==1
 scalar_array = scalar_array(1:DS_factor:end,:);
 imagesc(scalar_array)
 colormap(mymap)
+
+
 else
     imagesc(scalar_array)
     colormap(mymap)
 end
-
 
     
 for i=1:length(dscalarwithassignments) 
