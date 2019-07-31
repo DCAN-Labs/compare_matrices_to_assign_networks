@@ -32,9 +32,15 @@ function [muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_f
 % 18) indepen_time_series = if 1, each repititon will use a different dconn, if 0 it will use the same dconn. When minutes are specified these are randomly sampled from available frames below the FD threshold to make the dconn.  If you want to use the exact same dconn, this will make symlinks to that dconn. 
 
 
-%% Start
-load('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/minutes_vector.mat') %[1,2,3,4,5,10,15,20];
+%% Inititalize by adding paths
+this_code = which('mutualinfofromnetworks');
+[code_dir,~] = fileparts(this_code);
+support_folder=[code_dir '/support_files']; %find support files in the code directory.
+addpath(genpath(support_folder));
+settings=settings_comparematrices;%
+np=size(settings.path,2);
 
+%load('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/minutes_vector.mat') %[1,2,3,4,5,10,15,20];
 
 if isnumeric(minutes_vector)==1
 else
@@ -74,12 +80,7 @@ else
 end
 
 
-this_code = which('mutualinfofromnetworks');
-[code_dir,~] = fileparts(this_code);
-support_folder=[code_dir '/support_files']; %find support files in the code directory.
-addpath(genpath(support_folder));
-settings=settings_comparematrices;%
-np=size(settings.path,2);
+
 
 warning('off') %supress addpath warnings to nonfolders.
 disp('Attempting to add neccesaary paths and functions.')
@@ -101,7 +102,11 @@ min_region_size = 30;
 %community_detection = 'infomap';
 num_reps = 20;
 
+%hardcodes for template matching;
+allow_overlap = 1; 
+overlap_method = 'smooth_then_derivative';
 
+%% Start
 
 if indepen_time_series == 1
    
@@ -170,7 +175,7 @@ if indepen_time_series == 1
                         
                      %case 'template_matching'
                         disp('Community detection method is template_matching')
-                        [new_subject_labels, template_output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name minutes_andreps_name],method,data_type,cifti_enhancement);
+                        [new_subject_labels, template_output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name minutes_andreps_name],method,data_type,cifti_enhancement,allow_overlap,overlap_method);
                        
                     %case 'bigclam'
 %                         disp('big clam not yet supported')

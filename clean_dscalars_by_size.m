@@ -292,8 +292,7 @@ for i=1:length(dscalarwithassignments)
                         end
                     else
                         borderverts(temp_out(borderverts)<1) = [];
-                        %mode_neighborval = mode(temp_out(isassinged(borderverts)));
-                        mode_neighborval = mode(temp_out(borderverts));
+                        mode_neighborval = mode(temp_out(isassinged(borderverts)));
                     end
                     %Grab the next value
                     %mode_neighborval = mode(temp_out(borderverts));
