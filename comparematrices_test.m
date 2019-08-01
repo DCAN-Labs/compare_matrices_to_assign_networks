@@ -1,4 +1,4 @@
-function [new_subject_labels, output_cifti_scalar_name] = comparematrices_test(input_cifti,output_cifti_name,method,data_type,cifti_enhancement)
+function [new_subject_labels, output_cifti_scalar_name] = comparematrices_test(input_cifti,output_cifti_name,method,data_type,cifti_enhancement,allow_overlap,overlap_method)
 %10/25/18 Hermosillo R.
 
 %This code uses a connectivity matrices, a template connectivity matrix, and label file, to try to assingn
@@ -18,8 +18,8 @@ make_cifti_from_results =1; %output results as a viewable cifti.
 plot_data = 0; ROI = 50;
 include_self = 0; % remove self from correlation (e.g. remove 1s from diagnoal when calculating correlation.
 distribute_job =0; % Not supported. For use with dconns.  If distribute jobs =1, the code will attempt to split the 8.3bn comparisons (correlations or eta-squared) across 20 nodes. NOTE: Currently only tested with correlations.
-transform_data = 'Convert_FisherZ_to_r'; %cases:'Convert_FisherZ_to_r' or 'Convert_r_to_Pearons' or 'Convert_to_Zscores' %Used for template matching.  If your template values are in Pearson's r, but your data is Fisher Z transformed, this will convert your data from Fisher Z to Pearson. 
-
+%transform_data = 'Convert_FisherZ_to_r'; %cases:'Convert_FisherZ_to_r' or 'Convert_r_to_Pearons' or 'Convert_to_Zscores' %Used for template matching.  If your template values are in Pearson's r, but your data is Fisher Z transformed, this will convert your data from Fisher Z to Pearson. 
+transform_data = 'Convert_to_Zscores';
 
 %% Begin code.
 if cifti_enhancement ==1
@@ -40,7 +40,9 @@ end
 
 
 %% Adding paths for this function
-support_folder=[pwd '/support_files'];
+this_code = which('comparematrices_test');
+[code_dir,~] = fileparts(this_code);
+support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
@@ -385,17 +387,19 @@ switch method
         disp('Template matching method selected. Running...');
         if exist([output_cifti_name '.mat']) == 0 % if the matrix already exists skip
             disp([output_cifti_name '.mat file (contains Eta_to_template_vox) Eta_to_template_vox .mat file not found for this subject found. Running template matching (~1-2 hrs).'])
-            networks_template_path = settings.path{12};
-            [eta_subject_index, output_cifti_scalar_name] = template_matching_RH(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,wb_command);
-            new_subject_labels = eta_subject_index;
+            %networks_template_path = settings.path{12};
+            networks_template_path = settings.path_template_nets;
+            cifti_output_folder = pwd;
+            [new_subject_labels,output_cifti_scalar_name] = template_matching_RH(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,cifti_output_folder,wb_command,make_cifti_from_results,allow_overlap,overlap_method);
+            %[eta_to_template_vox, eta_subject_index,output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results)
+
+            %new_subject_labels = eta_subject_index;
             %save([output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
-            saving_template =ciftiopen(settings.path{8}, wb_command);
-            % Ciftis are made by default in template matching code used
-            % above.  So it is not necessary to remake them (i.e. not necessary to set "make_ciftis_from_results" to 1).
-            make_cifti_from_results = 0;
+            saving_template =ciftiopen(settings.path{8}, wb_command);   
         else
             disp([output_cifti_name '.mat file (contains Eta_to_template_vox) found for this subject found. Template matching has alreday been run for subject. Loading data.'])
-            networks_template_path = settings.path{12};
+            %networks_template_path = settings.path{12};
+            networks_template_path = settings.path_template_nets;
             saving_template =ciftiopen(settings.path{8}, wb_command);
             load([output_cifti_name '.mat'])  
             new_subject_labels = eta_subject_index;
