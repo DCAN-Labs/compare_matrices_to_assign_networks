@@ -7,22 +7,25 @@
 %B= importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/infomap_all_subjects1run.conc');
 template_matching = 1;
 if template_matching == 1
-A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
-B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
-%A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
-%B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
+%A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
+%B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
+
+A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
+B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
+
+%E = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half1.conc');
 
 else
 end
 
 infomap = 0;
 if infomap == 1
-%C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
-D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
-
 C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
 
-
+%C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
+%D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
+D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
+%F = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half1/MSC_half1_allframes_infomap.conc');
 else
 end
 
@@ -31,19 +34,21 @@ if infomap == 0 && template_matching == 0
     return
 else
 end
+
 %subject should be arranged in following way in the conc file:
 %subject1_time1_rep1
 %subject1_time1_rep2
 %subject1_time2_rep1
 %subject1_time2_rep2
 %subject2_time1_rep1
+%etc
 
 %parameters:
 num_subjects = 10;
 num_time_intervals = 8;
 none_minuteslimit = 0;
 num_reps = 10;
-minutes = [1 2  3 4 5 10 15 20 ];
+minutes = [1 2 3 4 5 10 15 20];
 
 %% Adding paths for this function
 this_code = which('plot_template_matching_reps');
@@ -58,8 +63,8 @@ warning('off') %supress addpath warnings to nonfolders.
 for i=2:np
     addpath(genpath(settings.path{i}));
 end
-rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+%rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
@@ -95,7 +100,7 @@ if infomap == 1
         else
         end
     end
-    disp('All template matching test scalars files exist continuing ...')
+    disp('All infomap test scalars files exist continuing ...')
     
     for i = 1:length(D)
         if exist(D{i}, 'file') == 0
@@ -104,7 +109,7 @@ if infomap == 1
         else
         end
     end
-    disp('All template matching reference scalars files exist continuing ...')
+    disp('All infomap reference scalars files exist continuing ...')
     
 else
 end
@@ -254,7 +259,11 @@ end
 
 else
 end
-
+if infomap ==1
+save('MSC_templ_info_10reps_MuI_to_2nd_half','muI_info','muI_templ','MIn_templ','MIn_info')
+else
+save('MSC_templ_10reps_MuI_to_2nd_half','muI_templ','MIn_templ')
+end
 %rep1 = squeeze(muI(:,:,1)');
 %plot(minutes, rep1);
 %C = permute(muI,[1,2,3]);
@@ -279,13 +288,13 @@ end
 
 %% Actually make plots
 if template_matching == 1
-subplot (2,2,2)
+subplot (1,2,1)
 for i = 1:num_subjects
 errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
 end
 title('Template matching: Mutual information of various intervals to "hold out" half');
 legend('Location','southeast');axis([0 20 0 2.4])
-subplot (2,2,4)
+subplot (1,2,2)
 else
 end
 
@@ -298,5 +307,5 @@ legend('Location','southeast');axis([0 20 0 2.4])
 else
 end
 disp('Done running plot_templatematching_reps');
-
+set(gcf,'color','w')
 

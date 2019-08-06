@@ -4,7 +4,7 @@ function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,motion_file,Zscore_regio
 %consen = ft_read_cifti_mod('/mnt/max/shared/code/internal/utilities/community_detection/fair/120_colorassn_minsize400_manualconsensus.dtseries.nii');
 
 %some hardcodes:
-FD_threshold = 0.2;
+FD_threshold = 0.3;
 
 if Zscore_regions == 1
     L_size = 29696; %hardcode - number of parcellations
@@ -30,8 +30,9 @@ end
 %addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio')
 %rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 %addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')
+addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities')
 addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_scripts')
-rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/'); % remove non-working gifti path included with MSCcodebase
 %rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio/');
 warning('on')
 

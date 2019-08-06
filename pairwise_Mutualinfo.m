@@ -2,28 +2,26 @@
 %load('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/surface_area/ADHDsymptoms.mat')
 
 %niggtwins
-%dscalarwithassignments = importdata('/mnt/rose/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
+%dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
 %HCP twins
-%dscalarwithassignments = importdata('/mnt/rose/shared/projects/NIGGTWINS/WTO/Data/HCP_data/monozygotic_twins_100pairs.conc');
+%dscalarwithassignments = importdata('/mnt/max/shared/projects/NIGGTWINS/WTO/Data/HCP_data/monozygotic_twins_100pairs.conc');
+
+%ABCD twins
+%dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/ABCD_32_rtg_monozyg.conc');
+%dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/ABCD_180_rtg_dizyg.conc');
 
 %MSC Halves
 %templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/bothhalvesdsclars.conc');
+templ_match_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_templ.conc');
 %infomap_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/bothhalvesdsclars.conc');
 
-%Tests
-%templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/bothhalvesdsclars_6sub.conc');
-%templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/MSC_infomaphalf1_to_templmatchhalf2.conc');
-templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/MSC_infomaphalf2_to_templmatchhalf2.conc');
-
-%templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/MSC_half1templ_to_half2infomap.conc');
-%templ_match_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/MSC_templ_to_infomap_anygoodhalf.conc');
-
 twins=0;
+Number_network_surfarea = 16;
 
 %% Add necessary paths
-addpath('/mnt/max/shared/code/internal/analyses/compare_matrices')
-addpath(genpath('/mnt/max/shared/code/internal/utilities/plotting-tools'))
-this_code = which('surfaceareafromgreyordinates');
+addpath ('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices')
+
+this_code = which('pairwise_Mutualinfo');
 [code_dir,~] = fileparts(this_code);
 support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
@@ -76,15 +74,12 @@ if exist('infomap_dscalarwithassignments','var') == 1
     disp('All infomap dscalars exist continuing ...')
 end
 
-
 if twins == 1
-Number_subjects = length(dscalarwithassignments);
+    Number_subjects = length(dscalarwithassignments);
 else
- Number_subjects = length(templ_match_dscalarwithassignments);
+   Number_subjects = length(templ_match_dscalarwithassignments);
 end
 
-
-Number_network_surfarea = 16;
 
 disp('loading scalars')
 if twins == 1
@@ -350,16 +345,19 @@ end
 
 figure()
 imagesc(block_muI)
-title('Mutual information from twin 1 to twin 2')
-xlabel('Twin2')
-ylabel('Twins1')
-figure()
 
-clims = [0 1];
-imagesc(block_MIn,clims)
+if twins == 1
 title('Mutual information from twin 1 to twin 2')
 xlabel('Twin2')
 ylabel('Twins1')
+else
+title('Mutual information from half 1 to half 2')
+xlabel('Subject')
+ylabel('Subject')   
+end
+
+
+
 % figure()
 % subplot(1,2,1)
 % G = graph(allposs_muI_pairs,{'MSC1a','MSC1b','MSC2a','MSC2b','MSC3a','MSC3b','MSC4a','MSC4b','MSC5a','MSC5b','MSC6a','MSC6b','MSC7a','MSC7b','MSC8a','MSC8b','MSC9a','MSC9b','MS10a','MSC10b'},'upper','omitselfloops');
@@ -372,10 +370,7 @@ ylabel('Twins1')
 % LWidths = abs((zscore(H.Edges.Weight/mean(H.Edges.Weight))));
 % plot(H,'LineWidth',LWidths);
 % title('Zscored edge weights')
-% 
-% 
-
-X{1} = diff_muI_values;X{2} = muI_templ;
+ X{1} = diff_muI_values;X{2} = muI_templ;
 figure()
 options.shown_as='stairs';
 options.n_bins = 30;
@@ -393,6 +388,12 @@ my_color=[27,158,119
 231,41,138]/255;
 clf
 
+%uncomment to plot both mono and dizygotic twins.
+%all_nulld = XD_muI{1};
+%all_nullm = XM_muI{1};
+%both_null = [all_nulld; all_nullm];
+%bothX{1} = both_null; bothX{2} = XM_muI{2}; bothX{3} = XD_muI{2};
+
 for i=1:4
    
     options.shown_as=ct{i};
@@ -406,7 +407,7 @@ for i=1:4
     custom_hist(X,options,my_color)
     title (['shown as ' ct{i}])
 end
-
+% 
  disp('Done running pairwise_mutalinfo.')
 % 
 % %try
