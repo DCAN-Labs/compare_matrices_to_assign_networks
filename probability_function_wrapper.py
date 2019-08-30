@@ -56,7 +56,7 @@ def get_cli_args():
     # Create arg parser
     parser = argparse.ArgumentParser(
         description=("Wrapper for probability function script. This loads in "
-                     "a conc of dcalars to visualize them for all subjects. "
+                     "a conc of dscalars to visualize them for all subjects. "
                      "It also can calculate the probability of a network "
                      "assignment from the provided list of subjects.")
     )
