@@ -1,0 +1,7 @@
+.idea/
+data/*
+!data/README.md
+support_files/
+!support_files/run_visualizedscalars.sh
+!support_files/visualizedscalars
+!support_files/visualizedscalars.m

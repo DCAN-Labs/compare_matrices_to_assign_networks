@@ -1,69 +1,49 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, cifti_output_folder)
+%BLV  maxNumCompThreads=2
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
 %
-%BLV dt_or_ptseries_conc_file:
+%dt_or_ptseries_conc_file='NIGGtwins_dtseries.conc';
+%motion_file='NIGGtwins_motion.conc';
+%left_surface_file='NIGGtwins_left_surface.conc';
+%right_surface_file='NIGGtwins_right_surface.conc';
+%cifti_output_folder='/mnt/max/shared/projects/NIGGTWINS/BIDS/Twins_subjects/temp_matching_cifti_output/';
 
-
-
+%%
+maxNumCompThreads(4);
 %hardcodes:
 num_sub=length(dt_or_ptseries_conc_file);
 FD_threshold = 0.2;
 smoothing_kernal = 2.55;
 bit8 = 0;
-%TR=2.5;
+TR=0.8;
 minutes_limit = 'none';
 series = 'dtseries';
 data_type = 'dense';
-%wb_command = 'LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 OMP_NUM_THREADS=2 /usr/local/bin/wb_command';
-wb_command = '/home/exacloud/lustre1/fnl_lab/code/external/utilities/workbench-1.2.3-HCP/bin_rh_linux64/wb_command';
+wb_command = 'LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 OMP_NUM_THREADS=2 /usr/local/bin/wb_command';
 %transform_data = 'Convert_FisherZ_to_r';
 transform_data = 'Convert_to_Zscores';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
-%template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_dtseries_all_networksZscored.mat';
-template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored.mat';
+template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored';
 remove_dconn = 1;
-make_dconn_conc = 0;
-%output_file_name = 'ADHD315';
-calculate_mutual_info = 0;
+output_file_name = 'NIGGtwins';
+calculate_mutual_info = 1;
 make_cifti_from_results = 1;
+make_dconn_conc = 0;
 allow_overlap = 1; 
 overlap_method = 'smooth_then_derivative';
 remove_outliers= 1; additional_mask = 'none';
-
-%check input format
-if isnumeric(TR)==1
-else
-    TR=str2num(TR);
-end
-
+Zscore_eta = 0;
 %% Start
 %import concs
+dtseries_file = importdata(dt_or_ptseries_conc_file);
+motion_all = importdata(motion_file);
+all_L_surface = importdata(left_surface_file);
+all_R_surface = importdata(right_surface_file);
 
-conc = strsplit(dt_or_ptseries_conc_file, '.');
-conc = char(conc(end));
-if strcmp('conc',conc) == 1
-    dtseries_file = importdata(dt_or_ptseries_conc_file);
-    motion_all = importdata(motion_file);
-    all_L_surface = importdata(left_surface_file);
-    all_R_surface = importdata(right_surface_file);
-    
-else
-    dtseries_file = {dt_or_ptseries_conc_file};
-    motion_all = {motion_file};
-    all_L_surface = {left_surface_file};
-    all_R_surface = {right_surface_file};    
-end
-
-%dtseries_file = importdata(dt_or_ptseries_conc_file);
-%motion_all = importdata(motion_file);
-%all_L_surface = importdata(left_surface_file);
-%all_R_surface = importdata(right_surface_file);
-
-
-
+%%
 
 for i = 1:length(dtseries_file)
     if exist(dtseries_file{i}) == 0
@@ -80,9 +60,8 @@ if remove_dconn ==1
 else
     disp('Settings are set to save all dconns. Be mindful of space.')
 end
-
+%%
 for i = 1:length(dtseries_file) %number of subjects
-    
     %step 0: infer output cifti name based on dtseries\
     subject_dt_series = dtseries_file{i};
     motion = motion_all{i};
@@ -93,7 +72,7 @@ for i = 1:length(dtseries_file) %number of subjects
     [~,filename_short]= fileparts(filename_long);
     output_cifti_name =[filename_short '_template_matched'];
     
-    
+ %% 
     switch data_type
         case 'parcellated'
             output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
@@ -101,21 +80,17 @@ for i = 1:length(dtseries_file) %number of subjects
             
             output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
     end
-    
+   %% 
     if strcmp(transform_data,'Convert_to_Zscores') == 1
     output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '_Zscored.dscalar.nii' ];  
     else
     end
     %Step 1: make matrix
-    %support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/'];
-    %addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
-    
-    support_folder=['/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices'];
-    addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien/');
+    %BLV added additional path for template_matching_RH
+    support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/'];
     addpath(genpath(support_folder));
-    
-    
-    
+    addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
+%%    
     %     if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
     %         disp('.mat file already created.  loading...');
     %         load([cifti_output_folder '/' output_cifti_name '.mat']);
@@ -138,6 +113,7 @@ for i = 1:length(dtseries_file) %number of subjects
     %else
     %    disp(['Cifti file already exists. Data was loaded from corresponding .mat file.' ]);
     %end
+    %%
     if exist([output_cifti_scalar_name],'file') == 2
         disp(['Template_matching scalar found for this subject: ' output_cifti_scalar_name])
         dotsloc = strfind(output_cifti_scalar_name,'.');
@@ -153,12 +129,11 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
     else % start from beginning
-        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
-           %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
+        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8,remove_outliers, additional_mask,make_dconn_conc,wb_command);
+        %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file,bit8,remove_outliers, additional_mask, make_dconn_conc)
 
-        %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %Step 2: get network assingments
-        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results);
+        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results,allow_overlap,overlap_method);
         
         if remove_dconn ==1 % RH added in case filespace becomes an limited.
             % Step 2.5: Remove dconn to save space.
@@ -169,8 +144,8 @@ for i = 1:length(dtseries_file) %number of subjects
             disp('Keeping dconn. Be mindful of space.')
         end
     end
-end
-
+%end
+%%
 if calculate_mutual_info == 1
     disp('Done calculating network assingments for all pairs. Proceeding to calculate mutual information for all pairs.');
     

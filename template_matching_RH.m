@@ -1,4 +1,7 @@
 function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results,allow_overlap,overlap_method)
+%hard coding in  Zscore_eta = 0;
+Zscore_eta = 0;
+
 
 %subjectlist = subject (e.g. dconn.nii)
 %data_type = "parcellated" or "dense" connectivity matrix
