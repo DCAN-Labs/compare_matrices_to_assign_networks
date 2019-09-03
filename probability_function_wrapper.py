@@ -4,7 +4,7 @@
 Probability Function Wrapper
 Greg Conan: conan@ohsu.edu
 Created 2019-07-23
-Last Updated 2019-08-30
+Last Updated 2019-09-03
 """
 
 ##################################
@@ -113,7 +113,6 @@ def get_cli_args():
     parser.add_argument(
         "-m",
         "--mre_dir",
-        type=str,
         help=("Path to the directory containing the MATLAB Runtime "
               "Environment (MRE) version 9.1 or newer. This is used to run "
               "a compiled MATLAB script. This argument must be a valid path "
@@ -194,8 +193,8 @@ def validate_readable_file(path, parser):
 
 def valid_whole_number_as_string(str_to_check):
     """
-    Throws ValueError unless str_to_check is a string representing a positive
-    integer.
+    Throws ValueError or AssertionError unless str_to_check is a string
+    representing a positive integer.
     :param str_to_check: string to validate
     :return: string which is either "none" or represents a valid float value
     """

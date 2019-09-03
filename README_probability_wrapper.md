@@ -9,7 +9,7 @@ Clone this repository and save it somewhere on the Linux/Unix system that you wa
 ## Dependencies
 
 1. [Python version 3.5.2](https://www.python.org/downloads/release/python-352) or above
-1. [MathWorks MATLAB Runtime Environment (MRE) version 9.2 (2017a)](https://www.mathworks.com/products/compiler/matlab-runtime.html) or above
+1. MathWorks [MATLAB Runtime Environment (MRE) version 9.1 (2016b)](https://www.mathworks.com/products/compiler/matlab-runtime.html)
 
 ## Usage
 
@@ -19,7 +19,7 @@ Clone this repository and save it somewhere on the Linux/Unix system that you wa
  
 Here is an example of a basic call to this script:
 ```
-python3 ./probability_function_wrapper.py example/file/path/data_dscalar_paths.conc
+python3 ./probability_function_wrapper.py example/file/path/dscalar_paths.conc
 ```
 
 ### Server-Dependent Arguments
@@ -42,14 +42,17 @@ python3 ./probability_function_wrapper.py example/file/path/data_dscalar_paths.c
 
 Here is an example of a more complex call to this script, to create visualizations for all dscalars listed in `data_dscalar_paths.conc` and downsample so that only every 50th greyordinate is sampled. Once the script is finished, it will save the `dscalar` output files to the `./visualizations` directory.
 ```
-python3 ./probability_function_wrapper.py ./example/file/path/data_dscalar_paths.conc --downsample_scalar --DS_factor 50 -save_percentages --output ./visualizations
+python3 ./probability_function_wrapper.py ./example/file/path/data_dscalar_paths.conc --downsample_scalar --DS_factor 50 --save_percentages --output ./visualizations
 ```
+
+For more usage information, call `python3 probability_function_wrapper.py --help`.
 
 ## Required Files
 
 - `./probability_function_wrapper.py`
-- `./support_files/visualizedscalars`
+- `./support_files/PowerColorMap.mat`
 - `./support_files/run_visualizedscalars.sh`
+- `./support_files/visualizedscalars`
 
 ## Updates
 
