@@ -4,7 +4,7 @@
 Probability Function Wrapper
 Greg Conan: conan@ohsu.edu
 Created 2019-07-23
-Last Updated 2019-09-03
+Last Updated 2019-09-16
 """
 
 ##################################
@@ -25,6 +25,8 @@ import subprocess
 DEFAULT_COLORMAP = "./support_files/PowerColorMap.mat"
 DEFAULT_OUTPUT = "./data"
 DEFAULT_TEMPFILE = "./support_files/test_clean_91282.dscalar.nii"
+
+DS_FACTOR_LIMIT = 91282
 
 # MATLAB Runtime Environment (MRE) directories which depend on the host server
 MRE_EXACLOUD = ("/home/exacloud/lustre1/fnl_lab/code/external/utilities/"
@@ -84,11 +86,12 @@ def get_cli_args():
         "-D",
         "--DS_factor",
         type=valid_whole_number_as_string,
-        help=("Downsample factor. Reduce the 91282 vector by this factor to "
-              "reduce the load on matlab visualization tools (e.g. DS = 2 "
-              "will sample every other greyordinate, so visualization will "
-              "have 45641 data points per subject). This must be a whole "
-              "number (with only digits).")
+        help=("Downsample factor. Reduce the " + str(DS_FACTOR_LIMIT)
+              + " vector by this factor to reduce the load on Matlab "
+              "visualization tools (e.g. DS = 2 will sample every other "
+              "greyordinate, so visualization will have "
+              + str(DS_FACTOR_LIMIT/2) + " data points per subject). This "
+              "must be a whole number (with only digits).")
     )
     parser.add_argument(
         "-d",
@@ -114,7 +117,7 @@ def get_cli_args():
         "-m",
         "--mre_dir",
         help=("Path to the directory containing the MATLAB Runtime "
-              "Environment (MRE) version 9.1 or newer. This is used to run "
+              "Environment (MRE) version 9.1. This is used to run "
               "a compiled MATLAB script. This argument must be a valid path "
               "to an existing folder.")
     )
@@ -149,8 +152,9 @@ def validate_cli_args(cli_args, parser):
     :return: Validated command-line arguments argparse namespace
     """
     # Validate DS factor
-    if int(cli_args.DS_factor) >= 91282:
-        parser.error("Downsample factor must be less than 91282.")
+    if int(cli_args.DS_factor) >= DS_FACTOR_LIMIT:
+        parser.error("Downsample factor must be less than "
+                     + str(DS_FACTOR_LIMIT))
 
     # Validate file/dir path CLI args
     validate_readable_file(cli_args.dscalarwithassignments, parser)
@@ -171,6 +175,12 @@ def validate_cli_args(cli_args, parser):
         if not os.access(cli_args.mre_dir, os.R_OK):
             parser.error("Cannot read MATLAB Runtime Environment directory at "
                          + cli_args.mre_dir)
+
+    # Validate MRE dir
+    if not (os.path.isdir(cli_args.mre_dir) and
+            os.access(cli_args.mre_dir, os.R_OK)):
+        parser.error("Cannot read MATLAB Runtime Environment directory at "
+                     + cli_args.mre_dir)
 
     return cli_args
 
