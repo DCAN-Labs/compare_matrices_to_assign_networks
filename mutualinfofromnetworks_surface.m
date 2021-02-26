@@ -1,4 +1,4 @@
-function [muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,community_detection, method, cifti_enhancement,other_half_networks_cii,num_interval_reps,indepen_time_series)
+function [muI] = mutualinfofromnetworks_surface(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,community_detection, method, cifti_enhancement,other_half_networks_cii,num_interval_reps,indepen_time_series, additional_mask)
 %% This code then runs template matching or infomap on subjects and calculate the mututal information to a specifided dscalar.
 %%This code is designed to make correlation matrix from a subject's dtseries, and motion, and surface files (if smoothing is desired) See documentation for cifti_conn_matrix.
 % Correlation matrices are automatically Z-scored.
@@ -33,14 +33,16 @@ function [muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_f
 
 
 %% Inititalize by adding paths
-this_code = which('mutualinfofromnetworks');
+this_code = which('mutualinfofromnetworks_surface');
 [code_dir,~] = fileparts(this_code);
 support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
 settings=settings_comparematrices;%
-np=size(settings.path,2);
+np=size(settings.path,10);
 
 %load('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/minutes_vector.mat') %[1,2,3,4,5,10,15,20];
+
+minutes_vector = [1,2,3,4,5,10,15,20];
 
 if isnumeric(minutes_vector)==1
 else
@@ -88,6 +90,10 @@ for i=1:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+
+addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/Matlab_CIFTI'))
+addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/gifti-1.6'))
+
 wb_command=settings.path_wb_c; %path to wb_command
 warning('on')
 num_reps_vector = 1:num_interval_reps;
@@ -102,7 +108,7 @@ min_region_size = 30;
 %community_detection = 'infomap';
 num_reps = 20;
 donotZscore = 0; 
-surface_only = 0;
+surface_only = 1;
 
 %hardcodes for template matching;
 allow_overlap = 1; 
@@ -110,7 +116,7 @@ overlap_method = 'smooth_then_derivative';
 
 %% Start
 
-if indepen_time_series == 1
+if indepen_time_series == 0 %sample from the same dconn.
    
     for r=1:num_interval_reps
         tic
@@ -125,8 +131,12 @@ if indepen_time_series == 1
                     %if cifti_enhancement ==1
                     %    output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_method_' method '_NE.dscalar.nii'];
                     %else
-                    templ_dscalar_out_dir = pwd;                    
-                    template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_method_' method '.dscalar.nii'];
+                    templ_dscalar_out_dir = pwd;
+                    if donotZscore == 0 
+                    template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_method_' method '_Zscored_recolored.dscalar.nii'];
+                    else
+                    template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_method_' method '_recolored.dscalar.nii'];    
+                    end
                     %end
 
                     
@@ -136,8 +146,8 @@ if indepen_time_series == 1
                 %% Step 1: make connectivity matrix
                 %%HARDCODE WARNING
                 addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien');
-                remove_outliers =1; %hardcoded options for making connectivity matrices
-                additional_mask = 'none';
+                remove_outliers =0; %hardcoded options for making connectivity matrices. changed this to 0 for infants
+                %additional_mask = 'none';
                 orig_temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector{i}, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers,additional_mask);
                 temp_short = orig_temp_name(1:end-10); %remove dconn.nii
                 
@@ -170,14 +180,14 @@ if indepen_time_series == 1
                         %HARDCODES
                         path_dist_matrix = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
                         
-                        %disp(['running community detection with command: cifti_community_detection_RH(' temp_name ',' path_dist_matrix ',' template ',' num2str(min_distance) ',' num2str(tie_density) ',' num2str(min_network_size) ',' num2str(min_region_size) ',' num2str(donotZscore) ',' num2str(surface_only) ',' 'infomap' ',' num2str(num_reps) ')']);
-                        %[ info_output_cifti_scalar_name] = cifti_community_detection_RH(temp_name,path_dist_matrix,template,min_distance,tie_density,min_network_size,min_region_size,donotZscore,surface_only,'infomap',num_reps);
-                        %cleaned_infomapfile = ciftiopen(info_output_cifti_scalar_name,wb_command);
-                        %new_subject_labels = cleaned_infomapfile.cdata;
+                        disp(['running community detection with command: cifti_community_detection_surface(' temp_name ',' path_dist_matrix ',' template ',' num2str(min_distance) ',' num2str(tie_density) ',' num2str(min_network_size) ',' num2str(min_region_size) ',' num2str(donotZscore) ',' num2str(surface_only) ',' 'infomap' ',' num2str(num_reps) ')']);
+                        [ info_output_cifti_scalar_name] = cifti_community_detection_surface(temp_name,path_dist_matrix,template,min_distance,tie_density,min_network_size,min_region_size,donotZscore,surface_only,'infomap',num_reps);
+                        cleaned_infomapfile = ciftiopen(info_output_cifti_scalar_name,wb_command);
+                        new_subject_labels = cleaned_infomapfile.cdata;
                         
                      %case 'template_matching'
                         disp('Community detection method is template_matching')
-                        [new_subject_labels, template_output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name minutes_andreps_name],method,data_type,cifti_enhancement,allow_overlap,overlap_method);
+                        [new_subject_labels, template_output_cifti_scalar_name] = comparematrices_test_surface(temp_name,[output_cifti_name minutes_andreps_name],method,data_type,cifti_enhancement,allow_overlap,overlap_method);
                        
                     %case 'bigclam'
 %                         disp('big clam not yet supported')
@@ -191,7 +201,7 @@ if indepen_time_series == 1
 %                         num_reps = 20;
 %                         
 %                         disp(['Community detection method is Bigclam'])
-%                         [new_subject_labels, output_cifti_scalar_name] = cifti_community_detection_RH(temp_name,distance_matrix,template,min_distance,tie_density,min_network_size,min_region_size,community_detection,num_reps);
+%                         [new_subject_labels, output_cifti_scalar_name] = cifti_community_detection_surface(temp_name,distance_matrix,template,min_distance,tie_density,min_network_size,min_region_size,community_detection,num_reps);
 %                     otherwise
                 %end
                 %% Step 3: Remove dconn.
@@ -235,8 +245,7 @@ else %sample from the same dconn.
         %% Step 1: make connectivity matrix
         %%HARDCODE WARNING
         addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien');
-        remove_outliers =1; %hardcoded options for making connectivity matrices
-        additional_mask = 'none';
+        remove_outliers =0; %hardcoded options for making connectivity matrices. changed this to 0 for infants
         orig_temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector{i}, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers,additional_mask);
         temp_short = orig_temp_name(1:end-10); %remove dconn.nii
         [~,temp_file] = fileparts(orig_temp_name);
@@ -299,10 +308,11 @@ else %sample from the same dconn.
                 end
                 
                 %% Step 2: Run community detection to get network assingments
+                
                 switch community_detection
                     case 'template_matching'
                         disp('Community detection method is template_matching')
-                        [new_subject_labels, output_cifti_scalar_name] = comparematrices_test(temp_name,[output_cifti_name num2str(minutes_vector{i})],method,data_type,cifti_enhancement);
+                        [new_subject_labels, output_cifti_scalar_name] = comparematrices_test_surface(temp_name,[output_cifti_name num2str(minutes_vector{i})],method,data_type,cifti_enhancement);
                         
                     case 'infomap'
                         disp('Community detection method is infomap')
@@ -311,8 +321,8 @@ else %sample from the same dconn.
                         %HARDCODES
                         
                         path_dist_matrix = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
-                        disp(['running community detection with command: cifti_community_detection_RH(' temp_name ',' path_dist_matrix ',' template ',' num2str(min_distance) ',' num2str(tie_density) ',' num2str(min_network_size) ',' num2str(min_region_size) ',' num2str(donotZscore) ',' num2str(surface_only) ',' 'infomap' ',' num2str(num_reps) ')']);
-                        [ output_cifti_scalar_name] = cifti_community_detection_RH(temp_name,path_dist_matrix,template,min_distance,tie_density,min_network_size,min_region_size,donotZscore,surface_only,'infomap',num_reps);
+                        disp(['running community detection with command: cifti_community_detection_surface(' temp_name ',' path_dist_matrix ',' template ',' num2str(min_distance) ',' num2str(tie_density) ',' num2str(min_network_size) ',' num2str(min_region_size) ',' num2str(donotZscore) ',' num2str(surface_only) ',' 'infomap' ',' num2str(num_reps) ')']);
+                        [ output_cifti_scalar_name] = cifti_community_detection_surface(temp_name,path_dist_matrix,template,min_distance,tie_density,min_network_size,min_region_size,donotZscore,surface_only,'infomap',num_reps);
                         cleaned_infomapfile = ciftiopen(output_cifti_scalar_name,wb_command);
                         new_subject_labels = cleaned_infomapfile.cdata;
                         
@@ -328,7 +338,7 @@ else %sample from the same dconn.
                         num_reps = 20;
                         
                         disp(['Community detection method is Bigclam'])
-                        [new_subject_labels, output_cifti_scalar_name] = cifti_community_detection_RH(temp_name,path_dist_matrix,template,min_distance,tie_density,min_network_size,min_region_size,donotZscore,surface_only,community_detection,num_reps);
+                        [new_subject_labels, output_cifti_scalar_name] = cifti_community_detection_surface(temp_name,path_dist_matrix,template,min_distance,tie_density,min_network_size,min_region_size,donotZscore,surface_only,community_detection,num_reps);
                         
                     otherwise
                 end

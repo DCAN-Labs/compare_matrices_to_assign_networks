@@ -1,4 +1,4 @@
-function [new_subject_labels, output_cifti_scalar_name] = comparematrices_test(input_cifti,output_cifti_name,method,data_type,cifti_enhancement,allow_overlap,overlap_method)
+function [new_subject_labels, output_cifti_scalar_name] = comparematrices_test_surface(input_cifti,output_cifti_name,method,data_type,cifti_enhancement,allow_overlap,overlap_method)
 %10/25/18 Hermosillo R.
 
 %This code uses a connectivity matrices, a template connectivity matrix, and label file, to try to assingn
@@ -40,7 +40,7 @@ end
 
 
 %% Adding paths for this function
-this_code = which('comparematrices_test');
+this_code = which('comparematrices_test_surface');
 [code_dir,~] = fileparts(this_code);
 support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
@@ -98,18 +98,18 @@ else
             disp('opening template dconn...(1/4)')
             %cii=ciftiopen('/mnt/max/shared/projects/hcp_community_detection/Evan_test/Cifti_Community_Detection/distmat_creation/EUGEODistancematrix_XYZ_255interhem_unit8.pconn.nii',path_wb_c);
             %template_cii=ciftiopen('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii', wb_command);
-            template_cii=ciftiopen(settings.path{9}, wb_command); %dconn path
+            template_cii=ciftiopen(settings.path{16}, wb_command); %dconn path
             template_conn = single(template_cii.cdata);
             clear template_cii %save memory
             disp('opening dscalar of network labels...(2/4)');
             %template_cii=ciftiopen('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.dscalar.nii', wb_command);
-            template_cii=ciftiopen(settings.path{6}, wb_command); %dense network labels (dscalar).
+            template_cii=ciftiopen(settings.path{16}, wb_command); %dense network labels (dscalar).
             template_labels = single(template_cii.cdata);
             num_surface_grey = length(template_labels);
             %additional template needed with more ROIs (i.e. 352 vs 333).
             disp('opening dscalar for saving...(3/4)');
             %saving_template =ciftiopen('/mnt/max/shared/code/internal/pipelines/HCP_release_20170910_v1.4/global/templates/91282_Greyordinates/91282_Greyordinates.dscalar.nii',wb_command);
-            saving_template =ciftiopen(settings.path{8}, wb_command);
+            saving_template =ciftiopen(settings.path{15}, wb_command);
             %subject_cii=ciftiopen('/mnt/max/shared/data/study/ADHD/HCP/processed/ADHD_NoFMNoT2/10050-2/20120418-SIEMENS-Nagel_K-Study/HCP_release_20161027/10050-2/MNINonLinear/Results/10050-2_FNL_preproc_Gordon_subcortical.ptseries.nii_5_minutes_of_data_at_FD_0.2.pconn.nii', wb_command);
             disp('opening subject dconn...(4/4)');
             subject_cii=ciftiopen(input_cifti, wb_command); % finally opening subject's data
@@ -389,43 +389,45 @@ switch method
             disp([output_cifti_name '.mat file (contains Eta_to_template_vox) Eta_to_template_vox .mat file not found for this subject found. Running template matching (~1-2 hrs).'])
             %networks_template_path = settings.path{12};
             networks_template_path = settings.path_template_nets;
+            networks_template_path = ('/home/exacloud/lustre1/fnl_lab/projects/INFANT/GEN_INFANT/Luci_template/infant_template/seedmaps_UCI_smoothed_dtseries_all_networksZscored.mat');
             cifti_output_folder = pwd;
-            [new_subject_labels,output_cifti_scalar_name] = template_matching_RH(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,cifti_output_folder,wb_command,make_cifti_from_results,allow_overlap,overlap_method);
+            [new_subject_labels,output_cifti_scalar_name] = template_matching_LM(input_cifti,data_type, networks_template_path,transform_data,output_cifti_name,cifti_output_folder,wb_command,make_cifti_from_results,allow_overlap,overlap_method);
             %[eta_to_template_vox, eta_subject_index,output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results)
 
             %new_subject_labels = eta_subject_index;
             %save([output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
-            saving_template =ciftiopen(settings.path{8}, wb_command);   
+            %saving_template =ciftiopen(settings.path{16}, wb_command);   
         else
             disp([output_cifti_name '.mat file (contains Eta_to_template_vox) found for this subject found. Template matching has alreday been run for subject. Loading data.'])
             %networks_template_path = settings.path{12};
             networks_template_path = settings.path_template_nets;
-            saving_template =ciftiopen(settings.path{8}, wb_command);
+            saving_template =ciftiopen(settings.path{16}, wb_command);
             load([output_cifti_name '.mat'])  
             new_subject_labels = eta_subject_index;
+            if make_cifti_from_results == 1
+                disp('saving file to cifti')
+                saving_template.cdata = single(new_subject_labels);
+                %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
+                disp('Saving new scalar')
+                save(saving_template, [output_cifti_name '.gii'], 'ExternalFileBinary')
+                disp('Converting Zscored scalar .gii to .nii')
+                switch data_type
+                    case 'parcellated'
+                        output_cifti_scalar_name  = [output_cifti_name '.pscalar.nii' ];
+                    case 'dense'
+                        output_cifti_scalar_name  = [output_cifti_name '.dscalar.nii' ];
+                end
+                unix([wb_command ' -cifti-convert -from-gifti-ext ' output_cifti_name '.gii ' output_cifti_scalar_name ]);
+                disp('Removing .gii')
+                unix(['rm -f ' output_cifti_name '.gii']);
+                unix(['rm -f ' output_cifti_name '.dat']);
+            else
+            end
         end
     otherwise
         Disp('"method_type" either not supported or not found.  Please select "average" "useeta" or "template_matching"  (in single quotes)');
 end
 
-if make_cifti_from_results == 1
-    disp('saving file to cifti')
-    saving_template.cdata = single(new_subject_labels);
-    %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
-    disp('Saving new scalar')
-    save(saving_template, [output_cifti_name '.gii'], 'ExternalFileBinary')
-    disp('Converting Zscored scalar .gii to .nii')
-    switch data_type
-        case 'parcellated'
-            output_cifti_scalar_name  = [output_cifti_name '.pscalar.nii' ];
-        case 'dense'
-            output_cifti_scalar_name  = [output_cifti_name '.dscalar.nii' ];
-    end
-            unix([wb_command ' -cifti-convert -from-gifti-ext ' output_cifti_name '.gii ' output_cifti_scalar_name ]);
-    disp('Removing .gii')
-    unix(['rm -f ' output_cifti_name '.gii']);
-    unix(['rm -f ' output_cifti_name '.dat']);
-else
-end
+
 
 disp('done')

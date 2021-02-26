@@ -7,25 +7,25 @@
 %B= importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/infomap_all_subjects1run.conc');
 template_matching = 1;
 if template_matching == 1
-%A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
-%B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
-
-A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
-B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
-
-%E = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half1.conc');
-
+    %A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
+    %B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
+    
+    A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
+    B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
+    
+    %E = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half1.conc');
+    
 else
 end
 
 infomap = 0;
 if infomap == 1
-C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
-
-%C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
-%D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
-D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
-%F = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half1/MSC_half1_allframes_infomap.conc');
+    C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
+    
+    %C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
+    %D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
+    D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
+    %F = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half1/MSC_half1_allframes_infomap.conc');
 else
 end
 
@@ -158,35 +158,14 @@ else
 end
 
 if template_matching == 1
-m = 1; % counter for line in conc file.
-if none_minuteslimit == 0
-    %% Step 4: load template networks from 2nd half of data:
-    for i = 1:num_subjects
-        reference_cii = ciftiopen(B{i},wb_command);
-        other_half_networks = reference_cii.cdata;
-        disp(['Reference scalar = ' B{i}])
-        for j = 1:num_time_intervals
-            for k = 1:num_reps
-                test_cii = ciftiopen(A{m},wb_command);
-                new_subject_labels = test_cii.cdata;
-                disp(['Test scalar = ' A{m}]);
-                disp('Caluating mutual information between scalars')
-                %% Step 5: Calculate mutual information
-                muI_templ(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
-                [VIn_templ(i,j,k), MIn_templ(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
-                m =m+1;
-            end
-        end
-        disp(num2str(i))
-    end
-else
-    %% Step 4: load template networks from 2nd half of data:
-    for i = 1:num_subjects
-        reference_cii = ciftiopen(B{i},wb_command);
-        other_half_networks = reference_cii.cdata;
-        disp(['Reference scalar = ' B{i}])
-        for j = 1:num_time_intervals+1
-            if j <= num_time_intervals %check if the interval is the last one (i.e. "none minutes limit" for which there will be no reps.)
+    m = 1; % counter for line in conc file.
+    if none_minuteslimit == 0
+        %% Step 4: load template networks from 2nd half of data:
+        for i = 1:num_subjects
+            reference_cii = ciftiopen(B{i},wb_command);
+            other_half_networks = reference_cii.cdata;
+            disp(['Reference scalar = ' B{i}])
+            for j = 1:num_time_intervals
                 for k = 1:num_reps
                     test_cii = ciftiopen(A{m},wb_command);
                     new_subject_labels = test_cii.cdata;
@@ -197,48 +176,48 @@ else
                     [VIn_templ(i,j,k), MIn_templ(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
                     m =m+1;
                 end
-            else % if it is the minutes limit, dont go through reps.
-                m =m+1;
             end
+            disp(num2str(i))
         end
-        disp(num2str(i))
+    else
+        %% Step 4: load template networks from 2nd half of data:
+        for i = 1:num_subjects
+            reference_cii = ciftiopen(B{i},wb_command);
+            other_half_networks = reference_cii.cdata;
+            disp(['Reference scalar = ' B{i}])
+            for j = 1:num_time_intervals+1
+                if j <= num_time_intervals %check if the interval is the last one (i.e. "none minutes limit" for which there will be no reps.)
+                    for k = 1:num_reps
+                        test_cii = ciftiopen(A{m},wb_command);
+                        new_subject_labels = test_cii.cdata;
+                        disp(['Test scalar = ' A{m}]);
+                        disp('Caluating mutual information between scalars')
+                        %% Step 5: Calculate mutual information
+                        muI_templ(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
+                        [VIn_templ(i,j,k), MIn_templ(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
+                        m =m+1;
+                    end
+                else % if it is the minutes limit, dont go through reps.
+                    m =m+1;
+                end
+            end
+            disp(num2str(i))
+        end
     end
-end
-
+    
 else
 end
 
 
 if infomap == 1
-m = 1; % counter for line in conc file.
-if none_minuteslimit == 0
-    %% Step 4: load template networks from 2nd half of data:
-    for i = 1:num_subjects
-        reference_cii = ciftiopen(D{i},wb_command);
-        other_half_networks = reference_cii.cdata;
-        disp(['Reference scalar = ' D{i}])
-        for j = 1:num_time_intervals
-            for k = 1:num_reps
-                test_cii = ciftiopen(C{m},wb_command);
-                new_subject_labels = test_cii.cdata;
-                disp(['Test scalar = ' C{m}]);
-                disp('Caluating mutual information between scalars')
-                %% Step 5: Calculate mutual information
-                muI_info(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
-                [VIn_info(i,j,k), MIn_info(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
-                m =m+1;
-            end
-        end
-        disp(num2str(i))
-    end
-else
-    %% Step 4: load template networks from 2nd half of data:
-    for i = 1:num_subjects
-        reference_cii = ciftiopen(D{i},wb_command);
-        other_half_networks = reference_cii.cdata;
-        disp(['Reference scalar = ' D{i}])
-        for j = 1:num_time_intervals+1
-            if j <= num_time_intervals %check if the interval is the last one (i.e. "none minutes limit" for which there will be no reps.)
+    m = 1; % counter for line in conc file.
+    if none_minuteslimit == 0
+        %% Step 4: load template networks from 2nd half of data:
+        for i = 1:num_subjects
+            reference_cii = ciftiopen(D{i},wb_command);
+            other_half_networks = reference_cii.cdata;
+            disp(['Reference scalar = ' D{i}])
+            for j = 1:num_time_intervals
                 for k = 1:num_reps
                     test_cii = ciftiopen(C{m},wb_command);
                     new_subject_labels = test_cii.cdata;
@@ -249,20 +228,41 @@ else
                     [VIn_info(i,j,k), MIn_info(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
                     m =m+1;
                 end
-            else % if it is the minutes limit, dont go through reps.
-                m =m+1;
             end
+            disp(num2str(i))
         end
-        disp(num2str(i))
+    else
+        %% Step 4: load template networks from 2nd half of data:
+        for i = 1:num_subjects
+            reference_cii = ciftiopen(D{i},wb_command);
+            other_half_networks = reference_cii.cdata;
+            disp(['Reference scalar = ' D{i}])
+            for j = 1:num_time_intervals+1
+                if j <= num_time_intervals %check if the interval is the last one (i.e. "none minutes limit" for which there will be no reps.)
+                    for k = 1:num_reps
+                        test_cii = ciftiopen(C{m},wb_command);
+                        new_subject_labels = test_cii.cdata;
+                        disp(['Test scalar = ' C{m}]);
+                        disp('Caluating mutual information between scalars')
+                        %% Step 5: Calculate mutual information
+                        muI_info(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
+                        [VIn_info(i,j,k), MIn_info(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
+                        m =m+1;
+                    end
+                else % if it is the minutes limit, dont go through reps.
+                    m =m+1;
+                end
+            end
+            disp(num2str(i))
+        end
     end
-end
-
+    
 else
 end
 if infomap ==1
-save('MSC_templ_info_10reps_MuI_to_2nd_half','muI_info','muI_templ','MIn_templ','MIn_info')
+    save('MSC_templ_info_10reps_MuI_to_2nd_half','muI_info','muI_templ','MIn_templ','MIn_info')
 else
-save('MSC_templ_10reps_MuI_to_2nd_half','muI_templ','MIn_templ')
+    save('MSC_templ_10reps_MuI_to_2nd_half','muI_templ','MIn_templ')
 end
 %rep1 = squeeze(muI(:,:,1)');
 %plot(minutes, rep1);
@@ -275,37 +275,51 @@ end
 %rep1b = squeeze(muI(:,:,1)); rep2b = squeeze(muI(:,:,2)); rep3b = squeeze(muI(:,:,3));E = [rep1b;rep2b;rep3b;];
 %parallelcoords(E,'group',subjects,'labels',timelabels,'quantile',0.25)
 if template_matching == 1
-mean_MuI_templ = mean(muI_templ,3); % calculate the mean of each interval (For each participant) using the reps.
-SEM_MuI_templ = std(muI_templ,0,3)/sqrt(size(muI_templ,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
+    mean_MuI_templ = mean(muI_templ,3); % calculate the mean of each interval (For each participant) using the reps.
+    SEM_MuI_templ = std(muI_templ,0,3)/sqrt(size(muI_templ,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
 else
 end
 
 if infomap == 1
-mean_MuI_info = mean(muI_info,3); % calculate the mean of each interval (For each participant) using the reps.
-SEM_MuI_info = std(muI_info,0,3)/sqrt(size(muI_info,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
+    mean_MuI_info = mean(muI_info,3); % calculate the mean of each interval (For each participant) using the reps.
+    SEM_MuI_info = std(muI_info,0,3)/sqrt(size(muI_info,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
 else
 end
 
 %% Actually make plots
-if template_matching == 1
-subplot (1,2,1)
-for i = 1:num_subjects
-errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
-end
-title('Template matching: Mutual information of various intervals to "hold out" half');
-legend('Location','southeast');axis([0 20 0 2.4])
-subplot (1,2,2)
+if template_matching ==1 && infomap ==1
+    if template_matching == 1
+        subplot (1,2,1)
+        for i = 1:num_subjects
+            errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
+        end
+        title('Template matching: Mutual information of various intervals to "hold out" half');
+        legend('Location','southeast');axis([0 20 0 2.4])
+        subplot (1,2,2)
+    else
+    end
+    
+    if infomap == 1
+        for i = 1:num_subjects
+            errorbar(minutes,mean_MuI_info(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
+        end
+        title('Infomap: Mutual information of various intervals to "hold out" half');
+        legend('Location','southeast');axis([0 20 0 2.4])
+    else
+    end
+    disp('Done running plot_templatematching_reps');
+    set(gcf,'color','w')
+    
 else
+    if template_matching == 1
+        %subplot (1,2,1)
+        for i = 1:num_subjects
+            errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
+        end
+        title('Template matching: Mutual information of various intervals to "hold out" half');
+        legend('Location','southeast');axis([0 20 0 2.4])
+        %subplot (1,2,2)
+    else
+    end
+    
 end
-
-if infomap == 1
-for i = 1:num_subjects
-errorbar(minutes,mean_MuI_info(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
-end
-title('Infomap: Mutual information of various intervals to "hold out" half');    
-legend('Location','southeast');axis([0 20 0 2.4])    
-else
-end
-disp('Done running plot_templatematching_reps');
-set(gcf,'color','w')
-

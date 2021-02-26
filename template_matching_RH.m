@@ -1,4 +1,4 @@
-function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(subjectlist, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results,allow_overlap,overlap_method)
+function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(dconn_filename, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results,allow_overlap,overlap_method,surface_only,already_surface_only)
 
 %subjectlist = subject (e.g. dconn.nii)
 %data_type = "parcellated" or "dense" connectivity matrix
@@ -7,7 +7,10 @@ function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(s
 %output_cifti_name = output_cifti_name pretty clear
 %cifti_output_folder = your project directory
 %wb_command = path to run HCP workbench command.
-
+%make_cifti_from_results = set to 1 if you want to save your results as a cifti. 0 will not save anything.
+%allow_overlap = set to 1 if you're using overlapping networks in your cifti (Your input networks file will likely be a .dtseries.nii)
+%overlap_method =  currently, the only supported method is
+%"smooth_then_derivative"
 
 %%% load subjects, network info %%%
 %load /data/cn6/allyd/kelleyData/pnm_list_revised.mat
@@ -18,6 +21,7 @@ function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(s
 %allow_overlap = 1;
 %overlap_method = 'smooth_then_derivative';
 %thresholds = [1:0.25:3.5];
+Zscore_eta = 0; % not necessary to zscore
 %% Adding paths for this function
 this_code = which('template_matching_RH');
 [code_dir,~] = fileparts(this_code);
@@ -33,6 +37,7 @@ for i=2:np
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
 
@@ -44,6 +49,16 @@ else
     else
         make_cifti_from_results = str2double(make_cifti_from_results);
     end
+end
+
+if isnumeric(allow_overlap)==1
+else
+        allow_overlap = str2double(allow_overlap);
+end
+
+if isnumeric(surface_only)==1
+else
+        surface_only = str2double(surface_only);
 end
 
 switch data_type
@@ -61,9 +76,9 @@ disp('NOTE: Your template-matching threshold should match the units of your temp
 switch transform_data
     case 'Convert_FisherZ_to_r'
         TEMPLATEMINIMUM = 0.37;
-    case 'Convert_r_to_Pearons'
+    case 'Convert_r_to_Fisher'
         TEMPLATEMINIMUM = 0.37;
-    case'Convert_to_Zscores'
+    case 'Convert_to_Zscores'
         TEMPLATEMINIMUM = 1.00;
     otherwise
         TEMPLATEMINIMUM = 0.37;
@@ -78,9 +93,9 @@ load(template_path);
 cifti_template_mat_full =seed_matrix;
 cifti_template_mat_full(cifti_template_mat_full<= TEMPLATEMINIMUM) = nan;
 
-if iscell(subjectlist) ==1
+if iscell(dconn_filename) ==1
 else
-    subjectlist = {subjectlist};
+    dconn_filename = {dconn_filename};
 end
 
 %change name for Zscored data
@@ -89,7 +104,7 @@ if strcmp(transform_data,'Convert_to_Zscores') ==1
 else
 end
 
-for i = 1:length(subjectlist)
+for i = 1:length(dconn_filename)
     if exist([cifti_output_folder '/' output_cifti_name '.dscalar.nii' ], 'file') == 2
             disp('Template_matching dscalar already found for this subject. loading...')
             subject_cii =ciftiopen([cifti_output_folder '/' output_cifti_name '.dscalar.nii'], wb_command);
@@ -156,10 +171,25 @@ for i = 1:length(subjectlist)
         %cii=ciftiopen('/mnt/max/shared/projects/hcp_community_detection/Evan_test/Cifti_Community_Detection/distmat_creation/EUGEODistancematrix_XYZ_255interhem_unit8.pconn.nii',path_wb_c);
         %template_cii=ciftiopen('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii', wb_command);
         tic
+        if surface_only ==1
+            if already_surface_only == 1
+                %do nothing
+            else % take out subcortical connections from dconn.
+                large_subjectdconn = char(dconn_filename);
+                [dconn_filename] = surface_only_dconn(char(dconn_filename),'inferred');
+                dconn_filename = [dconn_filename '.dconn.nii'];
+                disp('Removing connectivity matrix  since a smaller on eiwth surface only has been saved.')
+                %cmd = (['rm -f ' num2str(large_subjectdconn)]);
+                %system(cmd)
+            end
+        else
+        end
+        
+        
         disp('opening subject dconn...')
         switch transform_data
             case 'Convert_FisherZ_to_r'
-                subject_cii=ciftiopen(char(subjectlist), wb_command); %dconn path
+                subject_cii=ciftiopen(char(dconn_filename), wb_command); %dconn path
                 corr_mat_full = single(subject_cii.cdata);
                 
                 if range(corr_mat_full)>2
@@ -171,7 +201,7 @@ for i = 1:length(subjectlist)
                 corr_mat_full = tanh(corr_mat_full);
                 
             case 'Convert_r_to_Fisher'
-                subject_cii=ciftiopen(char(subjectlist), wb_command); %dconn path
+                subject_cii=ciftiopen(char(dconn_filename), wb_command); %dconn path
                 corr_mat_full = single(subject_cii.cdata);
                 if range(corr_mat_full)>2
                     disp('The range of input cifti is greater than 2.  Your correlation matrix is probably Fisher Z tranformed (or Z-scored). Ensure that your template is tranformed similarly or set "Convert_FisherZ_to_r" to "1" to have it automatically tranformed to Pearson.');
@@ -185,7 +215,11 @@ for i = 1:length(subjectlist)
                 disp('Converting from to Z-scores region-wise. Input dconn can either be pearson or fisherZ.')
                 addpath(genpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/'))
                 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn'))
-                Zdconn = Zscore_dconn(char(subjectlist{i}),'inferred');
+                if surface_only ==1
+                Zdconn = Zscore_dconn_surface_only(char(dconn_filename{i}),'inferred');
+                else
+                Zdconn = Zscore_dconn(char(dconn_filename{i}),'inferred');  
+                end
                 disp(['loading Zscored dconn: ' char(Zdconn)])
                 subject_cii=ciftiopen([char(Zdconn)], wb_command); %dconn path
                 corr_mat_full = single(subject_cii.cdata);
@@ -194,7 +228,7 @@ for i = 1:length(subjectlist)
                 
             otherwise
                 disp('Data transformation method not found. No tranformation will be applied.  If tranformation is desired, please select: "Convert_FisherZ_to_r" or "Convert_r_to_Pearons" or "Convert_to_Zscores".')
-                subject_cii=ciftiopen(char(subjectlist), wb_command); %dconn path
+                subject_cii=ciftiopen(char(dconn_filename), wb_command); %dconn path
                 corr_mat_full = single(subject_cii.cdata);
                 if range(corr_mat_full)>2
                     disp('The range of input cifti is greater than 2.  Your correlation matrix is probably Fisher Z tranformed (or Z-scored). Ensure that your template is tranformed similarly or set "Convert_FisherZ_to_r" to "1" to have it automatically tranformed to Pearson.');
@@ -240,13 +274,11 @@ for i = 1:length(subjectlist)
         if exist('allow_overlap','var') == 1 && allow_overlap == 1
             if allow_overlap == 1
                 disp('Calculating overlap')
-               MuI_threshhold_all_networks = findoverlapthreshold(eta_to_template_vox,network_names,0, overlap_method);
+               MuI_threshhold_all_networks = findoverlapthreshold(eta_to_template_vox,network_names,Zscore_eta, overlap_method);
             else
             end
-        else
-            
+        else 
         end
-        
         [x, new_subject_labels] = max(eta_to_template_vox,[],2); %find max for template matching
         
         %%% if requiring a minimum eta value for assignment %%%
@@ -278,8 +310,14 @@ for i = 1:length(subjectlist)
     
     %if exist([cifti_output_folder '/' output_cifti_name '.mat'],'file') == 2
     disp('saving file to cifti')
+    if surface_only ==1
+    saving_template =ciftiopen(settings.path{18}, wb_command); % don't forget to load in a gifti object, or  else saving_template will be interpreted as a struct.
+    else %assume 91282
     saving_template =ciftiopen(settings.path{8}, wb_command); % don't forget to load in a gifti object, or  else saving_template will be interpreted as a struct.
+    end
+    
     saving_template.cdata = single(new_subject_labels);
+    
     %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
     disp('Saving new scalar')
     save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary') 
@@ -299,11 +337,15 @@ for i = 1:length(subjectlist)
     if exist('allow_overlap','var') == 1 && allow_overlap == 1
         %open example dtseries.nii
         
-            disp('Saving overlap files as dtseries')
-            cii =ciftiopen(settings.path{13}, wb_command);
-            %cii =ciftiopen('/mnt/max/shared/projects/uo_tds/data/113/113_rfMRI_REST_FNL_preproc_v2_Atlas.dtseries.nii','LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command');
+        disp('Saving overlap files as dtseries')
+        if surface_only ==1
+            cii =ciftiopen(settings.path{14}, wb_command);
+        else %assume 91282
             
-            switch overlap_method
+            cii =ciftiopen(settings.path{13}, wb_command);
+        end
+        
+        switch overlap_method
                 case'hist_localmin'
                     for j=1:length(network_names)
                         if j==4 || j ==6
@@ -342,6 +384,9 @@ for i = 1:length(subjectlist)
                 otherwise
                     disp('Overlap network method not specified.')
             end
+            % make sure that"assign_unassinged is set to zero" for
+            % overlapping networks. Otherwise the whole brain will be assinged to every network.
+            clean_dscalars_by_size([cifti_output_folder '/' output_cifti_name '_overlap_' overlap_method '.dtseries.nii'],[],[],[],[],30,[],0,0,0);
     else
     end
     
@@ -353,7 +398,7 @@ for i = 1:length(subjectlist)
 end
 
 disp(['Cleaning: ' output_cifti_scalar_name]);
-[outname] = clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],0,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
+[outname] = clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
 disp(['Clean file: ' outname '.dscalar.nii'])
 
 % cmd = ['mv ' cifti_output_folder '/' output_cifti_scalar_name];

@@ -1,9 +1,9 @@
-function [all_areas_vec, network_surfarea, network_volume ] = surfaceareafromgreyordinates(Lmidthicknessfile,Rmidthicknessfile,output_only_greySA,dscalarwithassignments,outputname)
+function [ network_surfarea, network_volume ] = network_surface_area_from_network_file(Lmidthicknessfile,Rmidthicknessfile,dscalarwithassignments,outputname)
 
 %This wrapper create a surface area dscalar
 
 %% Add necessary paths
-this_code = which('surfaceareafromgreyordinates');
+this_code = which('network_surface_area_from_network_file');
 [code_dir,~] = fileparts(this_code);
 support_folder=[code_dir '/support_files']; %find support files in the code directory.
 addpath(genpath(support_folder));
@@ -89,15 +89,15 @@ end
 disp('All series files exist continuing ...')
 
 
-%Make a blank dscalar with 8000 as all the values using the 1st cifti.
-newcii = ciftiopen(dscalarwithassignments{1},wb_command);
-network_assignments = newcii.cdata;
-num_networks = max(network_assignments); %check that subject 1 has all networks.
-surfscalar = ones(size(network_assignments,1),1);
-surfscalar = surfscalar*8000;
-newcii.cdata = surfscalar;
-ciftisave(newcii, [support_folder '/' outputname '8000s_91282.dscalar.nii'],wb_command)
-
+    %Make a blank dscalar with 8000 as all the values using the 1st cifti.
+    newcii = ciftiopen(dscalarwithassignments{1},wb_command);
+     network_assignments = newcii.cdata;
+    num_networks = max(network_assignments); %check that subject 1 has all networks.
+    surfscalar = ones(size(network_assignments,1),1);
+    surfscalar = surfscalar*8000;
+    newcii.cdata = surfscalar;
+    ciftisave(newcii, [support_folder '/' outputname '8000s_91282.dscalar.nii'],wb_command)
+    
 for i = 1:size(dscalarwithassignments) % loop through every subject
     disp(['Getting surface area and volume for subject: ' num2str(i)])
     
@@ -131,48 +131,41 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
     all_areas = ciftiopen([outputname 'surfaceareas.dscalar.nii'], wb_command);
     all_areas_vec = all_areas.cdata;
     
-    if output_only_greySA   ==1
-        network_assignment_filetype = strsplit(dscalarwithassignments{i}, '.');
-        cifti_type = char(network_assignment_filetype(end-1));
-        if strcmp('dtseries',cifti_type) == 1
-            overlap =1;
-        else
-            overlap =0;
+    network_assignment_filetype = strsplit(dscalarwithassignments{i}, '.');
+    cifti_type = char(network_assignment_filetype(end-1));
+    if strcmp('dtseries',cifti_type) == 1
+        overlap =1;
+    else
+        overlap =0;
+    end
+    
+    if overlap ==1
+        for j = 1:size(network_assignments,2)
+            %for j = 1:num_networks
+            net_indices = find(network_assignments(:,j) ~= 0);
+            grey_SA = all_areas_vec(net_indices);
+            sub_indices = find(grey_SA > 1000);
+            surf_indices = find(grey_SA < 1000);
+            network_volume(i,j) = size(sub_indices,1)*8;
+            surf_SA = grey_SA(surf_indices);
+            network_surfarea(i,j) = sum(surf_SA);
         end
         
-        if overlap ==1
-            for j = 1:size(network_assignments,2)
-                %for j = 1:num_networks
-                net_indices = find(network_assignments(:,j) ~= 0);
-                grey_SA = all_areas_vec(net_indices);
-                sub_indices = find(grey_SA > 1000);
-                surf_indices = find(grey_SA < 1000);
-                network_volume(i,j) = size(sub_indices,1)*8;
-                surf_SA = grey_SA(surf_indices);
-                network_surfarea(i,j) = sum(surf_SA);
-            end
-            
-        else % run single network assingment
-            
-            for j = 1:num_networks
-                net_indices = find(network_assignments == j);
-                grey_SA = all_areas_vec(net_indices);
-                sub_indices = find(grey_SA > 1000);
-                surf_indices = find(grey_SA < 1000);
-                network_volume(i,j) = size(sub_indices,1)*8;
-                surf_SA = grey_SA(surf_indices);
-                network_surfarea(i,j) = sum(surf_SA);
-            end
+    else % run single network assingment
+        
+        for j = 1:num_networks
+            net_indices = find(network_assignments == j);
+            grey_SA = all_areas_vec(net_indices);
+            sub_indices = find(grey_SA > 1000);
+            surf_indices = find(grey_SA < 1000);
+            network_volume(i,j) = size(sub_indices,1)*8;
+            surf_SA = grey_SA(surf_indices);
+            network_surfarea(i,j) = sum(surf_SA);
         end
-    else
     end
 end
-
-if output_only_greySA   ==1
-    
-    disp('saving volumes and surface areas');
-    save( [pwd '/' outputname '.mat'], 'network_volume','network_surfarea')
-end
+disp('saving volumes and surface areas');
+save( [pwd '/' outputname '.mat'], 'network_volume','network_surfarea')
 
 disp('Done calculating surfaces areas and volumes');
 end
