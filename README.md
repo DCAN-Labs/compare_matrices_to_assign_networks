@@ -1,4 +1,10 @@
-Making Network tempalte for subjects.
+This package  is designed to identfy neural networks using times series data.
+A series of analysis packages are used to quantify the networks topology afterwrads.
+
+The data are assumed to be in processed with the freesurfaer processing pipeline ( theorhetically in BIDS format).  The code assumes that particpants have 91282 greyordinates  cortex + subcortical structures or are cortex only 549412).
+
+The code works by taking taking a desns connectivity matrix and comparing the similar to a series of network template from an independet data set.  If you don't have a dconn, you can build one with one of our other handy tools using the dense timeseries (dtseries.nii), see cifti_conn_matrix.m code for how to propoerly motion-censor the time series.
+
 
 %This code uses a connectivity matrices, a template connectivity matrix, and label file, to try to assingn
 %specific networks to the nodes of an individual.
@@ -11,7 +17,7 @@ There are several ways to do this:
 
 
 
-Severeal parameters are currrently specified at the beginning.  These will need to converted into being passed in as arguments at a later dates. 
+Several parameters are currrently specified at the beginning.  These will need to converted into being passed in as arguments at a later dates. 
 
 %Currently this code only supports dconns.  Pconns are in beta.
 
