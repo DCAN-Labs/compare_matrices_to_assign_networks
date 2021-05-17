@@ -1,5 +1,5 @@
 function [MuI_threshhold_all_networks] = findoverlapthreshold(eta_to_template_vox,network_names,Zscore_eta, method)
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
+addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
 % This function works by taking in a matrix of network X voxtel  of eta squared
 % values and sets a threshold by finding the local minimum
 % input is matrix with the voxels as rows and
@@ -55,7 +55,7 @@ for j=1:length(network_names)
     ct{3}='stairs';
     ct{4}='contour';
     options.n_bins=[];
-    
+    options.xlim=[];
     [x_hist, y_hist]=get_hist_data(Xcell,options);
     
     dx=mean(diff(x_hist));

@@ -64,8 +64,40 @@ switch server_name
         path{9}='/home/exacloud/tempwork/fnl_lab/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';        
         path_wb_c='/home/exacloud/tempwork/fnl_lab/code/external/utilities/workbench-9253ac2/bin_rh_linux64/wb_command'; % workbench command path
         
+    case '/home/fair'   
+        path{1}='/home/faird/shared/code/external/utilities/gifti-1.6';
+        path{2}='/home/faird/shared/code/external/utilities/Matlab_CIFTI';
+        path{3}='/home/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
+        path{4}='/home/faird/shared/code/internal/utilities/hcp_comm_det_damien/Gordan_subcortical_template_ptseries.conc_AVG.pconn.nii';
+        %templates:
+        path{5}='/home/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
+        path{6}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
+        path{7}='/path/to/example_pscalar.pscalar.nii';
+        path{8}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii'; 
+        path{9}='/home/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';        
+        path{10}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
+        path{11}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii';
+        path{12}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';      
+        path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_template_nets='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
-        
+    case '/panfs/roc'
+        path{1}='/panfs/roc/groups/8/faird/shared/code/external/utilities/gifti-1.6';
+        path{2}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/Matlab_CIFTI';
+        path{3}='/panfs/roc/groups/8/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
+        path{4}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/hcp_comm_det_damien/Gordan_subcortical_template_ptseries.conc_AVG.pconn.nii';
+        %templates:
+        path{5}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
+        path{6}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
+        path{7}='/path/to/example_pscalar.pscalar.nii';
+        path{8}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii';
+        path{9}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';
+        path{10}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
+        path{11}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
+        path{12}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
+        path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_template_nets='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
+
     case 'PCWIN64'
         path{1}='P:\code\external\utilities\gifti-1.6';
         path{2}='P:\code\external\utilities\Matlab_CIFTI';   

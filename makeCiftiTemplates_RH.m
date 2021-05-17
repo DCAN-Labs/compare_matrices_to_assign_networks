@@ -1,11 +1,13 @@
-function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,motion_file,Zscore_regions,power_motion,remove_outliers, surface_only)
+function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,TR,all_motion_conc_file,project_dir,Zscore_regions,power_motion,remove_outliers, surface_only,use_only_subjects_that_pass_motion_criteria,combined_outliermask_provided)
 %%% load consensus, subjects, networks
 %consen = ft_read_cifti_mod('/data/cn6/allyd/variants/120_colorassn_minsize400_manualconsensus.dtseries.nii');
 %consen = ft_read_cifti_mod('/mnt/max/shared/code/internal/utilities/community_detection/fair/120_colorassn_minsize400_manualconsensus.dtseries.nii');
 
 %some hardcodes:
-FD_threshold = 0.2;
+FD_threshold = 0.2; FD_column = 21;
 %FD_threshold = 0.3; %for infant
+check_motion_first =1;
+minutes_to_use =10;
 
 if surface_only ==1
     Zscore_regions = 0;
@@ -32,15 +34,12 @@ warning('off') %supress addpath warnings to nonfolders.
 for i=2:np
     addpath(genpath(settings.path{i}));
 end
-addpath(genpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio/'))
-%addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio')
-rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/gifti') % remove non-working gifti path included with MSCcodebase
-%addpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')
+%addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/fileio/'))
+%addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/gifti')); % add  new working gifti path included with MSCcodebase
 addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_scripts')
-rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/fileio/');
-addpath(genpath('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_scripts'))
-addpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/') %Add top level folder to get paircorr_mod.m
+%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+%addpath(genpath('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_scripts'))
+addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/')); %Add top level folder to get paircorr_mod.m
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
@@ -55,19 +54,22 @@ else
     subs = {dt_or_ptseries_conc_file};
 end
 
+j=0;
 for i = 1:length(subs)
-    if exist(subs{i}) == 0
+    if exist(subs{i},'file') == 0
         NOTE = ['Subject Series ' num2str(i) ' does not exist']
+        disp(num2str(subs{i}))
         return
     else
+        j=j+1;
     end
 end
-disp('All series files exist continuing ...')
+disp([num2str(j) ' of ' num2str(length(subs)) ' timeseries files found.  All series files exist continuing ...'])
 
 if strcmp('conc',conc) == 1
-    B = importdata(motion_file);
+    B = importdata(all_motion_conc_file);
 else
-    B = {motion_file};
+    B = {all_motion_conc_file};
 end
 
 %Make sure length of motion files matches length of timeseries
@@ -77,14 +79,17 @@ else
 end
 
 % Check that all motion files in conc file exist
+j=0;
 for i = 1:length(B)
-    if exist(B{i}) == 0
+    if exist(B{i},'file') == 0
         NOTE = ['motion file ' num2str(i) ' does not exist']
-        return
+        disp(num2str(B{i}))
+        %return
     else
+        j=j+1;
     end
 end
-disp('All motion files exist continuing ...')
+disp([num2str(j) ' of ' num2str(length(B)) 'motion files found. All motion files exist continuing ...'])
 
 file_dir = dt_or_ptseries_conc_file;
 file_split = strsplit(file_dir,'/');
@@ -105,16 +110,40 @@ consen = ft_read_cifti_mod(settings.path{6}); %path to dscalar with template lab
 %subs = textread('/data/cn6/allyd/TRsurfaces/allTRlist.txt','%s');
 %subs = textread('/mnt/max/shared/projects/midnight_scan_club/template_matching/MSC_subjects.txt','%s');
 %consen.data=consen.data(1:59412); %%% if surface only
+if check_motion_first ==1
+[all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, FD_column,[],0,1);
+         good_subs_idx = find(minutes_to_use<=all_subjects_minutes); %use these subjects
+         bad_subs_idx = find(minutes_to_use>all_subjects_minutes); %dont' use these subjects
+         really_bad_subs_idx= find(0.5>=all_subjects_minutes); %these subjects have very little data.
+end
 
+%Going Forward, only use timeseries and motion from subjects that pass
+%minimum number of minutes requirement.
+if use_only_subjects_that_pass_motion_criteria ==1
+subs = subs(good_subs_idx);
+B = B(good_subs_idx);
+else
+end
+
+%uncomment to plot
+% figure()
+% subplot(2,1,1)
+% histogram(all_subjects_minutes,20);
+% xlim([0 max(all_subjects_minutes)+1 ])
+% subplot(2,1,2)
+% histogram(all_subjects_minutes(good_subs_idx),20);
+% xlim([0 max(all_subjects_minutes)+1 ])
 
 %%% load BOLD data from subjects
 %%% extract mean time series for all voxels labeled network j
 %%% compute corr between mean and all voxels in that subject
-if exist([code_dir '/seedmaps_' file_root_no_ext '.mat'],'file') == 2
+if exist([project_dir filesep 'seedmaps_' file_root_no_ext '.mat'],'file') == 2
     disp('loading previously generated data from each subject for template');
-    load([code_dir '/seedmaps_' file_root_no_ext '.mat'])
+    load([project_dir filesep 'seedmaps_' file_root_no_ext '.mat'])
 else
     for i=1:length(subs)
+        %for    i=good_subs
+        disp(num2str(i));
         disp(['subject ' subs{i}]);
         
         %%% load subject BOLD data and tmask
@@ -123,7 +152,7 @@ else
         %newcii=cii;
         %TR_file = ciftiopen(subs{i}, wb_command);
         %TR = TR_file.cdata;
-        TR = ft_read_cifti_mod(subs{i});
+        timeseries = ft_read_cifti_mod(subs{i});
         %TR=single(cii.data);
         %tmask = dlmread(['/data/cn6/allyd/TRsurfaces/ciftiFiles_TR/' subs{i} '/total_tmask.txt']);
         
@@ -135,58 +164,96 @@ else
                 allFD(j) = motion_data{j}.FD_threshold;
             end
             FDidx = find(round(allFD,3) == round(FD_threshold,3));
+            if combined_outliermask_provided ==1
+              FDvec = motion_data{FDidx}.combined_removal;  
+            else
             FDvec = motion_data{FDidx}.frame_removal;
-            FDvec = abs(FDvec-1);
-            allmasks_before_outliers_removed_FD02{i} = FDvec;
-            if exist('remove_outliers','var') == 0 || remove_outliers == 1
-                
-                disp('Removal outliers not specified.  It will be performed by default.')
-                %% additional frame removal based on Outliers command: isoutlier with "median" method.
-                stdev_temp_filename =[char(file_root(1)) '_temp.txt'];
-                addpath('/mnt/max/shared/code/internal/utilities/CensorBOLDoutliers/')
-                [FDvec]= CensorBOLDoutliers(wb_command, subs, i, stdev_temp_filename, FDvec);
-                
-            else exist('remove_outliers','var') == 1 && remove_outliers == 0;
-                disp('Motion censoring performed on FD alone. Frames with outliers in BOLD std dev not removed');
             end
-            tmask = FDvec;
+            FDvec = abs(FDvec-1); % convert "1=remove to 1=keep"
+            allmasks_before_outliers_removed_FD02{i} = FDvec;
+            
+            if combined_outliermask_provided ==0
+                if exist('remove_outliers','var') == 0 || remove_outliers == 1
+                    
+                    disp('Removal outliers not specified.  It will be performed by default.')
+                    %% additional frame removal based on Outliers command: isoutlier with "median" method.
+                    stdev_temp_filename =[char(file_root(1)) '_temp.txt'];
+                    addpath('/mnt/max/shared/code/internal/utilities/CensorBOLDoutliers/')
+                    [FDvec]= CensorBOLDoutliers(wb_command, subs, i, stdev_temp_filename, FDvec);
+                    
+                else exist('remove_outliers','var') == 1 && remove_outliers == 0;
+                    disp('Motion censoring performed on FD alone. Frames with outliers in BOLD std dev not removed. Maybe you have already performed outlier detection.');
+                end
+                
+                good_frames_idx = find(FDvec == 1);
+                good_minutes = (length(good_frames_idx)*TR)/60; % number of good minutes in your data
+                
+                %disp(['Available possible minutes is ' good_minutes'])
+                
+                if good_minutes < 0.5 % if there is less than 30 seconds, don't generate the correlation matrix
+                    subject_has_too_few_frames = ['Subject ' num2str(i) ' has less than 30 seconds of good data']
+                    bad_mover(m) = i;
+                elseif minutes_to_use > good_minutes % if there is not enough data for your subject, just generate the matrix with all available frames
+                    fileID = fopen([char(project_dir) filesep char(orig_motion_filename) '_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt'],'w');
+                    fprintf(fileID,'%1.0f\n',FDvec);
+                    fclose(fileID);
+                    
+                elseif minutes_to_use <= good_minutes % if there is enough data, match the amount of data used for your subject matrix to the minutes_limit
+                    good_frames_needed = round(minutes_to_use*60/TR); %number of good frames to randomly pull
+                    rand_good_frames = sort(randperm(length(good_frames_idx),good_frames_needed));
+                    FDvec_cut = zeros(length(FDvec),1);
+                    ones_idx = good_frames_idx(rand_good_frames);
+                    FDvec_cut(ones_idx) = 1; % the new vector that should match good frames with the minutes limit
+                    
+                    fileID = fopen([char(project_dir) filesep char(orig_motion_filename) '_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt'],'w');
+                    fprintf(fileID,'%1.0f\n',FDvec_cut);
+                    fclose(fileID);
+                    
+                end
+            else
+                disp('Frames with outliers in BOLD std dev not removed. Maybe you have already performed outlier detection.');
+            end
+            tmask = logical(FDvec);
+            %tmask = FDvec;
         else
-            tmask = load(B{i}); %load .txt file that has a list of all masks.
+            tmask = logical(load(B{i})); %load .txt file that has a list of all masks.
+            %tmask = load(B{i}); %load .txt file that has a list of all masks.
+            
         end
         
         allmasks_outliers_removed_FD02{i} = FDvec; %save for later
        
-        %timeseries_temp = TR;
-        %clear TR
-        %TR.data = timeseries_temp(:,tmask>0);
-        
-        %TR.data = TR.data(:,tmask>0); % censor time series with mask.
-        
+        timeseries_temp = timeseries;
+        %clear timeseries
+        %timeseries.data = timeseries_temp(:,tmask>0);
+        %timeseries.data = timeseries_temp(:,tmask);
+        %timeseries.data = timeseries.data(:,tmask>0); % censor time series with mask.
+                timeseries.data = timeseries.data(:,tmask); 
         for j=1:length(network_names)
             if j==4 || j==6
                 continue
             end
             %disp(['  network ' network_names{j}]);
             inds = consen.data==j;
-            subNetAvg= nanmean(TR.data(inds,:),1);
+            subNetAvg= nanmean(timeseries.data(inds,:),1);
             if surface_only ==1
-                for voxel=1:length(TR.data(1:ncortgrey))
-                    goodvox= ~isnan(TR.data(voxel,:));
-                    corrs(voxel,j)=paircorr_mod(subNetAvg(goodvox)', TR.data(voxel,goodvox)')';
+                for voxel=1:length(timeseries.data(1:ncortgrey))
+                    goodvox= ~isnan(timeseries.data(voxel,:));
+                    corrs(voxel,j)=paircorr_mod(subNetAvg(goodvox)', timeseries.data(voxel,goodvox)')';
                 end
             else
-                for voxel=1:length(TR.data)
-                    goodvox= ~isnan(TR.data(voxel,:));
-                    corrs(voxel,j)=paircorr_mod(subNetAvg(goodvox)', TR.data(voxel,goodvox)')';
+                for voxel=1:length(timeseries.data)
+                    goodvox= ~isnan(timeseries.data(voxel,:));
+                    corrs(voxel,j)=paircorr_mod(subNetAvg(goodvox)', timeseries.data(voxel,goodvox)')';
                 end
             end
             clear inds
         end
-        clear TR tmask
-        seedmapsTR{i} = corrs;
+        clear timeseries tmask
+        seedmapstimeseries{i} = corrs;
         clear subNetAvg cii
     end
-    save(['seedmaps_' file_root_no_ext '.mat'],'seedmapsTR','allmasks_outliers_removed_FD02','allmasks_before_outliers_removed_FD02', '-v7.3')
+    save(['seedmaps_' file_root_no_ext '.mat'],'seedmapstimeseries','allmasks_outliers_removed_FD02','allmasks_before_outliers_removed_FD02', '-v7.3')
 end
 
 % if Zscore_regions == 1
@@ -237,10 +304,10 @@ for i=1:length(subs)
             continue
         end
         %seedmapsTR{i}(:,j)
-        if sum(isnan(seedmapsTR{i}(:,j))) > 0
+        if sum(isnan(seedmapstimeseries{i}(:,j))) > 0
             disp(['This subject ' num2str(i) ' has Nans'])
             disp(['File with nans is : ' subs{i} ])
-            disp(['number of greyordinates with nans = ' num2str(sum(isnan(seedmapsTR{i}(:,j))))])
+            disp(['number of greyordinates with nans = ' num2str(sum(isnan(seedmapstimeseries{i}(:,j))))])
             badsubidx(k,1) = i; k = k+1;
         else
         end
@@ -253,9 +320,9 @@ else
     badsubidx = unique(badsubidx);
     cleansubs(badsubidx,:) = [];
     subs = cleansubs;
-    cleanseedmapsTR = seedmapsTR;
-    cleanseedmapsTR(badsubidx) = [];
-    seedmapsTR = cleanseedmapsTR;
+    cleanseedmapstimeseries = seedmapstimeseries;
+    cleanseedmapstimeseries(badsubidx) = [];
+    seedmapstimeseries = cleanseedmapstimeseries;
     disp([num2str(length(badsubidx)) ' subjects were removed from average for "Nans" in greyordinates.'])
 end
 
@@ -264,15 +331,15 @@ for j=1:length(network_names)
     if j==4 || j==6
         continue
     end
-    grpNetAve= zeros(size(seedmapsTR{1},1),1);
+    grpNetAve= zeros(size(seedmapstimeseries{1},1),1);
     for i=1:length(subs)
-        grpNetAve=grpNetAve + atanh(seedmapsTR{i}(:,j));
+        grpNetAve=grpNetAve + atanh(seedmapstimeseries{i}(:,j));
     end
     grpNetAve=grpNetAve ./ length(subs);
     %avgSeedmaps{j}=inverseFisherTransform(grpNetAve);
     avgSeedmaps{j}=tanh(grpNetAve);
     
-    if surface_only == 1
+    if surface_only == 0
         if Zscore_regions == 1
             disp('Converting to Zscores')
             %for i=1:length(seedmapsTR)
@@ -324,12 +391,12 @@ for j=1:length(network_names)
     %made for a tempalte that is mising data?
     %ft_write_cifti_mod(['/data/cn6/allyd/cifti_TEST_RevisedTemplate_' network_names{j} '_network_surfOnly.dtseries.nii'], temp);
     if Zscore_regions == 1
-        %ft_write_cifti_mod([code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_networkZscored.dtseries.nii'], temp);
-        ciftisave(temp_file,[code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_networkZscored.dtseries.nii'],wb_command);
+        %ft_write_cifti_mod([project_dir filesep '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_networkZscored.dtseries.nii'], temp);
+        ciftisave(temp_file,[project_dir filesep 'seedmaps_' file_root_no_ext '_' network_names{j} '_networkZscored.dtseries.nii'],wb_command);
         seed_matrix(:,j) =avgSeedmaps{j};
     else
-        %ft_write_cifti_mod([code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_network.dtseries.nii'], temp);
-        ciftisave(temp_file,[code_dir '/support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_network.dtseries.nii'],wb_command);
+        %ft_write_cifti_mod([project_dir filesep 'support_files/seedmaps_' file_root_no_ext '_' network_names{j} '_network.dtseries.nii'], temp);
+        ciftisave(temp_file,[project_dir filesep 'seedmaps_' file_root_no_ext '_' network_names{j} '_network.dtseries.nii'],wb_command);
         seed_matrix(:,j) =avgSeedmaps{j};
     end
     
@@ -337,9 +404,9 @@ for j=1:length(network_names)
 end
 %save all maps
 if Zscore_regions == 1
-    save([code_dir '/support_files/seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'seed_matrix');
+    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'seed_matrix');
 else
-    save([code_dir '/support_files/seedmaps_' file_root_no_ext '_all_networks.mat'],'seed_matrix');
+    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networks.mat'],'seed_matrix');
 end
 
 disp('Done making network templates based on the subjects you provided.');

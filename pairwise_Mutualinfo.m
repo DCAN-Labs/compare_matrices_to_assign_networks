@@ -35,8 +35,8 @@
 %templ_match_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/templ_only.conc');
 
 %ABCD_best_subs
-templ_match_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_overlap_dscalar.conc');
-infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/infomap/merged_densities/infomap_both_halves.conc');
+templ_match_dscalarwithassignments = importdata('/home/faird/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_singlenet_dscalar.conc');
+%infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/infomap/merged_densities/infomap_both_halves.conc');
 
 twins=0;
 surface_only =0; ncortgrey = 59412;
@@ -45,8 +45,8 @@ omnibus =0; %for overlapping networks, set to true if you want to concatenate al
 network_names = {   'DMN'    'Vis'    'FP'      'DAN'       'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 %% Add necessary paths
-addpath ('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices')
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'))
+addpath ('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks')
+addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'))
 
 this_code = which('pairwise_Mutualinfo');
 [code_dir,~] = fileparts(this_code);

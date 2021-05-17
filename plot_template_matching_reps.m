@@ -6,26 +6,32 @@
 %B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
 %B= importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/infomap_all_subjects1run.conc');
 template_matching = 1;
+infomap = 1;
+
 if template_matching == 1
     %A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
     %B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
     
-    A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
-    B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
+    %A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
+    A = importdata('/home/faird/shared/projects/MSC_to_DCAN/split_halves/half1/MSC_half1_intervals_continuous.conc');
+    %B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
     
+    B = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
     %E = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half1.conc');
     
 else
 end
 
-infomap = 0;
 if infomap == 1
-    C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
+    %C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
     
     %C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
     %D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
-    D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
+    %D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
     %F = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half1/MSC_half1_allframes_infomap.conc');
+    C = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/full_intervals/MSChalf1_templ_matching_at_intervals_MSI_paths.conc');
+    D = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
+    
 else
 end
 
@@ -59,13 +65,13 @@ settings=settings_comparematrices;%
 np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
-warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+%warning('off') %supress addpath warnings to nonfolders.
+for i=1:np
     addpath(genpath(settings.path{i}));
 end
 %rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-warning('on')
+%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+%warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
 
@@ -140,7 +146,6 @@ else
 end
 
 if infomap == 1
-    
     if size(C,1) == expected_num_scalars
         disp('Number of subjects and reps matches conc file')
     else
@@ -204,7 +209,6 @@ if template_matching == 1
             disp(num2str(i))
         end
     end
-    
 else
 end
 
@@ -256,14 +260,15 @@ if infomap == 1
             disp(num2str(i))
         end
     end
-    
 else
 end
-if infomap ==1
-    save('MSC_templ_info_10reps_MuI_to_2nd_half','muI_info','muI_templ','MIn_templ','MIn_info')
-else
-    save('MSC_templ_10reps_MuI_to_2nd_half','muI_templ','MIn_templ')
-end
+
+% if infomap ==1
+%     save('MSC_templ_info_10reps_MuI_to_2nd_half','muI_info','muI_templ','MIn_templ','MIn_info')
+% else
+%     save('MSC_templ_10reps_MuI_to_2nd_half','muI_templ','MIn_templ')
+% end
+
 %rep1 = squeeze(muI(:,:,1)');
 %plot(minutes, rep1);
 %C = permute(muI,[1,2,3]);
@@ -277,49 +282,123 @@ end
 if template_matching == 1
     mean_MuI_templ = mean(muI_templ,3); % calculate the mean of each interval (For each participant) using the reps.
     SEM_MuI_templ = std(muI_templ,0,3)/sqrt(size(muI_templ,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
+    mean_MIn_templ = mean(MIn_templ,3);
+    SEM_MIn_templ = std(MIn_templ,0,3)/sqrt(size(MIn_templ,3));
+    
 else
 end
 
 if infomap == 1
     mean_MuI_info = mean(muI_info,3); % calculate the mean of each interval (For each participant) using the reps.
     SEM_MuI_info = std(muI_info,0,3)/sqrt(size(muI_info,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
+    mean_MIn_info = mean(MIn_info,3);
+    SEM_MIn_info = std(MIn_info, 0,3)/sqrt(size(MIn_info,3));
+    
 else
 end
 
 %% Actually make plots
-if template_matching ==1 && infomap ==1
-    if template_matching == 1
+
+% if template_matching == 1
+%     subplot (1,2,1)
+%     for i = 1:num_subjects
+%         errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
+%     end
+%     title('Template matching: Mutual information of various intervals to "hold out" half');
+%     legend('Location','southeast');axis([0 20 0 2.4])
+%     subplot (1,2,2)
+% else
+% end
+% 
+% if infomap == 1
+%     for i = 1:num_subjects
+%         errorbar(minutes,mean_MuI_info(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
+%     end
+%     title('Infomap: Mutual information of various intervals to "hold out" half');
+%     legend('Location','southeast');axis([0 20 0 2.4])
+% else
+% end
+
+
+
+F = figure();
+set(gcf,'color','w')
+set(gca,'FontSize',16)
+
+if template_matching == 1
+    
+    if template_matching ==1 && infomap ==1
         subplot (1,2,1)
-        for i = 1:num_subjects
-            errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
-        end
-        title('Template matching: Mutual information of various intervals to "hold out" half');
-        legend('Location','southeast');axis([0 20 0 2.4])
-        subplot (1,2,2)
-    else
     end
     
-    if infomap == 1
-        for i = 1:num_subjects
-            errorbar(minutes,mean_MuI_info(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
-        end
-        title('Infomap: Mutual information of various intervals to "hold out" half');
-        legend('Location','southeast');axis([0 20 0 2.4])
-    else
-    end
-    disp('Done running plot_templatematching_reps');
-    set(gcf,'color','w')
+    max_null_MIn = 0.4004;
+    average_null_MIn = 0.3663;
+    min_null_MIn =0.3208;
     
-else
-    if template_matching == 1
-        %subplot (1,2,1)
-        for i = 1:num_subjects
-            errorbar(minutes,mean_MuI_templ(i,:),SEM_MuI_templ(i,:),'LineWidth',2); hold on
-        end
-        title('Template matching: Mutual information of various intervals to "hold out" half');
-        legend('Location','southeast');axis([0 20 0 2.4])
-        %subplot (1,2,2)
-    else
+    patch([0 20 20 0],[min_null_MIn min_null_MIn max_null_MIn max_null_MIn],[180/255 180/255 180/255],'FaceAlpha',0.3); hold on
+    line([0 20],[max_null_MIn,max_null_MIn],'LineStyle','--');hold on
+    line([0 20],[average_null_MIn,average_null_MIn],'Color','black','LineWidth',3,'LineStyle',':');hold on
+    line([0 20],[min_null_MIn,min_null_MIn],'LineStyle','--');hold on
+    
+    max_real_MIn = 0.6891;
+    average_real_MIn = 0.6101;
+    min_real_MIn = 0.5136;
+    
+    patch([0 20 20 0],[min_real_MIn min_real_MIn max_real_MIn max_real_MIn],[0/255 120/255 200/255],'FaceAlpha',0.3); hold on
+    line([0 20],[max_real_MIn,max_real_MIn],'LineStyle','--'); hold on
+    line([0 20],[average_real_MIn,average_real_MIn],'Color','blue','LineWidth',3,'LineStyle',':');hold on
+    line([0 20],[min_real_MIn,min_real_MIn],'LineStyle','--');hold on
+    
+    for i = 1:num_subjects
+        G(i) = errorbar(minutes,mean_MIn_templ(i,:),SEM_MIn_templ(i,:),'LineWidth',2); hold on
     end
+    
+    MSC_labels ={'MSC01','MSC02','MSC03','MSC04','MSC05','MSC06','MSC07','MSC08','MSC09','MSC10'};
+    lgd = legend(G,MSC_labels,'Location','southeast');
+    lgd.FontSize = 10;
+    axis([0 20 0.25 0.70]);
+    axis([0 20 0.1 0.70]);
     
 end
+
+if infomap == 1
+    
+    if template_matching ==1 && infomap ==1
+        subplot (1,2,2)
+    end
+    
+    %HARDCODE warning
+    max_null_MIn = 0.4004;
+    average_null_MIn = 0.3663;
+    min_null_MIn =0.3208;
+    
+    patch([0 20 20 0],[min_null_MIn min_null_MIn max_null_MIn max_null_MIn],[180/255 180/255 180/255],'FaceAlpha',0.3); hold on
+    line([0 20],[max_null_MIn,max_null_MIn],'LineStyle','--');hold on
+    line([0 20],[average_null_MIn,average_null_MIn],'Color','black','LineWidth',3,'LineStyle',':');hold on
+    line([0 20],[min_null_MIn,min_null_MIn],'LineStyle','--');hold on
+    
+    max_real_MIn = 0.6891;
+    average_real_MIn = 0.6101;
+    min_real_MIn = 0.5136;
+    
+    patch([0 20 20 0],[min_real_MIn min_real_MIn max_real_MIn max_real_MIn],[0/255 120/255 200/255],'FaceAlpha',0.3); hold on
+    line([0 20],[max_real_MIn,max_real_MIn],'LineStyle','--'); hold on
+    line([0 20],[average_real_MIn,average_real_MIn],'Color','blue','LineWidth',3,'LineStyle',':');hold on
+    line([0 20],[min_real_MIn,min_real_MIn],'LineStyle','--');hold on
+    
+    for i = 1:num_subjects
+        G(i) = errorbar(minutes,mean_MIn_info(i,:),SEM_MIn_info(i,:),'LineWidth',2); hold on
+    end
+    
+    MSC_labels ={'MSC01','MSC02','MSC03','MSC04','MSC05','MSC06','MSC07','MSC08','MSC09','MSC10'};
+    lgd = legend(G,MSC_labels,'Location','southeast');
+    lgd.FontSize = 10;
+    axis([0 20 0.25 0.70]);
+    axis([0 20 0.1 0.70]);
+    
+end
+
+print('MSC_NMI_intervals','-dpng','-r600');
+
+disp('Done running plot_templatematching_reps');
+set(gcf,'color','w')
