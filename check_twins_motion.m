@@ -1,4 +1,4 @@
-function [all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR_or_TR_conc, FD_column,FD_conc_file,get_mean_FD)
+function [all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR_or_TR_conc, FD_column,FD_conc_file,get_mean_FD,use_outlierdetection_mask_if_possible)
 
 %This function read either a txt file (0 t d iscard , 1 to keep) or a Power_2014_FD_only.mat file.
 % It will then tell you how many frames are available.
@@ -81,7 +81,14 @@ for i = 1:length(all_motion_conc)
         
         
         load(all_motion_conc{i})
-        FD02_vector =  motion_data{FD_column}.frame_removal; % use 21 for FD= 0.2, 31 for 0.3
+        if use_outlierdetection_mask_if_possible ==1
+            try
+                FD02_vector = motion_data{FD_column}.combined_removal;
+            catch
+                disp('Subject does not have the outlier dection mask in this .mat file. combined_removal mask not found. using power2014 FD mask instead.')
+                FD02_vector =  motion_data{FD_column}.frame_removal; % use 21 for FD= 0.2, 31 for 0.3
+            end
+        end
         good_frames(i) = sum(abs(FD02_vector-1));
         if exist('get_mean_FD', 'var') == 1 && ~isempty(get_mean_FD) == 1
             all_mean_FD(i,1) = motion_data{1,FD_column}.remaining_frame_mean_FD;
