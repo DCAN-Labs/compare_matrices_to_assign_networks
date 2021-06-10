@@ -1,14 +1,21 @@
 
+%% Description
+
+%This code calculaters the normalized mutual information and a set od dscalars that were created with various time intervals, with an output dscalar.
+%Input 
+
 %load conc file of test dscalars.
 %A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztemplate_match_intervals/MSC_sofar.conc');
 %A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/infomap_all_subjects1run.conc');
 %A = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Community_Detection_Min_Dist_20_TieDen_0.02_MinNet_Size_400_MinReg_Size_30/infomap_1run.conc');%load confile of reference dscalars.
 %B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
 %B= importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/infomap_all_subjects1run.conc');
-template_matching = 1;
-infomap = 1;
 
-if template_matching == 1
+interval_setA = 1;
+interval_setB = 1;
+
+%-----------------------------------------------
+if interval_setA == 1
     %A = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/half1/intervals/MSChalf1_templ_matching_at_intervals.conc');
     %B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
     
@@ -17,12 +24,13 @@ if template_matching == 1
     %B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
     
     B = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
+    %B = importdata('/home/faird/shared/projects/MSC_to_DCAN/split_halves/half2ADHD315/MSC_half2_to_ADHD315Z_Zscored_recolored_dscalars.conc');
     %E = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half1.conc');
     
 else
 end
 
-if infomap == 1
+if interval_setB == 1
     %C = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_infomap_intervals_dscalars.conc');
     
     %C = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/Zscored_dscalars/intervals/MSChalf1_infomap_at_intervals.conc');
@@ -30,12 +38,13 @@ if infomap == 1
     %D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
     %F = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half1/MSC_half1_allframes_infomap.conc');
     C = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/full_intervals/MSChalf1_templ_matching_at_intervals_MSI_paths.conc');
-    D = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
-    
+    %D = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
+    D = importdata('/home/faird/shared/projects/MSC_to_DCAN/split_halves/half2ADHD315/MSC_half2_to_ADHD315Z_Zscored_recolored_dscalars.conc');
+
 else
 end
 
-if infomap == 0 && template_matching == 0
+if interval_setB == 0 && interval_setA == 0
     disp('Neither infomap or template matching methods selected.  Exiting...')
     return
 else
@@ -76,7 +85,7 @@ end
 wb_command=settings.path_wb_c; %path to wb_command
 
 %% Do checks
-if template_matching == 1
+if interval_setA == 1
     for i = 1:length(A)
         if exist(A{i}, 'file') == 0
             disp(['NOTE: Subject Series ' num2str(i) ' does not exist for template matching']);
@@ -98,7 +107,7 @@ if template_matching == 1
 else
 end
 
-if infomap == 1
+if interval_setB == 1
     for i = 1:length(C)
         if exist(C{i}, 'file') == 0
             disp(['NOTE: Subject Series ' num2str(i) ' does not exist for infomap']);
@@ -121,7 +130,7 @@ else
 end
 
 %% check minutes limit for all frames
-if template_matching == 1
+if interval_setA == 1
     if none_minuteslimit == 1
         expected_num_scalars = (num_time_intervals * num_reps * num_subjects) + num_subjects;
     else
@@ -145,7 +154,7 @@ if template_matching == 1
 else
 end
 
-if infomap == 1
+if interval_setB == 1
     if size(C,1) == expected_num_scalars
         disp('Number of subjects and reps matches conc file')
     else
@@ -162,7 +171,7 @@ if infomap == 1
 else
 end
 
-if template_matching == 1
+if interval_setA == 1
     m = 1; % counter for line in conc file.
     if none_minuteslimit == 0
         %% Step 4: load template networks from 2nd half of data:
@@ -177,8 +186,8 @@ if template_matching == 1
                     disp(['Test scalar = ' A{m}]);
                     disp('Caluating mutual information between scalars')
                     %% Step 5: Calculate mutual information
-                    muI_templ(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
-                    [VIn_templ(i,j,k), MIn_templ(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
+                    muI_setA(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
+                    [VIn_setA(i,j,k), MIn_setA(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
                     m =m+1;
                 end
             end
@@ -198,8 +207,8 @@ if template_matching == 1
                         disp(['Test scalar = ' A{m}]);
                         disp('Caluating mutual information between scalars')
                         %% Step 5: Calculate mutual information
-                        muI_templ(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
-                        [VIn_templ(i,j,k), MIn_templ(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
+                        muI_setA(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
+                        [VIn_setA(i,j,k), MIn_setA(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
                         m =m+1;
                     end
                 else % if it is the minutes limit, dont go through reps.
@@ -213,7 +222,7 @@ else
 end
 
 
-if infomap == 1
+if interval_setB == 1
     m = 1; % counter for line in conc file.
     if none_minuteslimit == 0
         %% Step 4: load template networks from 2nd half of data:
@@ -228,8 +237,8 @@ if infomap == 1
                     disp(['Test scalar = ' C{m}]);
                     disp('Caluating mutual information between scalars')
                     %% Step 5: Calculate mutual information
-                    muI_info(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
-                    [VIn_info(i,j,k), MIn_info(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
+                    muI_setB(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
+                    [VIn_setB(i,j,k), MIn_setB(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
                     m =m+1;
                 end
             end
@@ -249,8 +258,8 @@ if infomap == 1
                         disp(['Test scalar = ' C{m}]);
                         disp('Caluating mutual information between scalars')
                         %% Step 5: Calculate mutual information
-                        muI_info(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
-                        [VIn_info(i,j,k), MIn_info(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
+                        muI_setB(i,j,k) = MutualInformation(new_subject_labels, other_half_networks); %Mutual information
+                        [VIn_setB(i,j,k), MIn_info(i,j,k)] = partition_distance(new_subject_labels, other_half_networks); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix
                         m =m+1;
                     end
                 else % if it is the minutes limit, dont go through reps.
@@ -279,20 +288,20 @@ end
 %Dgroups = repmat([1:10]',1,8,3);
 %rep1b = squeeze(muI(:,:,1)); rep2b = squeeze(muI(:,:,2)); rep3b = squeeze(muI(:,:,3));E = [rep1b;rep2b;rep3b;];
 %parallelcoords(E,'group',subjects,'labels',timelabels,'quantile',0.25)
-if template_matching == 1
-    mean_MuI_templ = mean(muI_templ,3); % calculate the mean of each interval (For each participant) using the reps.
-    SEM_MuI_templ = std(muI_templ,0,3)/sqrt(size(muI_templ,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
-    mean_MIn_templ = mean(MIn_templ,3);
-    SEM_MIn_templ = std(MIn_templ,0,3)/sqrt(size(MIn_templ,3));
+if interval_setA == 1
+    %mean_MuI_templ = mean(muI_setA,3); % calculate the mean of each interval (For each participant) using the reps.
+    %SEM_MuI_templ = std(muI_setA,0,3)/sqrt(size(muI_setA,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
+    mean_MIn_setA = mean(MIn_setA,3);
+    SEM_MIn_setA = std(MIn_setA,0,3)/sqrt(size(MIn_setA,3));
     
 else
 end
 
-if infomap == 1
-    mean_MuI_info = mean(muI_info,3); % calculate the mean of each interval (For each participant) using the reps.
-    SEM_MuI_info = std(muI_info,0,3)/sqrt(size(muI_info,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
-    mean_MIn_info = mean(MIn_info,3);
-    SEM_MIn_info = std(MIn_info, 0,3)/sqrt(size(MIn_info,3));
+if interval_setB == 1
+    %mean_MuI_info = mean(muI_info,3); % calculate the mean of each interval (For each participant) using the reps.
+    %SEM_MuI_info = std(muI_info,0,3)/sqrt(size(muI_info,3)); % calculate the standard devitation of each interval (For each participant) using the reps.
+    mean_MIn_setB = mean(MIn_setB,3);
+    SEM_MIn_setB = std(MIn_setB, 0,3)/sqrt(size(MIn_setB,3));
     
 else
 end
@@ -325,9 +334,9 @@ F = figure();
 set(gcf,'color','w')
 set(gca,'FontSize',16)
 
-if template_matching == 1
+if interval_setA == 1
     
-    if template_matching ==1 && infomap ==1
+    if interval_setA ==1 && interval_setB ==1
         subplot (1,2,1)
     end
     
@@ -350,7 +359,7 @@ if template_matching == 1
     line([0 20],[min_real_MIn,min_real_MIn],'LineStyle','--');hold on
     
     for i = 1:num_subjects
-        G(i) = errorbar(minutes,mean_MIn_templ(i,:),SEM_MIn_templ(i,:),'LineWidth',2); hold on
+        G(i) = errorbar(minutes,mean_MIn_setA(i,:),SEM_MIn_setA(i,:),'LineWidth',2); hold on
     end
     
     MSC_labels ={'MSC01','MSC02','MSC03','MSC04','MSC05','MSC06','MSC07','MSC08','MSC09','MSC10'};
@@ -361,9 +370,9 @@ if template_matching == 1
     
 end
 
-if infomap == 1
+if interval_setB == 1
     
-    if template_matching ==1 && infomap ==1
+    if interval_setA ==1 && interval_setB ==1
         subplot (1,2,2)
     end
     
@@ -387,7 +396,7 @@ if infomap == 1
     line([0 20],[min_real_MIn,min_real_MIn],'LineStyle','--');hold on
     
     for i = 1:num_subjects
-        G(i) = errorbar(minutes,mean_MIn_info(i,:),SEM_MIn_info(i,:),'LineWidth',2); hold on
+        G(i) = errorbar(minutes,mean_MIn_setB(i,:),SEM_MIn_setB(i,:),'LineWidth',2); hold on
     end
     
     MSC_labels ={'MSC01','MSC02','MSC03','MSC04','MSC05','MSC06','MSC07','MSC08','MSC09','MSC10'};

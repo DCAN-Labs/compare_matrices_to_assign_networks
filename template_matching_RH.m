@@ -38,6 +38,7 @@ end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
+addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'));
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
 
@@ -59,6 +60,11 @@ end
 if isnumeric(surface_only)==1
 else
         surface_only = str2double(surface_only);
+end
+
+if isnumeric(already_surface_only)==1
+else
+        already_surface_only = str2double(already_surface_only);
 end
 
 switch data_type
@@ -218,7 +224,6 @@ for sub = 1:length(dconn_filename)
                     disp('Converting from to Z-scores region-wise. Input dconn can either be pearson or fisherZ.')
                     %                 addpath(genpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/'))
                     %                 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn'))
-                    addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'))
                     if surface_only ==1
                         Zdconn = Zscore_dconn_surface_only(char(dconn_filename{sub}),'inferred');
                     else
