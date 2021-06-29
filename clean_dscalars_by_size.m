@@ -241,15 +241,26 @@ for i=1:length(dscalarwithassignments)
         
         % Clean up tiny twinspieces
         if size(temp_out,1) == 91282
-            if exist([support_folder '/node_neighbors_91282.mat']) == 2
+            if exist([support_folder '/node_neighbors_91282.mat'],'file') == 2
                 load([support_folder '/node_neighbors_91282.mat']);
             else
-                neighbors = cifti_neighbors(regularized_ciftifile);
+                %neighbors = cifti_neighbors(regularized_ciftifile); Luci
+                %change 6/10/2021, replaced with following line:
+                neighbors = cifti_neighbors_dcan(regularized_ciftifile,[],[],path_to_neighbors_file);
             end
         else
-            neighbors = cifti_neighbors(regularized_ciftifile);
+%             if exist([support_folder '/node_neighbors_59412.mat'],'file') == 2
+%                 load([support_folder '/node_neighbors_59412.mat']);
+%             else
+                %error([char([support_folder '/node_neighbors_59412.mat']) ' file is missing.'])
+                %neighbors = cifti_neighbors(regularized_ciftifile); Luci
+                %change 6/10/2021: removed this line and replaced with
+                %following 2 lines in order to work for surface only data:
+                path_to_neighbors_file = [support_folder filesep 'node_neighbors.txt'];
+                neighbors = cifti_neighbors_dcan(regularized_ciftifile,[],[],path_to_neighbors_file);
+            %end
         end
-           
+        
         for j = 1:size(out,2)
             if j==4 || j ==6
                 continue
