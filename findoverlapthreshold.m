@@ -8,7 +8,7 @@ addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
 %HARDCODE WARNING - but no other method is currently available.
 %method = 'hist_localmin';
 method = 'smooth_then_derivative';
-plot_data = 1;
+plot_data = 0; % Originally was 1, changed by Cristian Morales to 0 (to run as job on MSI, in case is 1, requires an interactive session)
 %network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 

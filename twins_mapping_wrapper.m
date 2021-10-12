@@ -1,4 +1,4 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value)
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
@@ -14,7 +14,7 @@ bit8 = 0;
 series = 'dtseries';
 data_type = 'dense';
 %wb_command = 'LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 OMP_NUM_THREADS=2 /usr/local/bin/wb_command';
-wb_command = '/home/exacloud/lustre1/fnl_lab/code/external/utilities/workbench-1.2.3-HCP/bin_rh_linux64/wb_command';
+%wb_command = '/home/exacloud/lustre1/fnl_lab/code/external/utilities/workbench-1.2.3-HCP/bin_rh_linux64/wb_command';
 %transform_data = 'Convert_FisherZ_to_r';
 %transform_data = 'Convert_to_Zscores';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
@@ -61,6 +61,17 @@ else
     run_infomap_too=str2num(run_infomap_too);
 end
 
+if isnumeric(use_continous_minutes) ==1
+else
+    use_continous_minutes = str2num(use_continous_minutes);
+end
+
+if isnumeric(memory_limit_value) ==1
+else
+    memory_limit_value = str2num(memory_limit_value);
+end
+
+
 %Check to make sure that  minutes limit is a number (unless you've set it
 %to 'none')
 if strcmp(minutes_limit,'none')==1 || strcmp(minutes_limit,'None')==1 || strcmp(minutes_limit,'NONE')==1
@@ -82,13 +93,13 @@ np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+for i=1:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/MergeTimeSeries'));
+rmpath('/home/faird/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
+addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
 
@@ -183,8 +194,10 @@ for i = 1:length(dtseries_file) %number of subjects
     %support_folder=['/mnt/max/shared/code/internal/analyses/compare_matrices/'];
     %addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
     
-    support_folder='/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices';
-    addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien/');
+    %support_folder='/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices'; -old
+    support_folder='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks';
+    %addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien/'); -old
+    addpath('/home/faird/shared/code/internal/utilities/cifti_connectivity/src');
     addpath(support_folder);
     
     
@@ -270,17 +283,32 @@ for i = 1:length(dtseries_file) %number of subjects
                 if num_greys == 91282
                     disp(['The number of greyordinates is ' num2str(num_greys) '. It is highly likely that there are subcortical voxels.  Removing...'])
                     disp('Opening cortex-only cifti for writing.')
-                    cii  = ciftiopen(settings.path{14},wb_command); %path to surface_only dtseries.
+                    cii  = ciftiopen(settings.path{11},wb_command); %path to surface_only dtseries.
                     dtseries=dtseries(1:59412,:);
                     cii.cdata = dtseries;
-                    ciftisave(cii, [path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'], wb_command)
-                    subject_dt_series = [path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'];
                     
-                    cmd =(['cp ' motion ' ' motion_path filesep motion_name_only 'surf_only.mat']);
-                    disp([cmd '. This file is only copied so that an existing saved mask will not be overwritten.'])
-                    system(cmd);
-                    motion = [motion_path filesep motion_name_only 'surf_only.mat'];
+                    ciftisave(cii, [output_directory filesep filename_short '_surf_only.dtseries.nii'], wb_command);
+                    %ciftisave(cii, [path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'], wb_command)
                     
+                    subject_dt_series = [output_directory filesep filename_short '_surf_only.dtseries.nii'];
+                    %subject_dt_series = [path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'];
+                    
+                            motion_exten = strsplit(motion, '.');
+                            motion_exten = char(motion_exten(end));
+                            other_motion_mask = ~strcmp('mat', motion_exten);
+                            
+                            if other_motion_mask ==0
+                                cmd =(['cp ' motion ' ' output_directory filesep motion_name_only 'surf_only.mat']);
+                                disp([cmd '. This file is only copied so that an existing saved mask will not be overwritten.'])
+                                system(cmd);
+                                motion = [output_directory filesep motion_name_only 'surf_only.mat'];
+                            else
+                                cmd =(['cp ' motion ' ' output_directory filesep motion_name_only 'surf_only.txt']);
+                                disp([cmd '. This file is only copied so that an existing saved mask will not be overwritten.'])
+                                system(cmd);
+                                motion = [output_directory filesep motion_name_only 'surf_only.txt'];
+                            end
+                            
                 elseif num_greys == 59412
                     disp(['The number of greyordinates is ' num2str(num_greys) '. It is highly likely that subcortical have already been removed.  No subsectioning necessary'])
                     
@@ -303,7 +331,8 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
         %% BUILD DCONN
-        subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
+        %subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
+        subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [output_directory filesep], dtseries_conc, use_continous_minutes, memory_limit_value);
         %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         [path_to_dconn, dconn_name] = fileparts(subjectdconn);
@@ -339,7 +368,8 @@ for i = 1:length(dtseries_file) %number of subjects
                     donotZscore = 1;
                 end
                 %surface_only = 0;
-                addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair'))
+                %addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair'))
+                addpath(genpath('/home/faird/shared/code/internal/utilities/community_detection/fair'))               
                 [cleaned_info_ties_dtseries, raw_info_ties_dtseries] = Run_infomap_at_many_densities(subjectdconn,distance_matrix,template,min_distance,tie_density_vec,min_network_size,min_region_size,donotZscore,surface_only,already_surface_only,'infomap',num_reps);
                 
                
@@ -401,11 +431,12 @@ for i = 1:length(dtseries_file) %number of subjects
             disp(cmd);
             system(cmd);
             if use_all_ABCD_tasks == 1
-                cmd = ['rm -f ' path_to_orig_dtseries filesep filename_short '.dtseries.nii'];
+                cmd = ['rm -f ' output_directory filesep filename_short '.dtseries.nii'];
                 disp([cmd ' . Removing merged time series that created as part of the twins_mapping_wrapper.']);
                 system(cmd);
                 
                 cmd = ['rm -f ' motion_path filesep motion_name_only '.mat'];
+                
                 disp([cmd ' . Removing motion mask that was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
             else
@@ -420,17 +451,19 @@ for i = 1:length(dtseries_file) %number of subjects
                     system(cmd);
                 end
                 
-                cmd = ['rm -f ' path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'];
+                cmd = ['rm -f ' output_directory filesep filename_short '_surf_only.dtseries.nii'];
                 disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
                 
-                cmd = ['rm -f ' path_to_orig_dtseries filesep filename_short '_surf_only_SMOOTHED_' num2str(smoothing_kernal) '.dtseries.nii'];
+                cmd = ['rm -f ' output_directory filesep filename_short '_surf_only_SMOOTHED_' num2str(smoothing_kernal) '.dtseries.nii'];
                 disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
-                
-                cmd = ['rm -f ' motion_path filesep motion_name_only 'surf_only.mat'];
+              if other_motion_mask ==0  
+                cmd = ['rm -f ' output_directory filesep motion_name_only 'surf_only.mat'];          
                 disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
+              else
+              end
             else
                 disp('Surface only files are not set to be removed. (Reduced time series and motion file).  You probably started with surface_only files, but check to make sure that excess files not being left behind.')
             end
@@ -522,9 +555,11 @@ for i = 1:length(dtseries_file) %number of subjects
         end
     end
     % Pictures defaults
-    % The setting are cardcoded to make a power_colors png with 6 views. at 118 dots
+    % The setting are hardcoded to make a power_colors png with 6 views. at 118 dots
     % per cm.
-    pics_code_path = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/make_dscalar_pics/make_dscalar_pics_v9.sh';
+    
+    %pics_code_path = '/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+    pics_code_path = settings.path{15}; % path to figure_maker bash script.
     pics_folder = [cifti_output_folder '/pics_template_matching'];
     disp(['mkdir -p ' pics_folder])
     system(['mkdir -p ' pics_folder]);
@@ -535,7 +570,7 @@ for i = 1:length(dtseries_file) %number of subjects
     end
     
     %make template matching pic
-    cmd = [pics_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf FALSE 0 20 THRESHOLD_TEST_SHOW_OUTSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE'];
+    cmd = [pics_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf FALSE 0 20 THRESHOLD_TEST_SHOW_OUTSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
     disp(cmd);
     system(cmd);
     
@@ -543,7 +578,7 @@ for i = 1:length(dtseries_file) %number of subjects
     if run_infomap_too ==1
         pics_folder = [cifti_output_folder '/pics_infomap'];
         system(['mkdir -p ' pics_folder])
-        cmd = [pics_code_path ' ' expected_info_dscalar_name ' ' output_cifti_name_info '_recolored_infomap ' pics_folder ' FALSE 1 18 power_surf FALSE 0 20 THRESHOLD_TEST_SHOW_OUTSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE'];
+        cmd = [pics_code_path ' ' expected_info_dscalar_name ' ' output_cifti_name_info '_recolored_infomap ' pics_folder ' FALSE 1 18 power_surf FALSE 0 20 THRESHOLD_TEST_SHOW_OUTSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
         disp(cmd);
         system(cmd);
     end

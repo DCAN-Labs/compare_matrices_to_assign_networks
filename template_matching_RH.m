@@ -35,9 +35,9 @@ warning('off') %supress addpath warnings to nonfolders.
 for i=2:np
     addpath(genpath(settings.path{i}));
 end
-rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
+%rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
 addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'));
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
@@ -305,7 +305,8 @@ for sub = 1:length(dconn_filename)
             %clear new_full_mat net_subject_ind_full_matrix network_subject_index y template eta_subject_index temp
             
             toc
-%             save([cifti_output_folder '/' output_cifti_name '.mat'],'eta_to_template_vox','eta_subject_index','-v7.3')
+            disp(['Saving .mat file: ' cifti_output_folder '/' output_cifti_name '.mat'])
+             save([cifti_output_folder '/' output_cifti_name '.mat'],'eta_to_template_vox','new_subject_labels','network_names','-v7.3')
 %             new_subject_labels = eta_subject_index;
             
             switch transform_data

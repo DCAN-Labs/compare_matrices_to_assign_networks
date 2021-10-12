@@ -78,6 +78,10 @@ switch server_name
         path{10}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
         path{11}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii';
         path{12}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';      
+        path{13}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
+        path{14}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        
         path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
@@ -95,7 +99,11 @@ switch server_name
         path{10}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
         path{11}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
         path{12}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
-        path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path{13}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
+        path{14}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        
+        path_wb_c='/panfs/roc/groups/4/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
 
     case 'PCWIN64'
