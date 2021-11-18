@@ -31,8 +31,8 @@ settings=settings_comparematrices;%
 np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
-warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+%warning('off') %supress addpath warnings to nonfolders.
+for i=1:np
     addpath(genpath(settings.path{i}));
 end
 %rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
@@ -40,7 +40,12 @@ end
 addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
 addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'));
 warning('on')
-wb_command=settings.path_wb_c; %path to wb_command
+if exist('wb_command','var') ==1
+    %do nothing
+else
+wb_command = path.wb_c
+end
+    wb_command=settings.path_wb_c; %path to wb_command
 
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
@@ -114,6 +119,7 @@ for sub = 1:length(dconn_filename)
     
     if exist([cifti_output_folder '/' output_cifti_name '.dscalar.nii' ], 'file') == 2
         disp('Template_matching dscalar already found for this subject. loading...')
+        disp([cifti_output_folder filesep output_cifti_name '.dscalar.nii']); 
         subject_cii =ciftiopen([cifti_output_folder '/' output_cifti_name '.dscalar.nii'], wb_command);
         new_subject_labels = subject_cii.cdata;
         

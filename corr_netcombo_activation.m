@@ -269,9 +269,10 @@ if create_max_combo_cifti ==1
     end
     
     ciifile.cdata = netssum;
-    ciftisave(ciifile,[outputfolder filesep output_name '_corrtype' corr_type '_maxnets' num2str(maximum_combination_of_nets) '_absactivation' abs_act 'negnets' negnets '_max_probnet_combination_' combo_char '.dscalar.nii'],wb_command)
+    max_combo_output_name = [outputfolder filesep output_name '_corrtype' corr_type '_maxnets' num2str(maximum_combination_of_nets) '_absactivation' abs_act 'negnets' negnets '_max_probnet_combination_' combo_char '.dscalar.nii'];
+    ciftisave(ciifile,max_combo_output_name,wb_command);
 end
-
+ if plot_data ==1
 figure()
 if use_negative_nets ==0
     set(gcf,'color','w');
@@ -312,5 +313,13 @@ else
 end
 %disp(['Saving image: ' opts.saveFolder outputfilename])
 %print([opts.saveFolder outputfilename], '-dpng', '-r600')
-
+ else
+ end
+ 
+% Now that you've found the optimum combonation of networks, see which
+% thresholds maximize the correlation between them. 
+ disp('Attempting to find optimized threshold for correlation between dscalars...')
+ [~,~,maximum_value] = optimize_dscalar_thresholds(run_locally,activation_dscalar, max_combo_output_name, abs_activation,0,200,'correlate',1);
+ disp(['After testing all possible combinations of thresholds, the maximum correlation between dscalars is: ' num2double(maximum_value)])
+ 
 disp('Done running correlation script.')
