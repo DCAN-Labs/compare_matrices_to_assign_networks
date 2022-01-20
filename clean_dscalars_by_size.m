@@ -249,16 +249,17 @@ for i=1:length(dscalarwithassignments)
                 neighbors = cifti_neighbors_dcan(regularized_ciftifile,[],[],path_to_neighbors_file);
             end
         else
-%             if exist([support_folder '/node_neighbors_59412.mat'],'file') == 2
-%                 load([support_folder '/node_neighbors_59412.mat']);
-%             else
+             if exist([support_folder '/node_neighbors_59412.mat'],'file') == 2
+              load([support_folder '/node_neighbors_59412.mat']);
+            else
                 %error([char([support_folder '/node_neighbors_59412.mat']) ' file is missing.'])
                 %neighbors = cifti_neighbors(regularized_ciftifile); Luci
                 %change 6/10/2021: removed this line and replaced with
                 %following 2 lines in order to work for surface only data:
-                path_to_neighbors_file = [support_folder filesep 'node_neighbors.txt'];
+                %path_to_neighbors_file = [support_folder filesep 'node_neighbors.txt'];
+                path_to_neighbors_file = [support_folder filesep 'node_neighbors_59412.mat']; 
                 neighbors = cifti_neighbors_dcan(regularized_ciftifile,[],[],path_to_neighbors_file);
-            %end
+            end
         end
         
         for j = 1:size(out,2)
@@ -330,6 +331,11 @@ for i=1:length(dscalarwithassignments)
                         neighborverts = unique(neighbors((clusteredmetric==clusternum),2:end));
                         neighborverts(isnan(neighborverts)) = [];
                         borderverts = setdiff(neighborverts,find(clusteredmetric==clusternum));
+                        if size(temp_out,1) ~= 91282
+                        large_val=find(borderverts>59412);
+                        borderverts(large_val)=NaN;
+                        borderverts=borderverts(~isnan(borderverts));
+                        end
                         %borderverts(temp_out(borderverts)<1) = [];
                         %added by robert
                         if assign_unassigned ==1

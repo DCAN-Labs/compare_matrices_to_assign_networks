@@ -42,14 +42,21 @@ bufsize=16384;
 %     load(path_to_neighbors,'neighbors');
 %     neighbors= neighbors(1:size_cifti_data,:); 
 % else
-  surfneighborfile =  path_to_neighbors;
+%commented out 12/15/21 jm
+  %surfneighborfile =  path_to_neighbors;
 %surfneighborfile = '/data/cn/data1/scripts/CIFTI_RELATED/Resources/node_neighbors.txt';
 
 % Read in node neighbor file generated from caret -surface-topology-neighbors
-[surfneighbors(:,1) surfneighbors(:,2) surfneighbors(:,3) surfneighbors(:,4)...
-    surfneighbors(:,5) surfneighbors(:,6) surfneighbors(:,7)] = ...
-    textread(surfneighborfile,'%u %u %u %u %u %u %u',...
-    'delimiter',' ','bufsize',bufsize,'emptyvalue',NaN);
+%commented out 12/15/21 jm
+% [surfneighbors(:,1) surfneighbors(:,2) surfneighbors(:,3) surfneighbors(:,4)...
+%     surfneighbors(:,5) surfneighbors(:,6) surfneighbors(:,7)] = ...
+%     textread(surfneighborfile,'%u %u %u %u %u %u %u',...
+%     'delimiter',' ','bufsize',bufsize,'emptyvalue',NaN);
+
+%new comment:
+surfneighborsfile =  load(path_to_neighbors); %added 12/15/2021
+surfneighbors = cell2mat(struct2cell(surfneighborsfile)); %added 12/15/2021
+
 surfneighbors = surfneighbors+1;
 
 nsurfverts = size(surfneighbors,1);
