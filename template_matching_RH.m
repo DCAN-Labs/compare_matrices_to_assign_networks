@@ -192,7 +192,7 @@ for sub = 1:length(dconn_filename)
                 else % take out subcortical connections from dconn.
                     large_subjectdconn = char(dconn_filename);
                     [dconn_filename] = surface_only_dconn(char(dconn_filename),'inferred');
-                    dconn_filename = [dconn_filename '.dconn.nii'];
+                    %dconn_filename = [dconn_filename '.dconn.nii'];
                     disp('Removing connectivity matrix  since a smaller on eiwth surface only has been saved.')
                     %cmd = (['rm -f ' num2str(large_subjectdconn)]);
                     %system(cmd)
@@ -231,9 +231,12 @@ for sub = 1:length(dconn_filename)
                     %                 addpath(genpath('/mnt/max/shared/code/internal/utilities/Zscore_dconn/'))
                     %                 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn'))
                     if surface_only ==1
-                        Zdconn = Zscore_dconn_surface_only(char(dconn_filename{sub}),'inferred');
+                        %Zdconn = Zscore_dconn_surface_only(char(dconn_filename{sub}),'inferred');
+                        Zdconn = Zscore_dconn_surface_only(char(dconn_filename),'inferred'); %changed 20211216
                     else
-                        Zdconn = Zscore_dconn(char(dconn_filename{sub}),'inferred');
+                        %Zdconn =
+                        %Zscore_dconn(char(dconn_filename{sub}),'inferred');
+                        Zdconn = Zscore_dconn(char(dconn_filename),'inferred'); %changed 20211216
                     end
                     disp(['loading Zscored dconn: ' char(Zdconn)])
                     subject_cii=ciftiopen([char(Zdconn)], wb_command); %dconn path
