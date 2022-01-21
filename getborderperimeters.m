@@ -1,4 +1,4 @@
-function network_lengths_for_each_sub = getborderperimeters(dlabel_conc,L_surf_conc,R_surf_conc, remove_border_files)
+function [network_lengths_for_each_sub, num_surface_clusters] = getborderperimeters(dlabel_conc,L_surf_conc,R_surf_conc, remove_border_files,get_compactness,varargin)
 %This code calculates the perimenter of the networks in a a conc of label files. Surface files are necessary to calculate inter-greylength.
 
 %R. Hermosillo 10/22/2020
@@ -8,7 +8,8 @@ function network_lengths_for_each_sub = getborderperimeters(dlabel_conc,L_surf_c
 
 %Required Inputs are: 
 %1)input_cifti_list (e.g. a conc file) a list of paths to your dlabel files.  If you have dscalar
-%files, you'll need to convert them to dlabels first.
+%files, you'll need to convert them to dlabels first. Use: "wb_command
+%-cifti-label-import mydscalar.nii mylabeltable.txt mydlabel.nii"
 
 %2) L_surf_conc: A .conc file (a list) of the paths to the left midthickness surface 
 
@@ -19,6 +20,12 @@ function network_lengths_for_each_sub = getborderperimeters(dlabel_conc,L_surf_c
 %to be able to calculate the perimeter.  Set to "1" if you want to remove
 %the intermediate files.  Set to "0" if you want to keep them.
 
+%5) Calculate network compactness using Polsby-Popper: Set to 1 if you want to calculate
+%compactness. Set to 0 you just want the border perimeters.
+
+%6) Path to surface areas.  This can be a .mat file or .conc file.  It is assumed that .conc is a list of .label files. 
+%Ensure that it is the conc file is the same length and the same order as
+%the conc file.
 
 run_locally =0;
 seperate_pieces =1;
@@ -30,6 +37,7 @@ if run_locally ==1
     addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\utilities')
     addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\gifti')
     addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\fileio')
+    %     Dlabelconc = ''
     %     L_surf = 'C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\Conte69_atlas-v2.LR.32k_fs_LR.wb\Conte69.L.midthickness.32k_fs_LR.surf.gii';
     %     R_surf = 'C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\Conte69_atlas-v2.LR.32k_fs_LR.wb\Conte69.R.midthickness.32k_fs_LR.surf.gii';
 else
@@ -46,15 +54,13 @@ else
     for i=2:np
         addpath(genpath(settings.path{i}));
     end
-    rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-    rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
     addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
     addpath(genpath('/mnt/max/shared/code/internal/utilities/plotting-tools'));
     warning('on')
     wb_command=settings.path_wb_c; %path to wb_command
 end
 
-% Step 0) validate input file existence
+%% Step 0) validate input file existence
 conc = strsplit(dlabel_conc, '.');
 conc = char(conc(end));
 if strcmp('conc',conc) == 1
@@ -87,7 +93,6 @@ for i = 1:length(Lsurfs)
 end
 disp('All dscalar files exist continuing ...')
 
-
 if strcmp('conc',conc) == 1
     Rsurfs = importdata(R_surf_conc);
 else
@@ -109,7 +114,7 @@ else
 end
 
 network_lengths_for_each_sub =cell(length(input_cifti_list),2);
-
+%% Start
 for k = 1:length(input_cifti_list)
     input_cifti = char(input_cifti_list(k));
     L_surf = char(Lsurfs(k));
@@ -232,7 +237,15 @@ for k = 1:length(input_cifti_list)
     else
         %do nothing.  Be mindful of space.
     end
-    
 end
+
+disp('Done getting border length for all subjects')
+
+if get_compactness ==1
+    network_suface_area_mat_file_or_var =varargin{1};
+    % Get compactness score:
+    [scores,cluster_num_pvalue, compactness_pvalue,avg_compact_pval,avg_num_clusters_pval] = calculate_network_compactness(network_suface_area_mat_file_or_var,network_lengths_for_each_sub,'polsbypopper',0);
+end
+
 disp('Done getting border length for all subjects')
 end
