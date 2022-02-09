@@ -3,9 +3,18 @@ function settings=settings_comparematrices()
 %% Define the paths for support functions
 str = computer;
 code_dir = pwd;
-server_name=code_dir(1:10);
+
+try
+    server_name=code_dir(1:10);
+catch
+    server_name=code_dir(1:6);
+end
+
 
 switch server_name
+    
+    case '/code/'
+    
     case '/mnt/max/s' %rushmore
         path{1}='/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/';
         path{2}='/mnt/max/shared/code/external/utilities/Matlab_CIFTI';

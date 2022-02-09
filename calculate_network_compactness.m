@@ -21,8 +21,8 @@ function [scores,cluster_num_pvalue, compactness_pvalue,avg_compact_pval,avg_num
 % coined during tenure Massachusetts Governor Elbridge Gerry, who in 1812
 % redrew the voting districts for the Massachusetts State Senate to favor
 % his own party. One district caught the attention of the Boston Gazette,
-% who published a political cartoon likening the district’s shape to that
-% of a salamander and labeling the phenomenon “The Gerry-mander” after the
+% who published a political cartoon likening the districtï¿½s shape to that
+% of a salamander and labeling the phenomenon ï¿½The Gerry-manderï¿½ after the
 % Governor.
 
 %six of the most frequently used measures of compactness used by academic
@@ -31,15 +31,15 @@ function [scores,cluster_num_pvalue, compactness_pvalue,avg_compact_pval,avg_num
 % Length-Width Ratio (C.C. Harris, 1964).
 
 %Polsby-Popper
-%The Polsby-Popper (PP) measure (polsby & Popper, 1991) is the ratio of the area of the district (AD) to the area of a circle whose circumference is equal to the perimeter of the district (PD). A district’s Polsby-Popper score falls with the range of [0,1] and a score closer to 1 indicates a more compact district.
+%The Polsby-Popper (PP) measure (polsby & Popper, 1991) is the ratio of the area of the district (AD) to the area of a circle whose circumference is equal to the perimeter of the district (PD). A districtï¿½s Polsby-Popper score falls with the range of [0,1] and a score closer to 1 indicates a more compact district.
 %PP = 4pi x (A/(P^2))
 
 %Schwartzberg
-%The Schwartzberg score (S) compactness score is the ratio of the perimeter of the district (PD) to the circumference of a circle whose area is equal to the area of the district. A district’s Schwartzberg score as calculated below falls with the range of [0,1] and a score closer to 1 indicates a more compact district.
+%The Schwartzberg score (S) compactness score is the ratio of the perimeter of the district (PD) to the circumference of a circle whose area is equal to the area of the district. A districtï¿½s Schwartzberg score as calculated below falls with the range of [0,1] and a score closer to 1 indicates a more compact district.
 %S = 1/P/C = 1/(P/(2pi*sqrt((A/pi))));
 
 %Reock Score
-%The Reock Score (R) is the ratio of the area of the district AD to the area of a minimum bounding cirle (AMBC) that encloses the district’s geometry. A district’s Reock score falls within the range of [0,1] and a score closer to 1 indicates a more compact district.
+%The Reock Score (R) is the ratio of the area of the district AD to the area of a minimum bounding cirle (AMBC) that encloses the districtï¿½s geometry. A districtï¿½s Reock score falls within the range of [0,1] and a score closer to 1 indicates a more compact district.
 %R = ((A)/(AMBC)); NOTE: not currently supported as the calculation of the  minimum bounding circle
 %requires that that points lie on a 2D plane.
 
@@ -50,6 +50,7 @@ load(network_perimeter_mat_file,'network_lengths_for_each_sub');
 scores = zeros(size(network_surfarea,1), size(network_surfarea,2)-2);
 
 for i = 1:size(network_surfarea,1)
+    disp(i)
     this_subs_surface_areas = network_surfarea(i,:);
     %this_subs_perimeters = network_lengths_for_each_sub(i,:);
     
@@ -77,6 +78,11 @@ for i = 1:size(network_surfarea,1)
 end
 if run_get_pairwise_stats ==1
     [cluster_num_pvalue, compactness_pvalue,avg_compact_pval,avg_num_clusters_pval] = get_pairwise_stats(scores,network_lengths_for_each_sub);
+else
+    cluster_num_pvalue = []; 
+    compactness_pvalue=[];
+    avg_compact_pval=[];
+    avg_num_clusters_pval=[];
 end
 end
 

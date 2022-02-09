@@ -78,9 +78,6 @@ else
     wb_command=settings.path_wb_c; %path to wb_command
 end
 
-if exist([output_folder filesep output_name '.mat'],'file') ==0
-    disp(['Final perimter file (.mat) not found. Expeted name: ' output_folder filesep output_name '.mat'])
-    disp('Starting from the beginning...')
     %% Step 0) validate input file existence
     conc = strsplit(dlabel_conc, '.');
     conc = char(conc(end));
@@ -89,6 +86,10 @@ if exist([output_folder filesep output_name '.mat'],'file') ==0
     else
         input_cifti_list = {dlabel_conc};
     end
+   
+ if exist([output_folder filesep output_name '_perimeters.mat'],'file') ==0
+    disp(['Final perimter file (.mat) not found. Expeted name: ' output_folder filesep output_name '_perimeters.mat'])
+    disp('Starting from the beginning...')   
     
     for i = 1:length(input_cifti_list)
         if exist(input_cifti_list{i},'file') == 0
@@ -270,19 +271,35 @@ if exist([output_folder filesep output_name '.mat'],'file') ==0
             %do nothing.  Be mindful of space.
         end
     end
-    save([output_folder filesep output_name '.mat'],'network_lengths_for_each_sub')
+    
+
+    
+    save([output_folder filesep output_name '_perimeters.mat'],'input_cifti_list','network_lengths_for_each_sub')
     
     disp('Done getting border length for all subjects')
 else
     disp('Perimter file (.mat) already found. Loading...')
-    load([output_folder filesep output_name '.mat'],'network_lengths_for_each_sub');
+    load([output_folder filesep output_name '_perimeters.mat'],'network_lengths_for_each_sub');
 end
 %% Step6 -Optional - calculate compactness
 if get_compactness ==1
     network_suface_area_mat_file_or_var =varargin{1};
     % Get compactness score:
-    [scores,cluster_num_pvalue, compactness_pvalue,avg_compact_pval,avg_num_clusters_pval] = calculate_network_compactness(network_suface_area_mat_file_or_var,[output_folder filesep output_name '.mat'],'polsbypopper',0);
+    [scores,cluster_num_pvalue, compactness_pvalue,avg_compact_pval,avg_num_clusters_pval] = calculate_network_compactness(network_suface_area_mat_file_or_var,[output_folder filesep output_name '_perimeters.mat'],'polsbypopper',0);
+    save([output_folder filesep output_name '_PPcompactness_scores.mat'],'input_cifti_list','scores')
+    
+    [bad_subs, ~] = find(scores >1);
+    if isempty(bad_subs) ==1
+        disp('Good news: All subjects have a compactness below 1.')
+    else
+        disp(['Number of subjects with compactness scores above 1:' num2str(size(bad_subs))]);
+    end
+    scores_withoutbadsubs = scores;
+    scores_withoutbadsubs(bad_subs) = [];
+    save([output_folder filesep output_name '_PPcompactness_scores.mat'],'input_cifti_list','scores','bad_subs','scores_withoutbadsubs')
 end
+
+
 
 disp('Done getting border length for all subjects')
 end

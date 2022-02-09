@@ -110,7 +110,8 @@ subID=[split_dtpath{1} '_' split_dtpath{2}];
 
 if use_all_ABCD_tasks == 1
     % NOTE: this option has not been tested for conc files.
-    [dt_conc_name,motion_conc_names] = make_scan_conc(dtpath,dtfile); %use dtseries file name and location to find other tasks.
+    %[dt_conc_name,motion_conc_names] = make_scan_conc(dtpath,dtfile); %use dtseries file name and location to find other tasks.
+    [dt_conc_name,motion_conc_names] = make_scan_conc(dtpath,1); %use dtseries file name and location to find other tasks.
     MergeTimeSeries('TimeSeriesFiles',dt_conc_name,'MotionFiles',motion_conc_names,'OutputFile',[dtpath filesep subID '_merged_tasks.dtseries.nii'],'MotionOutputFile',[dtpath filesep subID '_merged_tasks_motion.mat'])
     %Set time series and motion files to the newly merged data.
     dt_or_ptseries_conc_file= [dtpath filesep subID '_merged_tasks.dtseries.nii'];
@@ -332,7 +333,7 @@ for i = 1:length(dtseries_file) %number of subjects
         
         %% BUILD DCONN
         %subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
-        subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [output_directory filesep], dtseries_conc, use_continous_minutes, memory_limit_value);
+        subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [output_directory filesep], subject_dt_series, use_continous_minutes, memory_limit_value);
         %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         [path_to_dconn, dconn_name] = fileparts(subjectdconn);
