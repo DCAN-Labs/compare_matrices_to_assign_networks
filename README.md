@@ -77,7 +77,7 @@ If using SLURM, be sure to have ample time and space set out for the system to a
 
 ## Step 1: Create your Template...or download a premade one
 
-[![Placeholder Networks templates image](/assets/images/templates.png "Functional Network Templates")) 
+![Gordon networks](/TM_images/TM_1.png?raw=true) 
 
 This code is based on the 14 neural network-template defined by Gordon et al. 2017 seen above. (See [Gordon et al. 2017](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub) for more information about each network.)
 
@@ -94,6 +94,10 @@ The most current iteration of the code is **template_matching_RH.m**
 
 
 `template_matching_RH(dconn_filename, data_type,template_path,transform_data,output_cifti_name,cifti_output_folder,wb_command,make_cifti_from_results,allow_overlap,overlap_method,surface_only,already_surface_only)`
+
+A graphic with following inputs is added below. 
+
+![Inputs graphic](/TM_images/TM_2.jpg?raw=true) 
 
 
 Below is a description of the required input parameters. 
@@ -142,9 +146,6 @@ In this call:
 - the overlap method will be **smooth_then_derivative**
 - the code will generate outputs for all the data, not just surface data
 - the data is known to not be surface only data 
-
-
-[![Placeholder Example image])
 
 
 # Outputs
