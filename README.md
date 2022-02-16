@@ -103,28 +103,28 @@ A graphic with following inputs is added below.
 Below is a description of the required input parameters. 
 
 - `dconn_filename` = path to input CIFTI file with network data 
-- `data_type` = currently, the only supported data type is "dense"
+- `data_type` = currently, the only supported data type is 'dense'
 - `template_path` = path to .mat file that has the network templates
 - `transform_data` =  if you want to convert your data before comparing to your template, use can use 1 of 3 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearsons' or 'Convert_to_Zscores' or use no tranformation
-    - "Covert_FisherZ_to_r" will convert your data through a Fisher-Z transformation (click [here](https://www.statisticshowto.com/fisher-z/) for more information)
-    - "Convert_r_to_Pearsons" will convert your data into Pearson's coefficient (click [here](https://www.socscistatistics.com/tests/pearson/) for more information)
-    - "Convert_to_Zscores" will convert your data into Z-scores (click [here](https://www.statisticshowto.com/probability-and-statistics/z-score/) for more information)
+    - 'Covert_FisherZ_to_r' will convert your data through a Fisher-Z transformation (click [here](https://www.statisticshowto.com/fisher-z/) for more information)
+    - 'Convert_r_to_Pearsons' will convert your data into Pearson's coefficient (click [here](https://www.socscistatistics.com/tests/pearson/) for more information)
+    - 'Convert_to_Zscores' will convert your data into Z-scores (click [here](https://www.statisticshowto.com/probability-and-statistics/z-score/) for more information)
 - `output_cifti_name` = name of the output CIFTI file
 - `cifti_output_folder` = your project directory
 - `wb_command` = [link](https://www.humanconnectome.org/software/connectome-workbench) to download workbench command to view outputs
-- `make_cifti_from_results` = "0" or "1"
-    - "0" = does not save anything 
-    - "1" = saves your results as a CIFTI file
--  `allow _overlap` = "0" or "1"
-    - "0" = since your input networks file will likely be a `*.dtseries.nii`, setting this to 0 will not use overlapping networks to analyze your data 
-    - "1" = will use overlapping networks to analyze data
-- `overlap_method` =  currently, the only supported method is "smooth_then_derivative"
-- `surface_only` = "0" or "1" 
-    - "0" = will not give output data on the surface
-    - "1" = gives output data based on the surface 
-- `already_surface_only` = "0" or "1"
-    - "0" = use this if the input networks file does not have surface only data
-    - "1" = use this if the input file is made up of surface data 
+- `make_cifti_from_results` = '0' or '1'
+    - '0' = does not save anything 
+    - '1' = saves your results as a CIFTI file
+-  `allow _overlap` = '0' or '1'
+    - '0' = since your input networks file will likely be a `*.dtseries.nii`, setting this to 0 will not use overlapping networks to analyze your data 
+    - '1' = will use overlapping networks to analyze data
+- `overlap_method` =  currently, the only supported method is 'smooth_then_derivative'
+- `surface_only` = '0' or '1' 
+    - '0' = will not give output data on the surface
+    - '1' = gives output data based on the surface 
+- `already_surface_only` = '0' or '1'
+    - '0' = use this if the input networks file does not have surface only data
+    - '1' = use this if the input file is made up of surface data 
 
 
 
