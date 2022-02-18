@@ -17,7 +17,7 @@ x=1; %Counter for found motion
 %% Check for rests
 if combine_all_dtseries_in_dir ==1
     disp(['Checking for all possible task/rest scans in the following directory: ' input_directory])
-    [status, task_rest_dtseries] = system(['ls ' input_directory filesep '*.dtseries.nii']);
+    [status, task_rest_dtseries] = system(['ls ' input_directory filesep '*_timeseries.dtseries.nii']);
     if status ==0
         disp('rest time series found')
         file_singlecell = textscan(task_rest_dtseries, '%s', 'delimiter', '\n' );

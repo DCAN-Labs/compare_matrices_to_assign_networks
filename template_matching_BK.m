@@ -63,7 +63,7 @@ for i = 1:length(subs_20min)
                 continue
             end            
             %%% compute an eta value for each voxel for each network (from fran's etacorr script) %%%
-            goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(:,)));
+            goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(:)));
             cmap = corr_mat_full(i,goodvox)';
             tmap = cifti_template_mat_full(j,goodvox)';
             Mgrand  = (mean(mean(tmap)) + mean(mean(cmap)))/2;
