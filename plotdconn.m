@@ -78,7 +78,7 @@ f = figure();
 set(gcf, 'color','w')
 
 if plot2dconns ==1
-    subplot(1,3,1)
+    ax1 = subplot(1,3,1);
 end
 if downsample_dconn == 1
     assigns_small = assigns(1:DS_factor:end);
@@ -102,7 +102,7 @@ print([image_name '.png'], '-dpng', '-r600')
 %f.Position = [100 100 600 600];
 
 if plot2dconns ==1
-    subplot(1,3,2)
+    ax2=subplot(1,3,2);
     
     if downsample_dconn == 1
         
@@ -130,7 +130,7 @@ if plot2dconns ==1
     caxis([-0.5 1])
     %f.Position = [100 100 600 600];
     
-    subplot(1,3,3)
+    ax3 = subplot(1,3,3);
     if downsample_dconn == 1
         diff_matrix = sorted_small1-sorted_small2;
     else
@@ -144,7 +144,7 @@ if plot2dconns ==1
     title('Matrix Difference','FontSize',9);
     %colormap jet
     load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
-    colormap(pos_neg_cmap);
+    colormap(ax3,pos_neg_cmap);
     caxis([-0.5 0.5])
     f.Position = [50 100 1300 400];
     print([image_name '.png'], '-dpng', '-r600')

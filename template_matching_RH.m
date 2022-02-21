@@ -31,7 +31,7 @@ settings=settings_comparematrices;%
 np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
-%warning('off') %supress addpath warnings to nonfolders.
+warning('off') %supress addpath warnings to nonfolders.
 for i=1:np
     addpath(genpath(settings.path{i}));
 end
@@ -43,9 +43,8 @@ warning('on')
 if exist('wb_command','var') ==1
     %do nothing
 else
-wb_command = path.wb_c
-end
     wb_command=settings.path_wb_c; %path to wb_command
+end
 
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
@@ -191,7 +190,7 @@ for sub = 1:length(dconn_filename)
                     %do nothing
                 else % take out subcortical connections from dconn.
                     large_subjectdconn = char(dconn_filename);
-                    [dconn_filename] = surface_only_dconn(char(dconn_filename),'inferred');
+                    [dconn_filename] = surface_only_dconn(char(dconn_filename),'inferred',wb_command);
                     %dconn_filename = [dconn_filename '.dconn.nii'];
                     disp('Removing connectivity matrix  since a smaller on eiwth surface only has been saved.')
                     %cmd = (['rm -f ' num2str(large_subjectdconn)]);
@@ -232,11 +231,11 @@ for sub = 1:length(dconn_filename)
                     %                 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Zscore_dconn'))
                     if surface_only ==1
                         %Zdconn = Zscore_dconn_surface_only(char(dconn_filename{sub}),'inferred');
-                        Zdconn = Zscore_dconn_surface_only(char(dconn_filename),'inferred'); %changed 20211216
+                        Zdconn = Zscore_dconn_surface_only(char(dconn_filename),'inferred',wb_command); %changed 20211216
                     else
                         %Zdconn =
                         %Zscore_dconn(char(dconn_filename{sub}),'inferred');
-                        Zdconn = Zscore_dconn(char(dconn_filename),'inferred'); %changed 20211216
+                        Zdconn = Zscore_dconn(char(dconn_filename),'inferred',wb_command); %changed 20211216
                     end
                     disp(['loading Zscored dconn: ' char(Zdconn)])
                     subject_cii=ciftiopen([char(Zdconn)], wb_command); %dconn path

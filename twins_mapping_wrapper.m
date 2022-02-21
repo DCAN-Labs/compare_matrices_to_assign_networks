@@ -1,4 +1,4 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value,wb_command)
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
@@ -101,7 +101,12 @@ rmpath('/home/faird/shared/code/external/utilities/MSCcodebase/Utilities/read_wr
 addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
 addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
 warning('on')
-wb_command=settings.path_wb_c; %path to wb_command
+if exist('wb_command','var') ==1
+    %do nothing
+else
+    wb_command=settings.path_wb_c; %path to wb_command
+end
+
 
 
 [dtpath, dtfile]=fileparts(dt_or_ptseries_conc_file);
