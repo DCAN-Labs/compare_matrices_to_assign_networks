@@ -159,6 +159,14 @@ There will be 1-5 outputs depending on the entered inputs.
 - *If the overlapping networks are enabled*, an additional `*.dtseries.nii` file will be generated. 
     - This file will also undergo a cleaning script, generating a `*_recolored.dtseries.nii` file.
 
-## What can we do with these files?
+# What can we do with these files? 
+
+## Viewing the files
 
 You can view the `*.dtseries.nii` and `*.dscalar.nii` files with **Workbench View** (wb_view). You can download it here: https://www.humanconnectome.org/software/connectome-workbench. It is part of a package by the Connectome Coordination Facility (CCF) called Connectome Workbench. 
+
+## Further Analysis 
+
+Using the resulting data of neural networks, you can calculate the perimeters of their borders using the following getborderperimeters.m code: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/getborderperimeters.m 
+
+You can also find the surface area of the resulting neural networks with the network_surface_area_from_network_file.m code following: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/network_surface_area_from_network_file.m
