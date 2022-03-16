@@ -97,8 +97,8 @@ set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
 %f.PaperPositionMode   = 'auto';
 title('Correlation matrix sorted by network','FontSize',9);
 colormap jet
+colorbar;
 caxis([-0.5 1])
-print([image_name '.png'], '-dpng', '-r600')
 %f.Position = [100 100 600 600];
 
 if plot2dconns ==1
@@ -127,6 +127,7 @@ if plot2dconns ==1
     %f.PaperPositionMode   = 'auto';
     title('Correlation matrix sorted by network','FontSize',9);
     colormap jet
+    colorbar;
     caxis([-0.5 1])
     %f.Position = [100 100 600 600];
     
@@ -145,15 +146,18 @@ if plot2dconns ==1
     %colormap jet
     load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
     colormap(ax3,pos_neg_cmap);
+    colorbar;
     caxis([-0.5 0.5])
     f.Position = [50 100 1300 400];
     print([image_name '.png'], '-dpng', '-r600')
-    
+else
+    print([image_name '.png'], '-dpng', '-r600')
 end
+
 end
 
 %% insert net lines
-function insert_net_lines(networks,sorted_networks,usenet_colors )
+function insert_net_lines(networks,sorted_networks,usenet_colors, full_black_lines )
 net_start_idx = zeros(1, size(networks,1)); % preallocate for speed
 net_end_idx = zeros(1, size(networks,1)); % preallocate for speed
 netRGBs = [
@@ -176,6 +180,21 @@ for i=1:size(networks,1)
     net_start_idx(i) = min(netidices)-1;
     net_end_idx (i)= max(netidices);
 end
+
+    for j = 1:size(networks,1)
+        line([net_start_idx(j)-0.5  net_start_idx(j)-0.5], [0.5 size(sorted_networks,1)+0.5],'Color','black','LineWidth',0.5)
+        line([0.5 size(sorted_networks,1)+0.5 ],[net_start_idx(j)-0.5  net_start_idx(j)-0.5],'Color','black','LineWidth',0.5)
+    end
+% 
+%     
+%     for i = 0:size(H,2)+1
+%         line([i-0.5 i-0.5], [0.5 size(H,2)+0.5],'Color','black','LineWidth',2)
+%     end
+%     for i = 0:size(H,1)+1
+%         line([0.5 size(H,1)+0.5],[i-0.5 i-0.5] ,'Color','black','LineWidth',2)
+%     end
+    
+
 if usenet_colors ==1
     for j = 1:size(networks,1)
         line([net_start_idx(j) net_start_idx(j)], [net_end_idx(j) net_start_idx(j)],'Color',netRGBs(j,:),'LineWidth',2)

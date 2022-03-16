@@ -1,4 +1,4 @@
-function patch_match
+function patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,output_subject_path,output_file_name,distance_matrix_to_use)
 
 %This function work trying to match up a subjects invidualized clusters
 %with the clusters observed in the group.
@@ -7,19 +7,39 @@ function patch_match
 
 tic
 %Hardcodes
-subject_input_cifti_file='C:\Users\hermosir\Documents\test_ciftis\sub-33005b_task-rest_DCANBOLDProc_v4.0.0_Atlas_template_matched_Zscored_recolored.dscalar.nii';
+%subject_input_cifti_file='C:\Users\hermosir\Documents\test_ciftis\sub-33005b_task-rest_DCANBOLDProc_v4.0.0_Atlas_template_matched_Zscored_recolored.dscalar.nii';
 %template_input_cifti_file=('C:\Users\hermosir\Documents\repos\support_folder\91282_Greyordinates.dscalar.nii');
 %template_input_cifti_file=('C:\Users\hermosir\Documents\test_ciftis\ABCD_GROUP_AVERAGES\ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii');
-template_input_cifti_file=('C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii');
-output_template_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
-output_subject_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
-output_file_name = 'sub-33005b';
+%template_input_cifti_file='C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
+template_input_cifti_file='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
+
+%output_template_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
+%output_subject_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
+%output_file_name = 'sub-33005b';
 min_patch_size = 80; % previously 30, but since bold voxels are 2x2x2, only 4 voxels=32.  80 means that voxels must be at least 10 grayodrinates
 min_num_of_grays = 10; % with above, if a cluster has less than 10 grayordiantes, don't count it as a unique patch to match (for either the template or the subject).
-maximum_combination_of_nets = 3;
+maximum_combination_of_nets = 4;
 save_matched_dscalars =1;
 min_dist=30;
 keep_cortical_subcortical_seperation =1; %Set to 1 to set cortico-subcortical distance at 255mm (max).  If 0, distance matrix will use the eucliden distance from cortical to subcortical grayordiantes.
+
+%distance_matrix_to_use = [support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'];
+%distance_matrix_to_use = [support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat']
+
+%     if exist('distances','var') ==1
+%         disp('Distance matrix already loaded.')
+%     else
+%         tic
+%         disp('loading distance matrix...')
+%         if keep_cortical_subcortical_seperation ==1
+%             disp('Note: Distance matrix has eucliean distances between the cortex and subcortex set to 255mm (max uint8).')
+%             load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
+%         else
+%             disp('Note: Distance matrix uses eucliean distances between the cortex and subcortex.')
+%             load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
+%         end
+%         toc
+%     end
 
 
 %% Step 0: Add dependency paths
@@ -46,7 +66,10 @@ else
         addpath(genpath(settings.path{i}));
     end
     warning('on')
+    if exist('wb_command','var') ==1
+    else
     wb_command=settings.path_wb_c; %path to wb_command
+    end
 end
 
 %load power colors
@@ -436,10 +459,12 @@ else
         disp('loading distance matrix...')
         if keep_cortical_subcortical_seperation ==1
             disp('Note: Distance matrix has eucliean distances between the cortex and subcortex set to 255mm (max uint8).')
-            load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
+            %load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
+            load(distance_matrix_to_use,'distances');
         else
             disp('Note: Distance matrix uses eucliean distances between the cortex and subcortex.')
-            load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
+            %load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
+            load(distance_matrix_to_use,'distances');
         end
         toc
     end
@@ -638,10 +663,12 @@ else
     disp('loading distance matrix...')
     if keep_cortical_subcortical_seperation ==1
         disp('Note: Distance matrix has eucliean distances between the cortex and subcortex set to 255mm (max uint8).')
-        load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
+        %load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
+        load(distance_matrix_to_use,'distances');
     else
         disp('Note: Distance matrix uses eucliean distances between the cortex and subcortex.')
-        load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
+        %load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
+        load(distance_matrix_to_use,'distances');
     end
     toc
     

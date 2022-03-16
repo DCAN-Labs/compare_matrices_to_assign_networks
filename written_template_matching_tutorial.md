@@ -6,11 +6,11 @@ Written run through of template matching, the code of which can be found [here](
 There are two ways to get a template file for this code. You can create a template file or download a premade one. First, a discussion on code-appropriate template files. 
 
 ### What is an appropriate template file?
-Since this template matching tutorial uses the [Gordon et al. 2017](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub) 14-neural network template as a basis for its matching, your template file should use the same divison for accurate matching. 
+Since this template matching tutorial uses the 14-neural network template as a basis for its matching, your template file should use the same divison for accurate matching (See [Gordon et al. 2017](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub) for details on the neural networks).
 
-The code will use the template file, in accordance with a required subject data file (See Step 2), to build a seed-based correlation matrix by showing functional relatedness between areas of the brain, or "voxels".
+The code will use the template file, in accordance with a required subject data file (see step 2), to build a seed-based correlation matrix by showing functional relatedness between areas of the brain, or "voxels".
 
-This template file should be a `*.mat` file containing time series data. 
+This template file should be a `.mat` file containing time series data. 
 
 ### Option A: Creating a template file
 
@@ -20,18 +20,18 @@ Using the code below, you can create a template file.
 `makeCiftiTemplates_RH(dt_or_ptseries_conc_file,TR,all_motion_conc_file,project_dir,Zscore_regions,power_motion,remove_outliers,surface_only,use_only_subjects_that_pass_motion_criteria,combined_outliermask_provided)` 
 
 In this code, the input parameters refer to:
-- `dt_or_ptseries_conc_file` = list of subjects' time series data; must be a `dtseries.nii` ending in `*.conc`
+- `dt_or_ptseries_conc_file` = list of subjects' time series data; must be a `dtseries.nii` ending in `.conc`
 - `TR` = frequency of every BOLD response in seconds
 - `all_motion_conc_file` = list of subjects' motion data
-    - for a high motion frame, it will be a `*_motion.mat` file which is a standard output of DCAN processing pipeline
-    - for a low motion frame, it will be a `*_motion.txt` file  
+    - for a high motion frame, it will be a `_motion.mat` file which is a standard output of DCAN processing pipeline
+    - for a low motion frame, it will be a `_motion.txt` file  
 - `project_dir` = path to output directory
 - `Zscore_regions` = '0' or '1'
     - '0' = will be a Pearson correlation of the seed maps to the networks 
     - '1' = will be a Z-score transformation of the seed map to the networks
 - `power_motion` = '0' or '1'
-    - '0' = if using a `*.txt file` for `all_motion_conc_file`
-    - '1' = if using a `*.mat file` for `all_motion_conc_file`
+    - '0' = if using a `.txt file` for `all_motion_conc_file`
+    - '1' = if using a `.mat file` for `all_motion_conc_file`
 - `remove_outliers` = '0' or '1' 
     - '0' = will not remove outliers
     - '1' = will remove outliers 
@@ -47,30 +47,32 @@ In this code, the input parameters refer to:
 
 
 ### Option B: Downloading pre-made template file
-Using a pre-made template file from the FairLab's repository is also a viable option. It can be found here: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/. 
+Using a pre-made template file from the DCAN Lab's repository is also a viable option. It can be found here: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/tree/master/support_files. 
  
 
 ## 2. Add subject data set
 To find the how areas in a certain subject's brain are related to each other in their function, you can use this code to match them according the neural network template discussed above.
 
 ### What is the subject data set?
-This data set should be a dconn.nii file, a or dense connectivity matrix, consisting of greyordinates, a numerical map of the brain's structure, with respect to time. Each cell should contain the BOLD response. 
+This data set should be a `dconn.nii` file, a or dense connectivity matrix, consisting of greyordinates, a numerical map of the brain's structure, with respect to time. Each cell should contain the BOLD response. 
 
 ### How to build a dconn?
 
-Refer to [cifti_conn_matrix.m](https://github.com/DCAN-Labs/cifti-connectivity) code for how to properly motion-censor the time series.
+Refer to [`cifti_conn_wrapper.py`](https://github.com/DCAN-Labs/cifti-connectivity) code for how to properly motion-censor the time series. You can also use this code to create your `dconn.nii` file if you do not have one. 
 
 
 *Important:* The time data in the subject data set should correlate to the template file time series data for accurate matching. 
 
 
 ## 3. Request system resources 
-Running this code with the vastness of the subject data and the template file data and the usage of a workbench command will take a great deal of time and space. This applied to both pulling the resources and running the code. 
+Running this code with the vastness of the subject data and the template file data will take a great deal of time and space. This applies to both pulling the resources and running the code if running on a cluster. 
 
 For example: 
-- using SLURM to request resources can take up to 150 GB of RAM
-- using the code for all data can take up to 2 hours
-    - on the other hand, using only surface data can take as little as 10 minutes 
+- Using SLURM to request resources can take up to 150 GB of RAM
+- Using the code for all data can take up to 2 hours
+    - On the other hand, using only surface data can take as little as 10 minutes 
+
+
 
 
 
@@ -115,11 +117,11 @@ An example call is written below:
 *Note:* `/some/path/to/` refers to the computer path to the desired file. 
 
 In this call:
-- the subject data file is called **dconn_example** in `*.dconn.nii` formart
+- the subject data file is called **dconn_example** in `.dconn.nii` format
 - the data type is labeled **dense**
-- the template file is called **template_example** in `*.mat` format
+- the template file is called **template_example** in `.mat` format
 - the output data will be converted to Zscores
-- the output data file will be named **example_run** in `*.dtseries.nii` format
+- the output data file will be named **example_run** in `.dtseries.nii` format
 - the path to wb_command is added
 - a CIFTI will be saved from the results
 - overlapping networks will be used to analyze data
