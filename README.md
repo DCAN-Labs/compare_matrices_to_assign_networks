@@ -61,7 +61,7 @@ The code works by taking taking a dense connectivity matrix (`*.dconn.nii`) and 
 
 A simplified, written tutorial for template matching can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/written_template_matching_tutorial.md). 
 
-A video tutorial can be found here.
+A video tutorial can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/TM_additional/TM_Video_Tutorial.mp4).
 
 If you don't have a dconn, you can build one with one of our other handy tools using the dense timeseries (`*.dtseries.nii`), See [cifti_conn_matrix.m](https://github.com/DCAN-Labs/cifti-connectivity) code for how to properly motion-censor the time series.
 
@@ -77,7 +77,7 @@ If using SLURM, be sure to have ample time and space set out for the system to a
 
 ## Step 1: Create your Template...or download a premade one
 
-![Gordon networks](/TM_images/TM_1.png?raw=true) 
+![Gordon networks](/TM_additional/TM_1.png?raw=true) 
 
 This code is based on the 14 neural network-template defined by Gordon et al. 2017 seen above. (See [Gordon et al. 2017](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub) for more information about each network.)
 
@@ -97,7 +97,7 @@ The most current iteration of the code is **template_matching_RH.m**
 
 A graphic with following inputs is added below. 
 
-![Inputs graphic](/TM_images/TM_2.jpg?raw=true) 
+![Inputs graphic](/TM_additional/TM_2.jpg?raw=true) 
 
 
 Below is a description of the required input parameters. 
