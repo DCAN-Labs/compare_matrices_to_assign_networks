@@ -193,10 +193,14 @@ As some CIFTI files are outputted, you should view them with **Workbench View** 
 
 
 An animated graphic showing the difference between the `dscalar.nii` and the `_recolored.dscalar.nii` files is shown below. 
+
 ![dscalars GIF](/TM_README_Images/TM_RM_Image_7.gif?raw=true) 
 
 An animated graphic of resulting `dtseries.nii` data is shown below. This `dtseries.nii` file has been cleaned and is using the data from the `_recolored.dtseries.nii` file.
-![dtseries GIF](/TM_README_Images/TM_RM_Image_8.gif?raw=true) 
+
+<p align="center">
+  ![dtseries GIF](/TM_README_Images/TM_RM_Image_8.gif?raw=true) 
+</p>
 
 
 ## Further Analysis 
