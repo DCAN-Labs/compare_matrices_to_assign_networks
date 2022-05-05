@@ -3,7 +3,7 @@
 
 This package  is designed to identify neural networks using times series data, specifically dense time series data in CIFTI format (`.dtseries.nii`) [(Glasser et al. 2013)](https://pubmed.ncbi.nlm.nih.gov/23668970/). A series of analysis packages are used to quantify the networks' topology afterwards. 
 
-![Template Matching Method](/TM_README_Images/TM_RM_Image_1.png?raw=true) 
+![Template Matching Method](/TM_README_Images/TM_RM_Image_1.jpg?raw=true) 
 
 
 ## What is template matching?
@@ -115,7 +115,7 @@ The most current iteration of the code is **template_matching_RH.m**
 
 A graphic with following inputs and outputs is added below. 
 
-![Inputs and Outputs Graphic](/TM_README_Images/TM_RM_Image_5.png?raw=true) 
+![Inputs and Outputs Graphic](/TM_README_Images/TM_RM_Image_5.jpg?raw=true) 
 
 
 Below is a description of the required input parameters. 
@@ -193,10 +193,10 @@ As some CIFTI files are outputted, you should view them with **Workbench View** 
 
 
 An animated graphic showing the difference between the `dscalar.nii` and the `_recolored.dscalar.nii` files is shown below. 
-![dscalars GIF](/TM_README_Images/TM_RM_Image_7.png?raw=true) 
+![dscalars GIF](/TM_README_Images/TM_RM_Image_7.gif?raw=true) 
 
 An animated graphic of resulting `dtseries.nii` data is shown below. This `dtseries.nii` file has been cleaned and is using the data from the `_recolored.dtseries.nii` file.
-![dtseries GIF](/TM_README_Images/TM_RM_Image_8.png?raw=true) 
+![dtseries GIF](/TM_README_Images/TM_RM_Image_8.gif?raw=true) 
 
 
 ## Further Analysis 
