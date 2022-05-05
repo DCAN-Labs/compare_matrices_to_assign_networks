@@ -1,16 +1,17 @@
 # Template Matching Documentation 
 ### Supervised community detection for neural networks 
 
-## Background
-The human brain function is achieved through an emergent property of neurons to self-organize into neural networks.  Investigations into how these networks are represented on the brain, suggest that the typically-developing brain self-organizes into a general set of common networks. However, there is significant inter-subject variability in topography on the macroscopic scale.
+This package  is designed to identify neural networks using times series data, specifically dense time series data in CIFTI format (`.dtseries.nii`) [(Glasser et al. 2013)](https://pubmed.ncbi.nlm.nih.gov/23668970/). A series of analysis packages are used to quantify the networks' topology afterwards. 
 
-Refer to Cui et al. 2020; Glasser et al. 2016; Gordon, Laumann, Gilmore, et al. 2017; Gratton et al. 2018, 2020; Huth et al. 2016; Laumann et al. 2015; Rajkowska and Goldman-Rakic 1995; D. Wang et al. 2015; Brodmann 1909; von Economo and Koskinas 1925; Churchland and Sejnowski 1988 for more information. 
-
-This package  is designed to identify neural networks using times series data, specifically dense time series data in CIFTI format (dtseries.nii) [(Glasser et al. 2013)](https://pubmed.ncbi.nlm.nih.gov/23668970/). A series of analysis packages are used to quantify the networks topology afterwards.
+![Template Matching Method](/TM_README_Images/TM_RM_Image_1.png?raw=true) 
 
 
 ## What is template matching?
-Template matching is a method of network mapping that leverages commonly observed networks that have been previously observed in a group average to accelerate the community detection process.  
+Template matching is a method of network mapping that leverages commonly observed networks that have been previously observed in a group average to accelerate the community detection process.
+
+![14 Neural Networks](/TM_README_Images/TM_RM_Image_2.png?raw=true) 
+
+This code uses a 14 neural network-base, first defined by [Gordon et al. 2017](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub), and recreated with another group average. These 14 neural networks can be seen above. Read more about each network [here](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub).
 
 Individual networks are identified in a 3-step process:
 
@@ -20,22 +21,23 @@ In Hermosillo et al. 2021, we used networks define from an average connectivity 
 2) **Generate a template of networks:** 
 Using the networks commonly observed in a group, we can create a template of networks in a specific file.
 
-3) **Match connectivity of each voxel:** This will correlate each voxel, or seed, to its respective pair based on its function.
+3) **Match connectivity of each voxel:** This will correlate the connectivity of each voxel, or seed, to its respective pair, based on function.
 
 ## Reasons for template matching
 
 1. If you have a correlation matrix for your subject and a template file, this code will calculate the correlation between each a vector of correlations for greyordinate to every other greyodinate.
 
-2. If you have a template of various networks, this code can use it to calculate an eta squared value against all other greyordinates. 
-    - To explore probablistic network functions based on individual network maps for your data check out [MIDB Atlas Maps](https://midbatlas.io).
+2. If you have a template of networks, this code can use it to calculate the functional connectivity of each greyordinate in a subject with each template.
+    - To explore probablistic network functions based on individual network maps for your data, check out [MIDB Atlas Maps](https://midbatlas.io).
+
+
+## Background
+The human brain function is achieved through an emergent property of neurons to self-organize into neural networks.  Investigations into how these networks are represented on the brain, suggest that the typically-developing brain self-organizes into a general set of common networks. However, there is significant inter-subject variability in topography on the macroscopic scale.
+
+Refer to Cui et al. 2020; Glasser et al. 2016; Gordon, Laumann, Gilmore, et al. 2017; Gratton et al. 2018, 2020; Huth et al. 2016; Laumann et al. 2015; Rajkowska and Goldman-Rakic 1995; D. Wang et al. 2015; Brodmann 1909; von Economo and Koskinas 1925; Churchland and Sejnowski 1988 for more information. 
+
 
 # The Code
-## Where is the code?
-
-The template matching procedure is part of a package called Compare Matrices to Assign Networks.
-
-This package can be found at: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks
-
 ## How do you install it?
 
 To install the code, please download it from the following link: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/template_matching_RH.m
@@ -49,55 +51,71 @@ The MATLAB versions used here is **Version 9.6** (release name **R2019a**).
 
 ## What does this code do? 
 
-This code uses connectivity matrices, a template connectivity matrix, and a label file to try to assess each greyordinate to a network for an individual.
+This code uses connectivity matrices, a template connectivity matrix, and a label file to try to assess each greyordinate to a network for an individual connectivity matrix.
 
 
 # Step-by-step Tutorial
 ## Background
 
-The data are assumed to be processed with the FreeSurfer processing pipeline (theorhetically being in BIDS format). The code assumes that particpants have 91282 greyordinates  cortex + subcortical structures or are cortex only 549412.
+A video tutorial for these steps can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/TM_additional/TM_Video_Tutorial.mp4).
 
-The code works by taking taking a dense connectivity matrix (`*.dconn.nii`) and comparing its similarity to a series of network templates from an independent data set.  
+The data are assumed to be processed with the [FreeSurfer processing pipeline](https://github.com/DCAN-Labs/abcd-hcp-pipeline), preferably being in [BIDS format](https://bids-specification.readthedocs.io/). The code assumes that participants have 91282 greyordinates in the cortex and subcortical structures or have cortex-only data with 59412 greyordinates.
 
-A simplified, written tutorial for template matching can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/written_template_matching_tutorial.md). 
-
-A video tutorial can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/TM_additional/TM_Video_Tutorial.mp4).
-
-If you don't have a dconn, you can build one with one of our other handy tools using the dense timeseries (`*.dtseries.nii`), See [cifti_conn_matrix.m](https://github.com/DCAN-Labs/cifti-connectivity) code for how to properly motion-censor the time series.
+The code works by taking taking a dense connectivity matrix (`*.dconn.nii`) and comparing its similarity to a series of network templates (`*.dtseries.nii`) from an independent data set.  
 
 
-## Gather the files you will need ahead of time
+## Step 1: Gather the files you will need ahead of time
 
-### Required:
-- **dconn** - the greyodrinate x time matrix where each cell contains the BOLD response.  It is highly recommended that this dconn is creaed using motion-regressed time series data in conjuction with motion scrubbing (If you're using the ABCD data set, you can use the .mat file within the derivatives that contains motion mask at various FD (framewise displacement thresholds)). Click [here](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3849338/) to read more about motion censoring and why it is important.
-- **template file** - this will be a file of times series data (`*.dtseries.nii`) that is used to identify neural network connections.
+### File 1. **Dense Connectivity Matrix** 
+
+![Dense Connectivity Matrix Method and Example](/TM_README_Images/TM_RM_Image_3.png?raw=true) 
+
+This will be a greyodrinate x time matrix in `.dconn.nii` format where each cell contains the BOLD response. 
+
+These dense connectivity matrices are created by taking time series data of a single subject (A), analyzed to see which peaks (B) correspond to which neural network (C). The resulting data can be opened in Workbench View and altered, just as the dconn in (D) has been altered. 
+
+- If you don't have a `*.dconn.nii`, you can build one with one of our other handy tools using the dense time series data (`*.dtseries.nii`) found [here](https://github.com/DCAN-Labs/abcd-hcp-pipeline) with the ABCD-HCP FreeSurfer processing pipeline. 
+
+It is highly recommended that this file is created using motion-regressed time series data in conjuction with motion scrubbing. To properly motion-censor your data, refer to [cifti_conn_matrix.m](https://github.com/DCAN-Labs/cifti-connectivity). Click [here](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3849338/) to read more about motion censoring and why it is important.
+
+- If using the ABCD data set, you can use the `*.mat` file within the derivatives that contain motion mask at various framewise displacement (FD) thresholds. 
 
 
-If using SLURM, be sure to have ample time and space set out for the system to allocate the required resources, as the jobs can take up to 150 GB of RAM. 
+### File 2. **Template File**
 
-## Step 1: Create your Template...or download a premade one
+![Template File Example](/TM_README_Images/TM_RM_Image_4.png?raw=true) 
 
-![Gordon networks](/TM_additional/TM_1.png?raw=true) 
+This will be a file of times series data (`*.dtseries.nii`) that is used to identify neural network connections. It is important to use an independent data set to identify the initial networks. With a starting set of networks, the code builds a seed-based correlation for all template subjects. This seed-based correlation shows how a seed voxel in one region of the brain is functionally related to another region of the brain based on the correlations between the time series of their activity.
 
-This code is based on the 14 neural network-template defined by Gordon et al. 2017 seen above. (See [Gordon et al. 2017](https://www.sciencedirect.com/science/article/pii/S089662731730613X?via%3Dihub) for more information about each network.)
+   - If you don't have a template file, proceed with one of two options:
 
+     - **Option A: Create a template file**
 
-It is important to use an independent data set to identify the initial networks.  Using a starting set of networks, the code builds a seed-based correlation for all template subjects. This seed-based correlation shows how a seed voxel in one region of the brain is functionally related to another region of the brain based on the correlations between the time series of their activity.
+        *Note:* Selection of subjects for template file should be considered carefully to ensure lack of bias. 
 
-`makeCiftiTemplates_RH(dt_or_ptseries_conc_file,TR,all_motion_conc_file,project_dir,Zscore_regions,power_motion,remove_outliers,surface_only,use_only_subjects_that_pass_motion_criteria,combined_outliermask_provided)`
+        Refer to [insert link to makeCiftiTemplates_README.md when finalized].
 
-Alternatively, you can download our of our pre-made template from our repository: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/  
+     - **Option B: Download a pre-made template file**
 
-## Step 2: Make idividual-specific maps
+        Using a pre-made template file from the DCAN Lab's repository is also a viable option. It can be found here: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/tree/master/support_files. 
+
+*Important:* The time series data in the subject data set should correlate to the time series data in the template file for accurate matching. 
+
+<br>
+If using Slurm, be sure to have ample time and space set out for the system to allocate the required resources, as the jobs can take up to 150 GB of RAM. 
+
+<br> 
+
+## Step 2: Make individual-specific maps
 
 The most current iteration of the code is **template_matching_RH.m** 
 
 
 `template_matching_RH(dconn_filename, data_type,template_path,transform_data,output_cifti_name,cifti_output_folder,wb_command,make_cifti_from_results,allow_overlap,overlap_method,surface_only,already_surface_only)`
 
-A graphic with following inputs is added below. 
+A graphic with following inputs and outputs is added below. 
 
-![Inputs graphic](/TM_additional/TM_2.jpg?raw=true) 
+![Inputs and Outputs Graphic](/TM_README_Images/TM_RM_Image_5.png?raw=true) 
 
 
 Below is a description of the required input parameters. 
@@ -105,13 +123,14 @@ Below is a description of the required input parameters.
 - `dconn_filename` = path to input CIFTI file with network data 
 - `data_type` = currently, the only supported data type is 'dense'
 - `template_path` = path to .mat file that has the network templates
-- `transform_data` =  if you want to convert your data before comparing to your template, use can use 1 of 3 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearsons' or 'Convert_to_Zscores' or use no tranformation
+- `transform_data` =  if you want to convert the inputted data, use 1 of 3 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearsons' or 'Convert_to_Zscores'. Please note that the cortical and subcortical regions are transformed separately. You may also chose to use no tranformation, though the recommended transformation is 'Convert_to_Zscores'.
     - 'Covert_FisherZ_to_r' will convert your data through a Fisher-Z transformation (click [here](https://www.statisticshowto.com/fisher-z/) for more information)
     - 'Convert_r_to_Pearsons' will convert your data into Pearson's coefficient (click [here](https://www.socscistatistics.com/tests/pearson/) for more information)
     - 'Convert_to_Zscores' will convert your data into Z-scores (click [here](https://www.statisticshowto.com/probability-and-statistics/z-score/) for more information)
+    - 'no_transformation' will not convert the input data. 
 - `output_cifti_name` = name of the output CIFTI file
 - `cifti_output_folder` = your project directory
-- `wb_command` = [link](https://www.humanconnectome.org/software/connectome-workbench) to download workbench command to view outputs
+- `wb_command` = [link](https://www.humanconnectome.org/software/connectome-workbench) to download Workbench Command to view outputs
 - `make_cifti_from_results` = '0' or '1'
     - '0' = does not save anything 
     - '1' = saves your results as a CIFTI file
@@ -135,7 +154,7 @@ Below is a description of the required input parameters.
 *Note:* `/some/path/to/` refers to the computer path to the desired file. 
 
 In this call:
-- the subject data file is called **dconn_example** in `*.dconn.nii` formart
+- the subject data file is called **dconn_example** in `*.dconn.nii` format
 - the data type is labeled **dense**
 - the template file is called **template_example** in `*.mat` format
 - the output data will be converted to Zscores
@@ -151,22 +170,37 @@ In this call:
 # Outputs
 There will be 1-5 outputs depending on the entered inputs.
 
--  A `*.mat` file with an eta squared value for each greyodrinate to specified network.
-- A `*.dscalar` file with network assignments associated with maximum eta value. 
-    - This file will go through a cleaning script and generate a `*.dscalar.nii` file. 
+![Intial MATLAB Outputs](/TM_README_Images/TM_RM_Image_6.png?raw=true) 
+
+ 1:. A `*.mat` file containing network names, new subject labels, and the functional connectivity of each greyordinate to the respective, provided template. 
+
+ 2: A `*.dscalar.nii` file with network assignments associated with maximum connectivity values. 
+    
+  -   3: This file will go through a cleaning script and generate a `*_recolored.dscalar.nii` file. 
     - *If requested,* this file will be saved locally.
     - *If only surface data is requested,* this file will contain the respective data.
-- *If the overlapping networks are enabled*, an additional `*.dtseries.nii` file will be generated. 
-    - This file will also undergo a cleaning script, generating a `*_recolored.dtseries.nii` file.
+
+ 4: *If the overlapping networks are enabled*, an additional `*.dtseries.nii` file will be generated. 
+
+ -  5: This file will also undergo a cleaning script, generating a `*_recolored.dtseries.nii` file.
 
 # What can we do with these files? 
 
 ## Viewing the files
 
-You can view the `*.dtseries.nii` and `*.dscalar.nii` files with **Workbench View** (wb_view). You can download it here: https://www.humanconnectome.org/software/connectome-workbench. It is part of a package by the Connectome Coordination Facility (CCF) called Connectome Workbench. 
+As some CIFTI files are outputted, you should view them with **Workbench View** (wb_view). These files will be the (1) `dscalar.nii`; (2) `_recolored.dscalar.nii`; (3) `dtseries.nii`; and (4) `_recolored.dtseries.nii`. You can download wb_view here: https://www.humanconnectome.org/software/connectome-workbench. It is part of a package by the Connectome Coordination Facility (CCF) called Connectome Workbench. 
+
+
+
+An animated graphic showing the difference between the `dscalar.nii` and the `_recolored.dscalar.nii` files is shown below. 
+![dscalars GIF](/TM_README_Images/TM_RM_Image_7.png?raw=true) 
+
+An animated graphic of resulting `dtseries.nii` data is shown below. This `dtseries.nii` file has been cleaned and is using the data from the `_recolored.dtseries.nii` file.
+![dtseries GIF](/TM_README_Images/TM_RM_Image_8.png?raw=true) 
+
 
 ## Further Analysis 
 
-Using the resulting data of neural networks, you can calculate the perimeters of their borders using the following getborderperimeters.m code: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/getborderperimeters.m 
+Using the resulting data of neural networks, you can calculate the perimeters of their borders using the following getborderperimeters.m code: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/tree/master/getborderperimeters
 
-You can also find the surface area of the resulting neural networks with the network_surface_area_from_network_file.m code following: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/network_surface_area_from_network_file.m
+You can also find the surface area of the resulting neural networks with the network_surface_area_from_network_file.m code following: https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/tree/master/network_surface_area
