@@ -229,7 +229,7 @@ Like with the `*.dscalars.nii`, the `*.dtseries.nii` has undergone a cleaning sc
 
 Following, all 16 map points of the `*_recolored.dtseries.nii` file are put together in an animated graphic. Map points 4 and 6 are empty as those networks are not used due to their observed inconsistency across subjects. Map point 14, corresponding to the Medial Temporal Lobe (MTL) neural network is empty only because it is not present in the pre-set left lateral view.  
 
-![dtseries GIF](/TM_README_Images/dtseries_different_map_points.gif?raw=true) 
+![dtseries GIF](/TM_README_Images/dtseries_map_points.gif?raw=true) 
 
 
 
