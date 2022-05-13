@@ -223,13 +223,14 @@ As previously said, this `*.dscalar.nii` file undergoes a cleaning script, creat
 
 Similarly, to view the `*.dtseries.nii` and the `*_recolored.dtseries.nii` files, you load in the brain templates and overlay the desired file(s). The display settings should be the same as when viewing the `*.dscalar.nii` files for consistency. As this file is with respect to time, meaning there are pictures at specific points in time, there are different results with different map settings. Below is an animated graphic showing how the results differ with map points 1-3. 
 
-![dtseries different map points GIF](/TM_README_Images/dtseries_different_map_points.gif?raw=true) 
+![dtseries GIF](/TM_README_Images/dtseries_map_points.gif?raw=true) 
 
 Like with the `*.dscalars.nii`, the `*.dtseries.nii` has undergone a cleaning script, creating the `*_recolored.dtseries.nii` file. In the graphic above, the `*_recolored.dtseries.nii` file has been overlaid. 
 
 Following, all 16 map points of the `*_recolored.dtseries.nii` file are put together in an animated graphic. Map points 4 and 6 are empty as those networks are not used due to their observed inconsistency across subjects. Map point 14, corresponding to the Medial Temporal Lobe (MTL) neural network is empty only because it is not present in the pre-set left lateral view.  
 
-![dtseries GIF](/TM_README_Images/dtseries_map_points.gif?raw=true) 
+![dtseries different map points GIF](/TM_README_Images/dtseries_different_map_points.gif?raw=true) 
+
 
 
 
