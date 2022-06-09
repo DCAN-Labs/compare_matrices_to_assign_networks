@@ -10,7 +10,8 @@ for i = 1:length(dtserieswithassignments)
     %get output_names
     %HARDCODE WARNING
     %uniqueID = char(dtseriesname(88:110));
-    uniqueID = char(dtseriesname(101:123));
+    %uniqueID = char(dtseriesname(101:123));
+    uniqueID = char(dtseriesname(96:113)); %HCP-D dtseries
     disp(uniqueID)
     outputname = [outputdir filesep uniqueID];
     visualizedscalars(dtserieswithassignments{i},outputname,'number_of_networks',0)

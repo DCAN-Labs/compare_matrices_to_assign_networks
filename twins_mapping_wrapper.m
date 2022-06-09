@@ -1,4 +1,4 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value,wb_command)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value,clean_up_intermed_files,wb_command,additional_mask)
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
@@ -21,14 +21,15 @@ data_type = 'dense';
 %template_path = '/mnt/max/shared/code/internal/analyses/compare_matclearrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
 %template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_dtseries_all_networksZscored.mat';
 %template_path = '/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/seedmaps_ABCD164template_SMOOTHED_dtseries_all_networksZscored.mat';
-clean_up_intermed_files = 1;
+%clean_up_intermed_files = 1;
 make_dconn_conc = 0;
 %output_file_name = 'ADHD315';
 calculate_mutual_info = 0;
 make_cifti_from_results = 1;
 allow_overlap = 1;
 overlap_method = 'smooth_then_derivative';
-remove_outliers= 1; additional_mask = 'none';
+remove_outliers= 1; 
+%additional_mask = 'none';
 
 %check input format
 if isnumeric(TR)==1
@@ -71,6 +72,10 @@ else
     memory_limit_value = str2num(memory_limit_value);
 end
 
+if isnumeric(clean_up_intermed_files) ==1
+else
+    clean_up_intermed_files = str2num(clean_up_intermed_files);
+end
 
 %Check to make sure that  minutes limit is a number (unless you've set it
 %to 'none')
@@ -91,6 +96,7 @@ addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
 
+if ~isdeployed
 disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
 for i=1:np
@@ -106,7 +112,8 @@ if exist('wb_command','var') ==1
 else
     wb_command=settings.path_wb_c; %path to wb_command
 end
-
+else
+end
 
 
 [dtpath, dtfile]=fileparts(dt_or_ptseries_conc_file);
@@ -116,7 +123,8 @@ subID=[split_dtpath{1} '_' split_dtpath{2}];
 if use_all_ABCD_tasks == 1
     % NOTE: this option has not been tested for conc files.
     %[dt_conc_name,motion_conc_names] = make_scan_conc(dtpath,dtfile); %use dtseries file name and location to find other tasks.
-    [dt_conc_name,motion_conc_names] = make_scan_conc(dtpath,1); %use dtseries file name and location to find other tasks.
+    [dt_conc_name,motion_conc_names,~] = make_scan_conc(dtpath,1,0,1); %use dtseries file name and location to find other tasks.
+    
     MergeTimeSeries('TimeSeriesFiles',dt_conc_name,'MotionFiles',motion_conc_names,'OutputFile',[dtpath filesep subID '_merged_tasks.dtseries.nii'],'MotionOutputFile',[dtpath filesep subID '_merged_tasks_motion.mat'])
     %Set time series and motion files to the newly merged data.
     dt_or_ptseries_conc_file= [dtpath filesep subID '_merged_tasks.dtseries.nii'];
@@ -151,6 +159,7 @@ end
 for i = 1:length(dtseries_file)
     if exist(dtseries_file{i},'file') == 0
         disp(['NOTE Subject Series ' num2str(i) ' does not exist'])
+        disp(dtseries_file{i})
         return
     else
     end
@@ -159,6 +168,7 @@ disp('All series files exist continuing ...')
 
 if exist(template_path,'file') == 0
     disp('NOTE template does not exist does not exist')
+    disp(template_path)
     return
 else
 end
@@ -338,6 +348,7 @@ for i = 1:length(dtseries_file) %number of subjects
         
         %% BUILD DCONN
         %subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
+        disp(['calling cifti_conn_matrixfor_wrapper_continous as follows: cifti_conn_matrix_for_wrapper_continous(' wb_command ',' subject_dt_series ',' series ',' motion ',' num2str(FD_threshold) ',' num2str(TR) ',' num2str(minutes_limit) ',' num2str(smoothing_kernal) ',' left_surface_file ',' right_surface_file ',' num2str(bit8) ',' num2str(remove_outliers) ',' additional_mask ',' num2str(make_dconn_conc) ',' [output_directory filesep] ',' subject_dt_series ',' num2str(use_continous_minutes) ',' num2str(memory_limit_value)])
         subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [output_directory filesep], subject_dt_series, use_continous_minutes, memory_limit_value);
         %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
@@ -359,7 +370,7 @@ for i = 1:length(dtseries_file) %number of subjects
                 disp('Skipping infomap step.')
             else
                 % some hardcodes for infomap
-                distance_matrix=settings.path{19}; % path to distance matrix
+                distance_matrix=settings.path{16}; % path to distance matrix
                 %some hardcodes for infomap:
                 template = 'none';
                 min_distance = 20;
@@ -374,9 +385,11 @@ for i = 1:length(dtseries_file) %number of subjects
                     donotZscore = 1;
                 end
                 %surface_only = 0;
+                   
                 %addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair'))
                 addpath(genpath('/home/faird/shared/code/internal/utilities/community_detection/fair'))               
-                [cleaned_info_ties_dtseries, raw_info_ties_dtseries] = Run_infomap_at_many_densities(subjectdconn,distance_matrix,template,min_distance,tie_density_vec,min_network_size,min_region_size,donotZscore,surface_only,already_surface_only,'infomap',num_reps);
+                
+                [cleaned_info_ties_dtseries, raw_info_ties_dtseries] = Run_infomap_at_many_densities(subjectdconn,distance_matrix,template,min_distance,tie_density_vec,min_network_size,min_region_size,donotZscore,surface_only,already_surface_only,wb_command,'infomap',num_reps);
                 
                
                 if surface_only ==1 % This name was likely altered during infomap due to the way it tries to remove the surface.
@@ -464,41 +477,77 @@ for i = 1:length(dtseries_file) %number of subjects
                 cmd = ['rm -f ' output_directory filesep filename_short '_surf_only_SMOOTHED_' num2str(smoothing_kernal) '.dtseries.nii'];
                 disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
-              if other_motion_mask ==0  
-                cmd = ['rm -f ' output_directory filesep motion_name_only 'surf_only.mat'];          
-                disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
-                system(cmd);
-              else
-              end
+                if other_motion_mask ==0
+                    cmd = ['rm -f ' output_directory filesep motion_name_only 'surf_only.mat'];
+                    disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
+                    system(cmd);
+                else
+                end
             else
                 disp('Surface only files are not set to be removed. (Reduced time series and motion file).  You probably started with surface_only files, but check to make sure that excess files not being left behind.')
             end
-            % Save motion mask
-            if isnumeric(minutes_limit) ==1
-                if surface_only ==1
-                    cmd = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
-                    disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
-                    system(cmd);
-                    
-                else
-                    cmd = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
-                    disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
-                    system(cmd);
-                end
-            else % 'all frames was probably selected selected'
-                if surface_only ==1
-                    cmd = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
-                    disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
-                    system(cmd);
-                    
-                else
-                    cmd = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
-                    disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
-                    system(cmd);
-                end
-            end
-            %sub-NDARINV3MTP07E9_ses-baselineYear1Arm1_merged_tasks_motionsurf_only.mat_0.2_cifti_censor_FD_vector_All_Good_Frames.txt
         end
+        
+        % Save motion mask
+        motion_folder = [cifti_output_folder '_motion_masks/'];
+        disp(['mkdir -p ' motion_folder])
+        system(['mkdir -p ' motion_folder]);
+        if isnumeric(minutes_limit) ==1
+            if surface_only ==1
+                cmd = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
+                disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
+                [cmdstatus,cmdout]=system(cmd);
+                if cmdstatus~=0
+                    disp(cmdout)
+                    disp('Problem moving motion file. "All frames" was mask was likely generated. (i.e. subject did not meet the "minimum number of minutes" criteria.')
+                    disp('Trying to move all_frames mask...')
+                    cmd2 = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                    disp([cmd2 ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
+                    [cmdstatus2,cmdout2]=system(cmd2);
+                    if cmdstatus2~=0
+                        disp(cmdout2)
+                        disp('WARNING: Problem moving motion file. Neither minutes mask not all frames maks could be moved.')
+                    else
+                        disp('Move was sucessfull.')
+                    end
+                else
+                    disp('Move was sucessfull.')
+                end
+            else
+                cmd = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
+                disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
+                [cmdstatus,cmdout]=system(cmd);
+                if cmdstatus~=0
+                    disp(cmdout)
+                    disp('Problem moving motion file. "All frames" was mask was likely generated. (i.e. subject did not meet the "minimum number of minutes" criteria.')
+                    disp('Trying to move all_frames mask...')
+                    cmd2 = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                    disp([cmd2 ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
+                    [cmdstatus2,cmdout2]=system(cmd2);
+                    if cmdstatus2~=0
+                        disp(cmdout2)
+                        disp('WARNING: Problem moving motion file. Neither minutes mask not all frames maks could be moved.')
+                    else
+                        disp('Move was sucessfull.')
+                    end
+                else
+                    disp('Move was sucessfull.')
+                end
+                
+            end
+        else % 'all frames was probably selected selected'
+            if surface_only ==1
+                cmd = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
+                system(cmd);
+                
+            else
+                cmd = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
+                system(cmd);
+            end
+        end
+        %sub-NDARINV3MTP07E9_ses-baselineYear1Arm1_merged_tasks_motionsurf_only.mat_0.2_cifti_censor_FD_vector_All_Good_Frames.txt
     end %finish running template matching.
     
     %% Make pretty pictures of your results

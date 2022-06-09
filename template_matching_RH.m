@@ -30,16 +30,25 @@ addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
 
-disp('Attempting to add neccesaary paths and functions.')
-warning('off') %supress addpath warnings to nonfolders.
-for i=1:np
-    addpath(genpath(settings.path{i}));
+amIdeployed = isdeployed(); 
+amIdeployed=num2str(double(amIdeployed));
+disp(['is deployed equals: ' amIdeployed]);
+
+if isdeployed
+    disp('Matlab is deployed. Not adding paths, as they should have been added during compiling.')
+else
+    disp('Attempting to add neccesaary paths and functions.')
+    warning('off') %supress addpath warnings to nonfolders.
+    for i=1:np
+       addpath(genpath(settings.path{i}));
+    end
+    %rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+    %rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+    addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
+    addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'));
+    warning('on')
 end
-%rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
-addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'));
-warning('on')
+
 if exist('wb_command','var') ==1
     %do nothing
 else
@@ -136,45 +145,7 @@ for sub = 1:length(dconn_filename)
             load([cifti_output_folder '/' output_cifti_name '.mat']);
             new_subject_labels = eta_subject_index;
         else
-            %subnum = subjectlist(i);
-            %index = find(allSubjects==subnum); %%% index of good subject in full subjects list %%%
-            
-            %%% concatenate all scan sessions dtseries for each subject %%%
-            %catData=[];
-            %catTmask=[];
-            %     for session=1:size(probabilistic_network_map_list{index,3},1)
-            %         sessionID = char(probabilistic_network_map_list{index,3}(session));
-            %         tempseries = ft_read_cifti_mod(['/data/cn5/selfRegulation/CIFTIs/cifti_timeseries_normalwall/' sessionID '_LR_surf_subcort_333_32k_fsLR_smooth2.55.dtseries.nii']);
-            %         catData = [catData tempseries.data];
-            %         tempTmask = dlmread(['/data/cn5/selfRegulation/finalOE/' sessionID '/total_tmask.txt'])';
-            %         catTmask = [catTmask tempTmask];
-            %         clear tempseries tempTmask
-            %     end
-            %
-            %     catData = subjectlist{i};
-            %     catTmask = motion_masks{i};
-            %     %%% apply tmask to cifti timeseries %%%
-            %     catData = catData(:,catTmask>0);
-            %     catData = catData(1:59412,:); %hardcode warning
-            %     %clear catTmask session sessionID
-            %     clear catTmask
-            %
-            %
-            %
-            %     %%% make correlation matrix %%%
-            %     disp(['Processing subject ' num2str(subnum) '...']);
-            %     disp('     computing correlation matrix')
-            %     corr_mat_full = paircorr_mod(catData');
-            %     clear catTemp catData
-            
-            %%% if excluding nearby voxels %%%
-            %     corr_mat_thr = corr_mat_full;
-            %     clear corr_mat_full
-            %     corr_mat_thr(dmat<20) = nan;
-            %     clear dmat
-            
-            
-            
+ 
             %%% if template-matching using correlation %%%
             %     for i=1:size(corr_mat_full,1)
             %        goodvox = ~isnan(corr_mat_full(i,:));
@@ -190,7 +161,7 @@ for sub = 1:length(dconn_filename)
                     %do nothing
                 else % take out subcortical connections from dconn.
                     large_subjectdconn = char(dconn_filename);
-                    [dconn_filename] = surface_only_dconn(char(dconn_filename),'inferred',wb_command);
+                    [dconn_filename] = surface_only_dconn(char(dconn_filename),'inferred',wb_command,settings.path{7});
                     %dconn_filename = [dconn_filename '.dconn.nii'];
                     disp('Removing connectivity matrix  since a smaller on eiwth surface only has been saved.')
                     %cmd = (['rm -f ' num2str(large_subjectdconn)]);

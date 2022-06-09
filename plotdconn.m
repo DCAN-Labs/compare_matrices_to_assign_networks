@@ -12,6 +12,10 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 % 4)the downsampling factor. set to 1 to use the full data set.
 % 5)Zscore dconn to to tre is you want to apply a within-region Zscore
 %transformaiton of the data.
+%6) image name
+%7) if you want ot plot 2 dconns, set to 1.
+%8) path to dconn2
+%9) path to dscalar 2.
 
 %net_order = [12 9 5 1 3 14 15 16 8 10 11 13 7 2];
 %net_order = [10 7 4 1 3 12 13 14 6 8 9 11 5 2];

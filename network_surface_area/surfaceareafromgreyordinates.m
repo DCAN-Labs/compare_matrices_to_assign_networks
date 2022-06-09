@@ -35,17 +35,17 @@ else
 end
 tic
 %check to make sure that surface files exist
-for i = 1:length(dscalarwithassignments)
-    if rem(i,100)==0
-        disp([' Validating file existence ' num2str(i)]);toc;
-    end
-    if exist(dscalarwithassignments{i}, 'file') == 0
-        disp(['Error Subject dscalar ' num2str(i) ' does not exist'])
-        disp(dscalarwithassignments{i});
-        return
-    else
-    end
-end
+% for i = 1:length(dscalarwithassignments)
+%     if rem(i,100)==0
+%         disp([' Validating file existence ' num2str(i)]);toc;
+%     end
+%     if exist(dscalarwithassignments{i}, 'file') == 0
+%         disp(['Error Subject dscalar ' num2str(i) ' does not exist'])
+%         disp(dscalarwithassignments{i});
+%         return
+%     else
+%     end
+% end
 disp('All series files exist continuing ...')
 
 
@@ -57,17 +57,17 @@ else
     Lmidthicknessfile = {Lmidthicknessfile};
 end
 % check to make sure that surface files exist
-for i = 1:length(Lmidthicknessfile)
-    if rem(i,100)==0
-        disp([' Validating file existence ' num2str(i)]);toc;
-    end
-    if exist(Lmidthicknessfile{i}, 'file') == 0
-        disp(['Error Subject surface ' num2str(i) ' does not exist'])
-        disp(Lmidthicknessfile{i});
-        return
-    else
-    end
-end
+% for i = 1:length(Lmidthicknessfile)
+%     if rem(i,100)==0
+%         disp([' Validating file existence ' num2str(i)]);toc;
+%     end
+%     if exist(Lmidthicknessfile{i}, 'file') == 0
+%         disp(['Error Subject surface ' num2str(i) ' does not exist'])
+%         disp(Lmidthicknessfile{i});
+%         return
+%     else
+%     end
+% end
 disp('All series files exist continuing ...')
 
 
@@ -78,17 +78,17 @@ if strcmp('conc',conc) == 1
 else
     Rmidthicknessfile = {Rmidthicknessfile};
 end
-for i = 1:length(Rmidthicknessfile)
-    if rem(i,100)==0
-        disp([' Validating file existence ' num2str(i)]);toc;
-    end
-    if exist(Rmidthicknessfile{i}, 'file') == 0
-        disp(['Error Subject surface ' num2str(i) ' does not exist'])
-        disp(Rmidthicknessfile{i});
-        return
-    else
-    end
-end
+% for i = 1:length(Rmidthicknessfile)
+%     if rem(i,100)==0
+%         disp([' Validating file existence ' num2str(i)]);toc;
+%     end
+%     if exist(Rmidthicknessfile{i}, 'file') == 0
+%         disp(['Error Subject surface ' num2str(i) ' does not exist'])
+%         disp(Rmidthicknessfile{i});
+%         return
+%     else
+%     end
+% end
 disp('All series files exist continuing ...')
 
 

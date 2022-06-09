@@ -1,4 +1,4 @@
-function patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,output_subject_path,output_file_name,distance_matrix_to_use)
+function patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile, output_subject_path,output_file_name,distance_matrix_to_use)
 
 %This function work trying to match up a subjects invidualized clusters
 %with the clusters observed in the group.
@@ -43,7 +43,7 @@ keep_cortical_subcortical_seperation =1; %Set to 1 to set cortico-subcortical di
 
 
 %% Step 0: Add dependency paths
-run_locally =1;
+run_locally =0;
 %add cifti paths
 if run_locally ==1
     %Some hardcodes:
@@ -62,13 +62,13 @@ else
     np=size(settings.path,2);
     disp('Attempting to add neccesaary paths and functions.')
     warning('off') %supress addpath warnings to nonfolders.
-    for i=2:np
+    for i=1:np
         addpath(genpath(settings.path{i}));
     end
     warning('on')
     if exist('wb_command','var') ==1
     else
-    wb_command=settings.path_wb_c; %path to wb_command
+        wb_command=settings.path_wb_c; %path to wb_command
     end
 end
 
@@ -80,75 +80,80 @@ net_list = [1 2 3 5 7 8 9 10 11 12 13 14 15 16]; % hardcoded network assingments
 
 %% Step 1: Load template data and create cluster_files
 % Let's get started
-template_cifti_obj = ciftiopen(template_input_cifti_file,wb_command);
-template_nets = template_cifti_obj.cdata;
-
-disp('Creating_patch_file_from_template_dscalar');
-disp(['Minimum patch size = ' num2str(min_patch_size)])
-k=1;
-
-for net_num =net_list
-    disp('Making patch dscalars for each network for template...')
-    template_raw_seperated_cifti_file = [output_template_path filesep 'template_net_' num2str(net_num) '_raw.dscalar.nii'];
-    patch_outputname_cifti_file = [output_template_path filesep 'template_net_' num2str(net_num) 'patches_size' num2str(min_patch_size) '.dscalar.nii'];
+if exist([output_template_path filesep 'template_net_all_unique_patches.dscalar.nii'],'file')
+    load([output_template_path filesep 'template_net_all_unique_patches.mat']);
+else
+    disp('Template data cannot be found.')
+    error('You probably do not want to remake the template')
+    template_cifti_obj = ciftiopen(template_input_cifti_file,wb_command);
+    template_nets = template_cifti_obj.cdata;
     
-    patch_list{k,1} = patch_outputname_cifti_file;k=k+1;
+    disp('Creating_patch_file_from_template_dscalar');
+    disp(['Minimum patch size = ' num2str(min_patch_size)])
+    k=1;
     
-    if exist(patch_outputname_cifti_file,'file') ~= 0
-        disp('Template patch dscalars has already been made for this network.')
-    else
+    for net_num =net_list
+        disp('Making patch dscalars for each network for template...')
+        template_raw_seperated_cifti_file = [output_template_path filesep 'template_net_' num2str(net_num) '_raw.dscalar.nii'];
+        patch_outputname_cifti_file = [output_template_path filesep 'template_net_' num2str(net_num) 'patches_size' num2str(min_patch_size) '.dscalar.nii'];
         
-        %net_num = 7;
-        this_net = template_nets==net_num;
-        this_net_double = double(this_net);
-        template_cifti_obj.cdata=this_net_double;
-        ciftisave(template_cifti_obj,template_raw_seperated_cifti_file,wb_command);
+        patch_list{k,1} = patch_outputname_cifti_file;k=k+1;
         
-        cmd=[wb_command ' -cifti-find-clusters ' template_raw_seperated_cifti_file ' 0 ' num2str(min_patch_size) ' 0  ' num2str(min_patch_size) ' COLUMN ' patch_outputname_cifti_file ' -left-surface C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\Conte69_atlas-v2.LR.32k_fs_LR.wb\Conte69.L.midthickness.32k_fs_LR.surf.gii -right-surface C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\Conte69_atlas-v2.LR.32k_fs_LR.wb\Conte69.R.midthickness.32k_fs_LR.surf.gii' ];
-        %disp(cmd);
-        system(cmd);
-    end
-end
-
-%Step 2 Load patches
-disp('loading patch dscalars...')
-for k=1:size(patch_list,1)
-    template_patch_obj = ciftiopen(patch_list{k},wb_command);
-    patch_matrix_column = net_list(k);
-    patch_matrix(:,patch_matrix_column) = template_patch_obj.cdata;
-end
-
-adjusted_patch_matrix = zeros(size(patch_matrix,1),size(patch_matrix,2));
-for j = 1: size(patch_matrix,2)
-    if j ==1
-        patches_this_net = nonzeros(unique(patch_matrix(:,j)));
-        full_patches_list = patches_this_net;
-        unique_patches_so_far = nonzeros(unique(full_patches_list));
-        template_list_of_adjusted_patches_by_networks{j,1} = patches_this_net;
-        template_list_of_patches_by_networks{j,1} = patches_this_net;
-        template_num_patches(j,1) = length(nonzeros(unique(full_patches_list)));
-        for k = 1:size(patches_this_net,1)
-            this_patches_indices = find(patch_matrix(:,j)==patches_this_net(k));
-            adjusted_patch_matrix(this_patches_indices,j) = patches_this_net(k);
-        end
-        
-    else
-        patches_this_net = nonzeros(unique(patch_matrix(:,j)));
-        if isempty(unique_patches_so_far) ==1
+        if exist(patch_outputname_cifti_file,'file') ~= 0
+            disp('Template patch dscalars has already been made for this network.')
         else
-            for k = 1:size(patches_this_net,1)
-                this_patches_indices = find(patch_matrix(:,j)==patches_this_net(k));
-                adjusted_patch_matrix(this_patches_indices,j) = patches_this_net(k)+max(full_patches_list);
-            end
-            adjusted_patches_this_net = patches_this_net+max(full_patches_list);
-            full_patches_list = [full_patches_list; adjusted_patches_this_net];
-            template_list_of_adjusted_patches_by_networks{j,1} = adjusted_patches_this_net;
+            
+            %net_num = 7;
+            this_net = template_nets==net_num;
+            this_net_double = double(this_net);
+            template_cifti_obj.cdata=this_net_double;
+            ciftisave(template_cifti_obj,template_raw_seperated_cifti_file,wb_command);
+            
+            cmd=[wb_command ' -cifti-find-clusters ' template_raw_seperated_cifti_file ' 0 ' num2str(min_patch_size) ' 0  ' num2str(min_patch_size) ' COLUMN ' patch_outputname_cifti_file ' -left-surface ' path_to_Lmidthicknessfile  ' -right-surface ' path_to_Rmidthicknessfile  ];
+            %disp(cmd);
+            system(cmd);
+        end
+    end
+    
+    %Step 2 Load patches
+    disp('loading patch dscalars...')
+    for k=1:size(patch_list,1)
+        template_patch_obj = ciftiopen(patch_list{k},wb_command);
+        patch_matrix_column = net_list(k);
+        patch_matrix(:,patch_matrix_column) = template_patch_obj.cdata;
+    end
+    
+    adjusted_patch_matrix = zeros(size(patch_matrix,1),size(patch_matrix,2));
+    for j = 1: size(patch_matrix,2)
+        if j ==1
+            patches_this_net = nonzeros(unique(patch_matrix(:,j)));
+            full_patches_list = patches_this_net;
+            unique_patches_so_far = nonzeros(unique(full_patches_list));
+            template_list_of_adjusted_patches_by_networks{j,1} = patches_this_net;
             template_list_of_patches_by_networks{j,1} = patches_this_net;
             template_num_patches(j,1) = length(nonzeros(unique(full_patches_list)));
-            %template_list_of_patches_by_networks{j,1} = patches_this_net;
+            for k = 1:size(patches_this_net,1)
+                this_patches_indices = find(patch_matrix(:,j)==patches_this_net(k));
+                adjusted_patch_matrix(this_patches_indices,j) = patches_this_net(k);
+            end
+            
+        else
+            patches_this_net = nonzeros(unique(patch_matrix(:,j)));
+            if isempty(unique_patches_so_far) ==1
+            else
+                for k = 1:size(patches_this_net,1)
+                    this_patches_indices = find(patch_matrix(:,j)==patches_this_net(k));
+                    adjusted_patch_matrix(this_patches_indices,j) = patches_this_net(k)+max(full_patches_list);
+                end
+                adjusted_patches_this_net = patches_this_net+max(full_patches_list);
+                full_patches_list = [full_patches_list; adjusted_patches_this_net];
+                template_list_of_adjusted_patches_by_networks{j,1} = adjusted_patches_this_net;
+                template_list_of_patches_by_networks{j,1} = patches_this_net;
+                template_num_patches(j,1) = length(nonzeros(unique(full_patches_list)));
+                %template_list_of_patches_by_networks{j,1} = patches_this_net;
+            end
         end
     end
-end
 
 template_patch_label_vector =sum(adjusted_patch_matrix,2);
 template_cifti_obj.cdata=template_patch_label_vector;
@@ -159,6 +164,10 @@ num_greys_removed = size(adjusted_patch_matrix,1)-nnz(template_patch_label_vecto
 disp(['Number of grayordinates removed: ' num2str(num_greys_removed)]);
 disp(['Number of grayordinates left: ' num2str(num_greys_left)]);
 disp(['Number of patches at this threshold: ' num2str(max(full_patches_list))]);
+
+
+end
+
 
 %% Step 3 :Load subject data.
 disp(['Loading subject...' subject_input_cifti_file]);
@@ -185,7 +194,7 @@ for net_num =net_list
         subject_cifti_obj.cdata=this_net_double;
         ciftisave(subject_cifti_obj,subject_outputname_cifti_file,wb_command);
         
-        cmd=[wb_command ' -cifti-find-clusters ' subject_outputname_cifti_file ' 0 ' num2str(min_patch_size) ' 0  ' num2str(min_patch_size) ' COLUMN ' patch_subject_outputname_cifti_file ' -left-surface C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\Conte69_atlas-v2.LR.32k_fs_LR.wb\Conte69.L.midthickness.32k_fs_LR.surf.gii -right-surface C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\Conte69_atlas-v2.LR.32k_fs_LR.wb\Conte69.R.midthickness.32k_fs_LR.surf.gii' ];
+        cmd=[wb_command ' -cifti-find-clusters ' subject_outputname_cifti_file ' 0 ' num2str(min_patch_size) ' 0  ' num2str(min_patch_size) ' COLUMN ' patch_subject_outputname_cifti_file ' -left-surface ' path_to_Lmidthicknessfile ' -right-surface ' path_to_Rmidthicknessfile ];
         %disp(cmd);
         system(cmd);
     end

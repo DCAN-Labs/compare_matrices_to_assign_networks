@@ -62,7 +62,7 @@ switch output_map_type
         disp('output map type not supported. check your inputs.')
 end
 %load colormap
-load('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/PowerColorMap.mat')
+load('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 conc = strsplit(dscalarswithassignments, '.');
 conc = char(conc(end));
@@ -212,9 +212,9 @@ end
 
 %open a file to write for saving
 if surface_only ==1
-    temp_file=ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/91282_Greyordinates_surf_only.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii',wb_command);
 else
-    temp_file=ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/support_files/91282_Greyordinates.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii',wb_command);
 end
 length(network_names)
 size(scalar_array,1)

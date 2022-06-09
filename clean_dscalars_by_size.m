@@ -45,15 +45,19 @@ addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
 
-warning('off') %supress addpath warnings to nonfolders.
-for i=1:np
-    addpath(genpath(settings.path{i}));
+if isdeployed
+    disp('Matlab is deployed. Not adding paths, as they should have been added during compiling.')
+else
+    warning('off') %supress addpath warnings to nonfolders.
+    for i=1:np
+        addpath(genpath(settings.path{i}));
+    end
+    rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
+    rmpath('/home/exacloud/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')
+    addpath(genpath('/panfs/roc/groups/8/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
+    wb_command=settings.path_wb_c; %path to wb_command
+    warning('on')
 end
-rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-rmpath('/home/exacloud/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')
-addpath(genpath('/panfs/roc/groups/8/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
-wb_command=settings.path_wb_c; %path to wb_command
-warning('on')
 
 if ~exist('mincol','var') || isempty(mincol)
     mincol = 1;

@@ -1,4 +1,4 @@
-function [all_rho, all_pval, all_nonmatched_num, all_nonmatched_percent] = make_percentage_correlation_plots(group1_conc_file,group2_conc_file,output_path)
+function [all_rho, all_pval, all_nonmatched_num, all_nonmatched_percent] = make_percentage_correlation_plots(group1_conc_file,group2_conc_file,output_path,outputfilename_summary_name)
 
 %group1_conc = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/group_pics/probability_pics/overlap_grp1.conc');
 %group2_conc = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/group_pics/probability_pics/overlap_grp2.conc');
@@ -13,7 +13,7 @@ settings=settings_comparematrices;%
 np=size(settings.path,2);
 disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+for i=1:np
 addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
@@ -23,7 +23,7 @@ wb_command=settings.path_wb_c; %path to wb_command
 group1_conc = importdata(group1_conc_file);
 group2_conc = importdata(group2_conc_file);
 
-[~,outputfilename_summary_name] = fileparts(group1_conc_file);
+%[~,outputfilename_summary_name] = fileparts(group1_conc_file);
 for i=1:size(group1_conc)
  [~,B_temp,~] = fileparts(group1_conc{i});
  [~, outputfilename,~] = fileparts(B_temp);
@@ -120,8 +120,8 @@ all_nonmatched_percent(i) = (sum(non_match_zero))/size(both_nonzero,1);
 % nonZgrp1 = DMN_GRP1(find(DMN_GRP1));
 % nonZgrp1 = DMN_GRP2(find(DMN_GRP2));
 end
-disp('Saving .mat file with summary stats using group1 filename. saving...')
-save([outputfilename_summary_name 'ABCD_GRP1vGRP2_infomap_surface_only_rest_correlation_.mat'],'all_rho','all_pval','all_nonmatched_num','all_nonmatched_percent','all_rho_wzero','all_pval_wzero')
+disp('Saving .mat file with summary stats saving...')
+save([output_path filesep outputfilename_summary_name '_correlation_.mat'],'all_rho','all_pval','all_nonmatched_num','all_nonmatched_percent','all_rho_wzero','all_pval_wzero')
 disp('Done running code for all files in conc.')
 
 end

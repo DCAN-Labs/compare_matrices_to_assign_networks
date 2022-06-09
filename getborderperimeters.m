@@ -20,8 +20,8 @@ function [network_lengths_for_each_sub] = getborderperimeters(dlabel_conc,L_surf
 %to be able to calculate the perimeter.  Set to "1" if you want to remove
 %the intermediate files.  Set to "0" if you want to keep them.
 
-%5) remove_hemigii_files: intermediate files that are created fromthe
-%dlabel.  BOrder files can only be generated from 1 hemiphere at a time.
+%5) remove_hemigii_files: intermediate files that are created from the
+%dlabel.  Border files can only be generated from 1 hemisphere at a time.
 
 %6) Calculate network compactness using Polsby-Popper: Set to 1 if you want to calculate
 %compactness. Set to 0 you just want the border perimeters.
@@ -88,12 +88,12 @@ end
     end
    
  if exist([output_folder filesep output_name '_perimeters.mat'],'file') ==0
-    disp(['Final perimter file (.mat) not found. Expeted name: ' output_folder filesep output_name '_perimeters.mat'])
+    disp(['Final perimeter file (.mat) not found. Expected name: ' output_folder filesep output_name '_perimeters.mat'])
     disp('Starting from the beginning...')   
     
     for i = 1:length(input_cifti_list)
         if exist(input_cifti_list{i},'file') == 0
-            error(['Subject Series ' num2str(i) ' does not exist'])
+             error(['Subject Series ' num2str(i) ' does not exist'])
             %return
         else
         end
@@ -121,13 +121,13 @@ end
         Rsurfs = {R_surf_conc};
     end
     
-    for i = 1:length(Rsurfs)
-        if exist(Rsurfs{i},'file') == 0
-            error(['Subject right surface ' num2str(i) 'file does not exist'])
-            %return
-        else
-        end
-    end
+%     for i = 1:length(Rsurfs)
+%         if exist(Rsurfs{i},'file') == 0
+%             error(['Subject right surface ' num2str(i) ' file does not exist'])
+%             %return
+%         else
+%         end
+%     end
     disp('All required files exist continuing ...')
     
     if length(input_cifti_list)==length(Lsurfs) || length(Lsurfs)==length(Rsurfs) || length(input_cifti_list)==length(Rsurfs)
@@ -270,6 +270,8 @@ end
         else
             %do nothing.  Be mindful of space.
         end
+        
+        clear Lnet_table Rnet_table
     end
     
 
