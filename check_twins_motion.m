@@ -160,7 +160,7 @@ if exist('find_best_subjects', 'var') == 1 && find_best_subjects == 1
     %upper_threshold = 346; % %provide a list of subjects that have frames above this threshold. e.g. 346 frames = ~14.4 minutes of data. 1500 at a TR of 0.8 = 1200sec. 1200secs / 60sec/min is 20minutes.
     %1500 at a TR of 0.8 = 1200sec. 1200secs / 60sec/min is 20minutes.
     %minimum_frames_threshold = 1208;
-    thresidx = find(frames ==minimum_frames_threshold);
+    thresidx = find(frames >=minimum_frames_threshold);
     if isempty(thresidx)
         thresidx = find(frames ==minimum_frames_threshold+1);
     end

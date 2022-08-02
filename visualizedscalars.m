@@ -259,6 +259,16 @@ if overlap == 1
         if save_results ==1
             temp_file.cdata=  avg_num_networks;
             disp('Saving average number of networks.')
+            whole_brain_number_of_nets = mean(scalar_array,1);
+            whole_brain_number_of_nets = whole_brain_number_of_nets'; 
+            integration_zonesscalarpath = '/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/ABCD_number_of_nets/ABCD_GRP1_overlap_number_of_nets_avg_number_of_network_2.2_thres_sz60_clusters.dscalar.nii';
+            intcii = ciftiopen(integration_zonesscalarpath,wb_command);
+            intmask = intcii.cdata;
+            intmask = intmask>0; %because this was built from a label file, binarize to make a mask.
+            intscalar=scalar_array(intmask,:);
+            integration_zone_number_of_nets=mean(intscalar,1);
+            integration_zone_number_of_nets = integration_zone_number_of_nets';
+            save([outputname '.mat'],'whole_brain_number_of_nets','integration_zone_number_of_nets');
             ciftisave(temp_file,[outputname '_avg_number_of_networks.dscalar.nii'],wb_command);
         end
     end

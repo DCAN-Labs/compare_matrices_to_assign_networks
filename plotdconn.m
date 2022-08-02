@@ -32,6 +32,16 @@ addpath(genpath('/panfs/roc/groups/8/faird/shared/code/internal/utilities/Matlab
 %load('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
 %load('parcel_probability_map.mat','parcel'); [~,index] = sortrows([parcel.power_val].'); parcel = parcel(index); clear index
 
+if downsample_dconn == 1
+    if isnumeric(DS_factor) ==1
+        if DS_factor <=0
+            error('DS_factor must be a positive real number.')
+        end
+    else
+        error('DS_factor must be numeric')
+    end
+end
+
 %load dconn and assingments
 disp('Loading dconn and assignments...')
 dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);

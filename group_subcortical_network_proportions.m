@@ -2,10 +2,11 @@ function [all_nets_mat, all_nets_vec] = group_subcortical_network_proportions(ds
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti/'))
+addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/'))
 
 %reference_dscalar = '/mnt/rose/shared/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
-reference_dscalar = '/home/exacloud/lustre1/fnl_lab/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
+%reference_dscalar = '/home/exacloud/lustre1/fnl_lab/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
+reference_dscalar = '/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii';
 
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.dscalar.nii';
 %reference_dscalar = 'rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
@@ -38,7 +39,7 @@ np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+for i=1:np
     addpath(genpath(settings.path{i}));
 end
 addpath(genpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')) % remove non-working gifti path included with MSCcodebase

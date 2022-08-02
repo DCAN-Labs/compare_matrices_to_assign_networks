@@ -1,3 +1,8 @@
+
+% R. Hermosillo 09/03/2018 - This code calculates the multual information,
+% (and variation of information and normalized mututal information) to calculate the pairwise similarity between participants.
+%  
+
 %load('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/surface_area/lucianov_test_cleaned.mat');%load surface and volume data
 %load('/mnt/max/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/surface_area/ADHDsymptoms.mat')
 
@@ -35,12 +40,22 @@
 %templ_match_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/templ_only.conc');
 
 %ABCD_best_subs
-templ_match_dscalarwithassignments = importdata('/home/faird/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_singlenet_dscalar.conc');
+%templ_match_dscalarwithassignments = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_singlenet_dscalar.conc');
 %infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/infomap/merged_densities/infomap_both_halves.conc');
+%ABCD 2 example_subs 
+%templ_match_dscalarwithassignments = importdata('/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_singlenet_dscalar_2examplesubs.conc');
+templ_match_dscalarwithassignments = importdata('/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_overlapping_dtseries_2examplesubs.conc');
+
+%ABCD FD03_subs:
+%templ_match_dscalarwithassignments = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/lower_FD_thresholds/FD03/ABCD_templ_matched_FD03AandB_10_min.conc');
+%ABCD FD04_subs:
+%templ_match_dscalarwithassignments = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/lower_FD_thresholds/FD04/ABCD_templ_matched_FD04_10_min.conc');
+%ABCD FD05_subs:
+%templ_match_dscalarwithassignments = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/lower_FD_thresholds/FD05/ABCD_templ_matched_FD05_10_min.conc');
 
 twins=0;
 surface_only =0; ncortgrey = 59412;
-omnibus =0; %for overlapping networks, set to true if you want to concatenate all networks together and run an omnibus mutual information.  Otherwise MuI will be calculated for each network seperately.
+omnibus =1; %for overlapping networks, set to true if you want to concatenate all networks together and run an omnibus mutual information.  Otherwise MuI will be calculated for each network seperately.
 %note: network names listed below have empty networks removed (e.g. 4 and 6 are revmoed from the data.)
 network_names = {   'DMN'    'Vis'    'FP'      'DAN'       'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
@@ -57,7 +72,7 @@ np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+for i=1:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
@@ -146,16 +161,20 @@ else
     for i = 1:Number_subjects
         allscalars_templ_temp = ciftiopen(templ_match_dscalarwithassignments{i},wb_command);
         if overlap ==1
+            %clear allscalars_templ
             thissubjectsgreys = single(allscalars_templ_temp.cdata);
             thissubjectsgreys(:,4) = []; % remove networks with no assingments
             thissubjectsgreys(:,5) = []; % remove networks with no assingments
             thissubjectsgreys  = thissubjectsgreys+1;
             if omnibus ==1
-                thissubjectsgreys  = reshape(thissubjectsgreys,[],1); % reshape
+                thissubjectsgreys  = reshape(thissubjectsgreys,size(thissubjectsgreys,1)*size(thissubjectsgreys,2),1); % reshape
+                allscalars_templ(:,i) = single(thissubjectsgreys);
+                A = find(allscalars_templ <1);
+            else
+               allscalars_templ(:,:,i) = single(thissubjectsgreys); 
             end
             %add 1 to all values for VIN calculation.  Does not like "0" %values.
             
-            allscalars_templ(:,:,i) = single(thissubjectsgreys);
         else
             if exist('surface_only','var') == 1 && surface_only ==1
                 thissubjectsgreys = single(allscalars_templ_temp.cdata);
@@ -228,7 +247,11 @@ end
 % %hist(diffmatrix(diff_indices),30); hold on; bar(a,16,50,'r')
 % end
 if overlap ==1
-    V = size(allscalars_templ,2);
+    if omnibus ==1
+        V = 1;
+    else
+        V = size(allscalars_templ,2);
+    end
 else
     V = 1;
 end
@@ -239,8 +262,14 @@ for j=1:V
     disp('Calculating mutual information for real pairs')
     for i = 1:2:Number_subjects %number of subjects
         if overlap ==1
-            muI_templ(round(i/2),j) = MutualInformation(allscalars_templ(:,j,i),allscalars_templ(:,j,i+1)); %Mutual information
-            [VIn_templ(round(i/2),j), MIn_templ(round(i/2),j)] = partition_distance(allscalars_templ(:,j,i),allscalars_templ(:,j,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+            if omnibus ==1
+                muI_templ(round(i/2),j) = MutualInformation(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Mutual information
+                [VIn_templ(round(i/2),j), MIn_templ(round(i/2),j)] = partition_distance(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+            else
+                muI_templ(round(i/2),j) = MutualInformation(allscalars_templ(:,j,i),allscalars_templ(:,j,i+1)); %Mutual information
+                [VIn_templ(round(i/2),j), MIn_templ(round(i/2),j)] = partition_distance(allscalars_templ(:,j,i),allscalars_templ(:,j,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
+                
+            end
         else
             muI_templ(round(i/2),j) = MutualInformation(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Mutual information
             [VIn_templ(round(i/2),j), MIn_templ(round(i/2),j)] = partition_distance(allscalars_templ(:,i),allscalars_templ(:,i+1)); %Normalized variation of information ([p, q] matrix), Normalized mutual information ([p, q] matrix)
@@ -256,9 +285,13 @@ for j=1:V
         for k = 1:Number_subjects %go through every other subject
             if i < k && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
                 if overlap ==1
-                    
-                    eta_net_assign1 = allscalars_templ(:,j,i);
-                    eta_net_assignk = allscalars_templ(:,j,k);
+                    if omnibus ==1
+                        eta_net_assign1 = allscalars_templ(:,i);
+                        eta_net_assignk = allscalars_templ(:,k);
+                    else
+                        eta_net_assign1 = allscalars_templ(:,j,i);
+                        eta_net_assignk = allscalars_templ(:,j,k);
+                    end
                 else
                     eta_net_assign1 = allscalars_templ(:,i);
                     eta_net_assignk = allscalars_templ(:,k);
@@ -277,9 +310,13 @@ for j=1:V
         for k = twin2_indices %go through every other subject
             %if i < k && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
             if overlap ==1
-                
-                eta_net_assign1 = allscalars_templ(:,j,i);
-                eta_net_assignk = allscalars_templ(:,j,k);
+                if omnibus ==1
+                    eta_net_assign1 = allscalars_templ(:,i);
+                    eta_net_assignk = allscalars_templ(:,k);
+                else
+                    eta_net_assign1 = allscalars_templ(:,j,i);
+                    eta_net_assignk = allscalars_templ(:,j,k);
+                end
             else
                 eta_net_assign1 = allscalars_templ(:,i);
                 eta_net_assignk = allscalars_templ(:,k);
@@ -299,9 +336,13 @@ for j=1:V
         for k = 1:Number_subjects %go through every other subject
             %if i < k% && twin1_indices(round(i/2))+1 ~=  twin2_indices(round(k/2)) %only calculate differences for non-twins.
             if overlap ==1
-                
+                  if omnibus ==1
+                                      eta_net_assign1 = allscalars_templ(:,i);
+                eta_net_assignk = allscalars_templ(:,k);
+                  else
                 eta_net_assign1 = allscalars_templ(:,j,i);
                 eta_net_assignk = allscalars_templ(:,j,k);
+                  end
             else
                 eta_net_assign1 = allscalars_templ(:,i);
                 eta_net_assignk = allscalars_templ(:,k);
@@ -460,10 +501,14 @@ end
 
 figure()
 if overlap ==1
+    if omnibus ==1
+     imagesc(block_MIn_templ)    
+    else
     for b=1: size(allscalars_templ,2)
         subplot(4,4,b)
         this_block = squeeze(block_MIn_templ(:,:,b));
         imagesc(this_block);
+    end
     end
 else
     imagesc(block_MIn_templ)
@@ -500,7 +545,8 @@ end
 % title('Zscored edge weights')templ_match_dscalarwithassignments
 if overlap ==0 % run overlap
     
-    
+    if omnibus ==1
+else
     if exist('templ_match_dscalarwithassignments','var') == 1
         X{1} = diff_MIn_values;X{2} = MIn_templ;
         %X{1} = diff_MIn_values_info;X{2} = MIn_info;
@@ -533,7 +579,7 @@ if overlap ==0 % run overlap
             
             subplot(4,2,2*i-1)
             custom_hist(X,options)
-            xlim([0.2 0.8])
+            xlim([0.2 0.5])
             title (['shown as ' ct{i}])
             
             % providing your own color
@@ -579,7 +625,7 @@ if overlap ==0 % run overlap
             
             subplot(4,2,2*i-1)
             custom_hist(X,options)
-            xlim([0.2 0.8])
+            xlim([0.2 0.5])
             title (['shown as ' ct{i}])
             
             % providing your own color
@@ -589,7 +635,7 @@ if overlap ==0 % run overlap
             title (['shown as ' ct{i}])
         end
     end
-    
+    end
 else
     if exist('templ_match_dscalarwithassignments','var') == 1
         

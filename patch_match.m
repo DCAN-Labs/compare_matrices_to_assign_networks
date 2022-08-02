@@ -349,6 +349,10 @@ for n = 1: size(jaccard_mat_all_nets,1)
                 break
             else
                 [x,y]=find(jaccard_mod{n,1}==maximum);
+                if size(x,1)>1
+                    x=x(1);
+                    y=y(1);
+                end
                 jaccard_mod{n,1}(x,:)=nan;
                 jaccard_mod{n,1}(:,y)=nan;
                 patches_to_exclude = nonzeros(D{n,1}(x,:));
@@ -875,7 +879,25 @@ disp(['The subject did not have the following networks: ' num2str(unmatched_indi
 subject_cifti_obj.cdata=subject_patch_label_vector;
 ciftisave(subject_cifti_obj,[output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post3.dscalar.nii'],wb_command);
 
-
+disp('removing files')
+for net_num =net_list
+    subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '_raw.dscalar.nii'];
+    patch_subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) 'patches_size' num2str(min_patch_size) 'patches.dscalar.nii'];
+    step3_subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '_maxcombo' num2str(maximum_combination_of_nets) '_patch_matched_dstance_' num2str(min_dist) '_post3.dscalar.nii'];
+    patch_matched_subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '_maxcombo' num2str(maximum_combination_of_nets) '_patch_matched.dscalar.nii'];
+    patch_matched_subject_outputname_cifti_file2 = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '_maxcombo' num2str(maximum_combination_of_nets) '_patch_matched_dstance_' num2str(min_dist) '.dscalar.nii'];
+    cmd = sprintf('rm -v "%s"', subject_outputname_cifti_file);
+    cmd2 = sprintf('rm -v "%s"', patch_subject_outputname_cifti_file);
+    cmd3 = sprintf('rm -v "%s"', step3_subject_outputname_cifti_file);
+    cmd4 = sprintf('rm -v "%s"', patch_matched_subject_outputname_cifti_file);
+    cmd5 = sprintf('rm -v "%s"', patch_matched_subject_outputname_cifti_file2);
+    system(cmd);
+    system(cmd2);
+    system(cmd3);
+    system(cmd4);
+    system(cmd5);
+end
+    
 disp('done')
 
 

@@ -1,4 +1,4 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value,clean_up_intermed_files,wb_command,additional_mask)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value,clean_up_intermed_files,wb_command,additional_mask,remove_outliers)
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
@@ -28,7 +28,7 @@ calculate_mutual_info = 0;
 make_cifti_from_results = 1;
 allow_overlap = 1;
 overlap_method = 'smooth_then_derivative';
-remove_outliers= 1; 
+%remove_outliers= 1; 
 %additional_mask = 'none';
 
 %check input format
@@ -75,6 +75,11 @@ end
 if isnumeric(clean_up_intermed_files) ==1
 else
     clean_up_intermed_files = str2num(clean_up_intermed_files);
+end
+
+if isnumeric(remove_outliers) ==1
+else
+    remove_outliers = str2num(remove_outliers);
 end
 
 %Check to make sure that  minutes limit is a number (unless you've set it
@@ -124,11 +129,12 @@ if use_all_ABCD_tasks == 1
     % NOTE: this option has not been tested for conc files.
     %[dt_conc_name,motion_conc_names] = make_scan_conc(dtpath,dtfile); %use dtseries file name and location to find other tasks.
     [dt_conc_name,motion_conc_names,~] = make_scan_conc(dtpath,1,0,1); %use dtseries file name and location to find other tasks.
-    
-    MergeTimeSeries('TimeSeriesFiles',dt_conc_name,'MotionFiles',motion_conc_names,'OutputFile',[dtpath filesep subID '_merged_tasks.dtseries.nii'],'MotionOutputFile',[dtpath filesep subID '_merged_tasks_motion.mat'])
+     %[dt_conc_name,motion_conc_names,~] = make_scan_conc(dtpath,0,0,1); %use dtseries file name and location to find other tasks.
+  
+    MergeTimeSeries('TimeSeriesFiles',dt_conc_name,'MotionFiles',motion_conc_names,'OutputFile',[output_directory filesep subID '_merged_tasks.dtseries.nii'],'MotionOutputFile',[output_directory filesep subID '_merged_tasks_motion.mat'])
     %Set time series and motion files to the newly merged data.
-    dt_or_ptseries_conc_file= [dtpath filesep subID '_merged_tasks.dtseries.nii'];
-    motion_file=[dtpath filesep subID '_merged_tasks_motion.mat'];
+    dt_or_ptseries_conc_file= [output_directory filesep subID '_merged_tasks.dtseries.nii'];
+    motion_file=[output_directory filesep subID '_merged_tasks_motion.mat'];
 else
 end
 

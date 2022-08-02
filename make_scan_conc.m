@@ -115,7 +115,9 @@ if combine_non_ABCD_dtseries_in_dir ==1
 else
     disp(['Checking for ABCD possible task/rest scans in the following directory: ' input_directory])
     
-    [status, task_rest_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-rest_bold_timeseries.dtseries.nii']);
+    %[status, task_rest_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-rest_bold_timeseries.dtseries.nii']);
+     [status, task_rest_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-rest_bold_desc-filtered_timeseries.dtseries.nii']);
+   
     if status ==0
         disp('rest time series found')
         file_singlecell = textscan(task_rest_dtseries, '%s', 'delimiter', '\n' );
@@ -125,7 +127,9 @@ else
         disp('No resting state scan found')
     end
     %check for corresponding motion file
-    [status, task_rest_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-rest_bold_mask.mat']);
+    %[status, task_rest_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-rest_bold_mask.mat']);
+     [status, task_rest_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-rest_desc-filtered_motion_mask.mat']);
+   
     if status ==0
         disp('rest motion found')
         file_singlecell = textscan(task_rest_motion, '%s', 'delimiter', '\n' );
@@ -136,7 +140,7 @@ else
     end
     
     %% Check for MID
-    [status, task_MID_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-MID_bold_timeseries.dtseries.nii']);
+    [status, task_MID_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-MID_bold_desc-filtered_timeseries.dtseries.nii']);
     if status ==0
         disp('MID time series found')
         file_singlecell = textscan(task_MID_dtseries, '%s', 'delimiter', '\n' );
@@ -146,7 +150,9 @@ else
         disp('No MID time series scan found')
     end
     %check for corresponding motion file
-    [status, task_MID_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-MID_bold_mask.mat']);
+    %[status, task_MID_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-MID_bold_mask.mat']);
+     [status, task_MID_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-MID_desc-filtered_motion_mask.mat']);
+ 
     if status ==0
         disp('MID motion found')
         file_singlecell = textscan(task_MID_motion, '%s', 'delimiter', '\n' );
@@ -158,7 +164,7 @@ else
     
     
     %% Check fot SST
-    [status, task_SST_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-SST_bold_timeseries.dtseries.nii']);
+    [status, task_SST_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-SST_bold_desc-filtered_timeseries.dtseries.nii']);
     if status ==0
         disp('SST time series found')
         file_singlecell = textscan(task_SST_dtseries, '%s', 'delimiter', '\n' );
@@ -168,7 +174,9 @@ else
         disp('No SST time series scan found')
     end
     %check for corresponding motion file
-    [status, task_SST_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-SST_bold_mask.mat']);
+    %[status, task_SST_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-SST_bold_mask.mat']);
+     [status, task_SST_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-SST_desc-filtered_motion_mask.mat']);
+
     if status ==0
         disp('SST motion found')
         file_singlecell = textscan(task_SST_motion, '%s', 'delimiter', '\n' );
@@ -180,7 +188,9 @@ else
     
     
     %% check for nBack
-    [status, task_nback_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-nback_bold_timeseries.dtseries.nii']);
+    %[status, task_nback_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-nback_bold_desc-filtered_timeseries.dtseries.nii']);
+    [status, task_nback_dtseries] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-nback_bold_desc-filtered_timeseries.dtseries.nii']);
+ 
     if status ==0
         disp('nback time series found')
         file_singlecell = textscan(task_nback_dtseries, '%s', 'delimiter', '\n' );
@@ -190,7 +200,9 @@ else
         disp('No nback time series scan found')
     end
     %check for corresponding motion file
-    [status, task_nback_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-nback_bold_mask.mat']);
+    %[status, task_nback_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-nback_bold_mask.mat']);
+    [status, task_nback_motion] = system(['ls ' input_directory filesep '*_ses-baselineYear1Arm1_task-nback_desc-filtered_motion_mask.mat']);
+  
     if status ==0
         disp('nback motion found')
         file_singlecell = textscan(task_nback_motion, '%s', 'delimiter', '\n' );
