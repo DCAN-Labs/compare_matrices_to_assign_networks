@@ -148,7 +148,7 @@ if plot_subcort ==1
     structure_percentC = zeros(size(subcort_assings_by_structC,1),size(possible_net_nums,2));
     structure_percentD = zeros(size(subcort_assings_by_structD,1),size(possible_net_nums,2));
     
-    for k = 1: size(subcort_assings_by_structC,1)
+    for k = 1: size(subcort_assings_by_structD,1)
         greysforstructC = subcort_assings_by_structC{k};
         greysforstructD = subcort_assings_by_structD{k};
         

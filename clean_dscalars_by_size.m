@@ -54,7 +54,7 @@ else
     end
     rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
     rmpath('/home/exacloud/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti')
-    addpath(genpath('/panfs/roc/groups/8/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
+    addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
     wb_command=settings.path_wb_c; %path to wb_command
     warning('on')
 end

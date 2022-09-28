@@ -1,4 +1,4 @@
-function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file)
+function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap)
 
 %R.Hermosillo 08/20/2019
 
@@ -18,6 +18,7 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 %9) path to dscalar 2.
 
 %net_order = [12 9 5 1 3 14 15 16 8 10 11 13 7 2];
+
 %net_order = [10 7 4 1 3 12 13 14 6 8 9 11 5 2];
 %Zscore_dconn=1; % set to true if you want to Zscore your dconn.
 %downsample_dconn  =1;
@@ -27,9 +28,9 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 %parameters:
 %wb_command='LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command';
 wb_command='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
-addpath(genpath('/panfs/roc/groups/8/faird/shared/code/external/utilities/gifti-1.6'))
-addpath(genpath('/panfs/roc/groups/8/faird/shared/code/internal/utilities/Matlab_CIFTI'))
-%load('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
+addpath(genpath('/panfs/jay/groups/6/faird/shared/code/external/utilities/gifti-1.6'))
+addpath(genpath('/panfs/jay/groups/6/faird/shared/code/internal/utilities/Matlab_CIFTI'))
+%load('/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
 %load('parcel_probability_map.mat','parcel'); [~,index] = sortrows([parcel.power_val].'); parcel = parcel(index); clear index
 
 if downsample_dconn == 1
@@ -42,14 +43,31 @@ if downsample_dconn == 1
     end
 end
 
-%load dconn and assingments
+%load assignments
+
+if strcmp(net_assigns(end-3:end),'.csv')
+    assigns = table2array(readtable(net_assigns));
+elseif strcmp(net_assigns(end-3:end),'.txt')
+    assigns = table2array(readtable(net_assigns)); 
+elseif strcmp(net_assigns(end-10:end),'pscalar.nii')
+    net_assigns = ciftiopen(net_assigns,wb_command);
+    assigns = net_assigns.cdata;
+elseif strcmp(net_assigns(end-10:end),'dscalar.nii')
+    net_assigns = ciftiopen(net_assigns,wb_command);
+    assigns = net_assigns.cdata;
+else
+    error('What kind of file are you trying touse to import assignments? Use a dscalar.nii, pscalar.nii, .txt, or .csv (1 assingment per line.)')
+end
+
+
+%load dconn
 disp('Loading dconn and assignments...')
 dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);
-net_assigns = ciftiopen(net_assigns,wb_command);
 %subsample dconn
 
 dconn = single(dconn_cifti.cdata);
-assigns = net_assigns.cdata;
+
+
 
 
 if apply_Zscore_dconn ==1
@@ -110,9 +128,14 @@ set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
 %xlim([0 1]);ylim([0 1]);
 %f.PaperPositionMode   = 'auto';
 title('Correlation matrix sorted by network','FontSize',9);
+if Pos_neg_colormap==1
+    load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+    colormap(pos_neg_cmap);
+else
 colormap jet
+end
 colorbar;
-caxis([-0.5 1])
+caxis(caxis_scale);
 %f.Position = [100 100 600 600];
 
 if plot2dconns ==1
@@ -142,7 +165,7 @@ if plot2dconns ==1
     title('Correlation matrix sorted by network','FontSize',9);
     colormap jet
     colorbar;
-    caxis([-0.5 1])
+    caxis(caxis_scale)
     %f.Position = [100 100 600 600];
     
     ax3 = subplot(1,3,3);
@@ -161,13 +184,13 @@ if plot2dconns ==1
     load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
     colormap(ax3,pos_neg_cmap);
     colorbar;
-    caxis([-0.5 0.5])
+    caxis(caxis_scale)
     f.Position = [50 100 1300 400];
     print([image_name '.png'], '-dpng', '-r600')
 else
     print([image_name '.png'], '-dpng', '-r600')
 end
-
+disp('Done plotting.')
 end
 
 %% insert net lines

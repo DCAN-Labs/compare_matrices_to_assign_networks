@@ -82,7 +82,7 @@ switch server_name
         %templates:
         path{5}='/home/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
         path{6}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
-        path{7}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dconn.nii';
+        path{7}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dconn.nii';
         path{8}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii'; 
         path{9}='/home/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';        
         path{10}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
@@ -97,27 +97,52 @@ switch server_name
         path_template_nets='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
     case '/panfs/roc' %mesabi
-        path{1}='/panfs/roc/groups/8/faird/shared/code/external/utilities/gifti-1.6';
-        path{2}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/Matlab_CIFTI';
-        path{3}='/panfs/roc/groups/8/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
-        path{4}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/hcp_comm_det_damien/Gordan_subcortical_template_ptseries.conc_AVG.pconn.nii';
+        path{1}='/panfs/jay/groups/6/faird/shared/code/external/utilities/gifti-1.6';
+        path{2}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/Matlab_CIFTI';
+        path{3}='/panfs/jay/groups/6/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
+        path{4}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/hcp_comm_det_damien/Gordan_subcortical_template_ptseries.conc_AVG.pconn.nii';
         %templates:
-        path{5}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
-        path{6}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
-        path{7}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dconn.nii';
-        path{8}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii';
-        path{9}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';
-        path{10}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
-        path{11}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
-        path{12}='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
-        path{13}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
-        path{14}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
-        path{15}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
-        path{16}='/panfs/roc/groups/8/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
+        path{5}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
+        path{6}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
+        path{7}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dconn.nii';
+        path{8}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii';
+        path{9}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';
+        path{10}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
+        path{11}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
+        path{12}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
+        path{13}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
+        path{14}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        path{16}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
-        path_wb_c='/panfs/roc/groups/4/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
-        path_template_nets='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
+        %path_wb_c='/panfs/roc/groups/4/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_wb_c='/panfs/jay/groups/2/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_template_nets='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
 
+    case '/panfs/jay' %mesabi
+        path{1}='/panfs/jay/groups/6/faird/shared/code/external/utilities/gifti-1.6';
+        path{2}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/Matlab_CIFTI';
+        path{3}='/panfs/jay/groups/6/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
+        path{4}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/hcp_comm_det_damien/Gordan_subcortical_template_ptseries.conc_AVG.pconn.nii';
+        %templates:
+        path{5}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
+        path{6}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
+        path{7}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dconn.nii';
+        path{8}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii';
+        path{9}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';
+        path{10}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
+        path{11}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
+        path{12}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
+        path{13}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
+        path{14}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        path{16}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
+        
+        %path_wb_c='/panfs/roc/groups/4/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_wb_c='/panfs/jay/groups/2/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_template_nets='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
+       
+        
     case 'PCWIN64'
         path{1}='P:\code\external\utilities\gifti-1.6';
         path{2}='P:\code\external\utilities\Matlab_CIFTI';   

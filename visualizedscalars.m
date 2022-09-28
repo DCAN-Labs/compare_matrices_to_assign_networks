@@ -1,4 +1,4 @@
-function visualizedscalars(dscalarswithassignments,outputname,output_map_type, plot_results)
+function [large_scalar_array,whole_brain_number_of_nets,integration_zone_number_of_nets] = visualizedscalars(dscalarswithassignments,outputname,output_map_type, plot_results,surface_only)
 
 %This code loads in a conc of dcalars to visualize them for all subjects.
 % It also can calculates the probability of a network assingment from the
@@ -62,11 +62,13 @@ switch output_map_type
         disp('output map type not supported. check your inputs.')
 end
 %load colormap
-load('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
+load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 conc = strsplit(dscalarswithassignments, '.');
 conc = char(conc(end));
 if strcmp('conc',conc) == 1
+    dscalarswithassignments = importdata(dscalarswithassignments);
+elseif strcmp('csv',conc) == 1
     dscalarswithassignments = importdata(dscalarswithassignments);
 else
     dscalarswithassignments = {dscalarswithassignments};
@@ -81,7 +83,8 @@ else
     overlap =0;
 end
 tic
-
+whole_brain_number_of_nets = [];
+integration_zone_number_of_nets =[];
 %check to make sure that surface files exist
 found_files_total=0; missing_files_total =0;% make a "found files counter" 
 for i = 1:length(dscalarswithassignments)
@@ -147,14 +150,19 @@ warning('on')
 disp('Using the first file to infer the number of greyordinates.')
 scalar_temp = ciftiopen(dscalarswithassignments{1},wb_command);
 grey_size=size(scalar_temp.cdata,1);
+
+if surface_only==1
+    grey_size =59412;
+else
+end
 switch grey_size
     
     case 91282
         disp('Number of greyordinates is 91282.')
-        surface_only =0;
+        %surface_only =0;
     case 59412
         disp('Number of greyordinates is 59412.')
-        surface_only =1;
+        %surface_only =1;
     otherwise
         disp('Number of greyordinates is neither 91282 nor 59412.  You may run into saving issues...')    
         surface_only =0;
@@ -171,6 +179,10 @@ for i=1:length(dscalarswithassignments)
     disp(i)
     scalar_temp = ciftiopen(dscalarswithassignments{i},wb_command);
     scalar=scalar_temp.cdata;
+    if surface_only ==1
+        scalar = scalar(1:grey_size,:);
+    end
+    
     if overlap == 1
         if calc_percentage ==1
             scalar_array(:,i,:) =scalar; %use scalar name despite it being a matrix.
@@ -212,9 +224,9 @@ end
 
 %open a file to write for saving
 if surface_only ==1
-    temp_file=ciftiopen('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii',wb_command);
 else
-    temp_file=ciftiopen('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii',wb_command);
 end
 length(network_names)
 size(scalar_array,1)
@@ -264,8 +276,15 @@ if overlap == 1
             integration_zonesscalarpath = '/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/ABCD_number_of_nets/ABCD_GRP1_overlap_number_of_nets_avg_number_of_network_2.2_thres_sz60_clusters.dscalar.nii';
             intcii = ciftiopen(integration_zonesscalarpath,wb_command);
             intmask = intcii.cdata;
+            if surface_only ==1
+                intmask=intmask(1:size(scalar_array),:) ;  %reduce to 59412 greyordinates.
+            else
+            end
+            
             intmask = intmask>0; %because this was built from a label file, binarize to make a mask.
+            
             intscalar=scalar_array(intmask,:);
+            
             integration_zone_number_of_nets=mean(intscalar,1);
             integration_zone_number_of_nets = integration_zone_number_of_nets';
             save([outputname '.mat'],'whole_brain_number_of_nets','integration_zone_number_of_nets');

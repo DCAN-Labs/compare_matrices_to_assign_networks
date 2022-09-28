@@ -1,4 +1,4 @@
-function [all_nets_mat, all_nets_vec] = group_subcortical_network_proportions(dscalar_conc,outname)
+function [all_nets_mat, all_nets_vec] = group_subcortical_network_proportions(dscalar_conc,outname,surface_only)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -6,7 +6,7 @@ addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/U
 
 %reference_dscalar = '/mnt/rose/shared/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
-reference_dscalar = '/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii';
+reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii';
 
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.dscalar.nii';
 %reference_dscalar = 'rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
@@ -52,9 +52,13 @@ wb_command=settings.path_wb_c; %path to wb_command
 end
 
 
-
-all_nets_mat = zeros(size(subject_list,1), 21, 14);
-all_nets_vec = zeros(size(subject_list,1), 21*14);
+if surface_only ==0
+    all_nets_mat = zeros(size(subject_list,1), 21, 14);
+    all_nets_vec = zeros(size(subject_list,1), 21*14);
+else
+    all_nets_mat = zeros(size(subject_list,1), 2, 14); %cortex only (i.e. only get proportions for left and right.)
+    all_nets_vec = zeros(size(subject_list,1), 2*14);
+end
 
 for sub = 1: size(subject_list,1)
     disp(sub);
