@@ -59,7 +59,8 @@ for i = 1:size(network_surfarea,1)
     this_subs_surface_areas(:,5)  = [];
     
     for j = 1:size(this_subs_surface_areas,2)
-                        total_length_this_sub = network_lengths_for_each_sub{i, 1}{j, 4}+ network_lengths_for_each_sub{i, 2}{j, 4};
+                        try
+                            total_length_this_sub = network_lengths_for_each_sub{i, 1}{j, 4}+ network_lengths_for_each_sub{i, 2}{j, 4};
 
         switch method
             
@@ -74,6 +75,10 @@ for i = 1:size(network_surfarea,1)
             otherwise
                 disp('method is not supported')
         end
+                        catch
+                            disp(['Something went wrong with subject /n', num2str(i)])
+                            scores(i,j) = NaN;
+                        end
     end
 end
 if run_get_pairwise_stats ==1

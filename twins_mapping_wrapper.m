@@ -429,7 +429,7 @@ for i = 1:length(dtseries_file) %number of subjects
                     % Get concensus across densities and clean up little bits.
                     [merged_infomap_dtseries_vector] = clean_dscalars_by_size([cifti_output_folder filesep subID '_merged_tasks_infomap_densities.dtseries.nii'],[],[],[],[],30,[],1,1,0);
                 else
-                    MergeTimeSeries('TimeSeriesFiles',raw_info_ties_dtseries,'OutputFile',[cifti_output_folder filesep subID '_infomap_densities.dtseries.nii'])
+                    MergeTimeSeries('TimeSeriesFiles',raw_info_ties_dtseries,'OutputFile',[cifti_output_folder filesep subID '_infomap_densities.dtseries.nii'],'wb_command','/home/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command')
                     disp('***CALCULATING CONSENSUS FROM TIE DENISTIES AND CLEANING UP TINY PIECES****')
                     % Get concensus across densities and clean up little bits.
                     [merged_infomap_dtseries_vector] = clean_dscalars_by_size([cifti_output_folder filesep subID '_infomap_densities.dtseries.nii'],[],[],[],[],30,[],1,1,0);

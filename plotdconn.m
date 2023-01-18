@@ -1,4 +1,4 @@
-function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap)
+function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap,exclude_zero_networks,save_non_zeromatrix,only_save_abs_diff_dconn)
 
 %R.Hermosillo 08/20/2019
 
@@ -16,6 +16,13 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 %7) if you want ot plot 2 dconns, set to 1.
 %8) path to dconn2
 %9) path to dscalar 2.
+%11) use_nets1  = use the same networks to sort both dconns.
+%12) net_assigns2_file = if the "use nets1" is 0, the supply the network assigns file.
+%13) caxis_scale = the color axis for the dconns.
+%14) Pos_neg_colormap  = use if you want to use a 0 equals white colormap,
+%set to 1. 0 uses color map jet.
+%15) exclude_zero_networks = to 1 if your dscalar has zeros and you want to
+%exclude those grarordinates.
 
 %net_order = [12 9 5 1 3 14 15 16 8 10 11 13 7 2];
 
@@ -55,18 +62,24 @@ elseif strcmp(net_assigns(end-10:end),'pscalar.nii')
 elseif strcmp(net_assigns(end-10:end),'dscalar.nii')
     net_assigns = ciftiopen(net_assigns,wb_command);
     assigns = net_assigns.cdata;
+elseif isnumeric(net_assigns)
+    assigns = net_assigns;
 else
+    
     error('What kind of file are you trying touse to import assignments? Use a dscalar.nii, pscalar.nii, .txt, or .csv (1 assingment per line.)')
 end
 
 
 %load dconn
 disp('Loading dconn and assignments...')
-dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);
+if isnumeric(dconn_cifti_path) ==1
+    dconn = dconn_cifti_path;
+    clear dconn_cifti_path
+else
+    dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);
+    dconn = single(dconn_cifti.cdata);
+end
 %subsample dconn
-
-dconn = single(dconn_cifti.cdata);
-
 
 
 
@@ -78,15 +91,29 @@ end
 
 clear dconn_cifti dconn
 
-[sort1,I] = sort(assigns); % get sorted indices;
-networks = unique(assigns); % get network assingments from template.
 disp('Sorting dconn...')
-sorted_dconn1 = newdconn(I,I);
-clear dconn newdconn
+nonzerounsorted_assigns = assigns~=0;
+[sort1,I] = sort(assigns); % get sorted indices;
+
+if exclude_zero_networks ==1
+    greys_to_use = sort1~=0;
+    networks = unique(nonzeros(assigns));
+    adjI = I(greys_to_use);
+    I = adjI;
+    sorted_dconn1 = newdconn(I,I);
+else
+    networks = unique(assigns); % get network assingments from template.
+    sorted_dconn1 = newdconn(I,I);
+end
+clear dconn
 
 if plot2dconns ==1
+    if isnumeric(dconn_cifti_path2) ==0
     dconn_cifti2=ciftiopen(dconn_cifti_path2,wb_command);
     dconn2 = single(dconn_cifti2.cdata);
+    else
+      dconn2 = dconn_cifti_path2; 
+    end
     clear dconn_cifti2
     if apply_Zscore_dconn ==1
         newdconn2 = Zscore_dconn_var(dconn2);
@@ -102,7 +129,7 @@ if plot2dconns ==1
         %networks2 = unique(assigns2); % get network assingments from template.
         disp('Sorting dconn...')
         sorted_dconn2 = newdconn2(I,I);
-        clear dconn2 newdconn2
+        clear dconn2
     end
 end
 
@@ -112,17 +139,29 @@ set(gcf, 'color','w')
 if plot2dconns ==1
     ax1 = subplot(1,3,1);
 end
+if use_showM ==1
+    
+else
 if downsample_dconn == 1
-    assigns_small = assigns(1:DS_factor:end);
+    if exclude_zero_networks ==1
+        assigns_sonly_assigned= assigns(find(assigns~=0));
+        assigns_small = assigns_sonly_assigned(1:DS_factor:end);
+        
+    else
+        assigns_small = assigns(1:DS_factor:end);
+    end
+    
     [sort1small,~] = sort(assigns_small);
+    
     sorted_small1 = sorted_dconn1(1:DS_factor:end,1:DS_factor:end);
     imagesc(sorted_small1); hold on;
     insert_net_lines(networks,sort1small,1);
+    
 else
     imagesc(sorted_dconn1); hold on;
     insert_net_lines(networks,sort1,1)
 end
-
+end
 set(gca,'FontSize',9)
 set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
 %xlim([0 1]);ylim([0 1]);
@@ -142,14 +181,21 @@ if plot2dconns ==1
     ax2=subplot(1,3,2);
     
     if downsample_dconn == 1
-        
         sorted_small2 = sorted_dconn2(1:DS_factor:end,1:DS_factor:end);
         imagesc(sorted_small2); hold on;
         if use_nets1 ==0
-            assigns_small2 = assigns2(1:DS_factor:end);
+            if exclude_zero_networks ==1
+                assigns_sonly_assigned= assigns2(find(assigns2~=0));
+                assigns_small2 = assigns_sonly_assigned(1:DS_factor:end);
+                
+            else
+                assigns_small2 = assigns2(1:DS_factor:end);
+            end
+            
             [sort2small,~] = sort(assigns_small2);
             insert_net_lines(networks,sort2small,1);
         else
+            
             insert_net_lines(networks,sort1small,1);
         end
         
@@ -184,11 +230,33 @@ if plot2dconns ==1
     load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
     colormap(ax3,pos_neg_cmap);
     colorbar;
-    caxis(caxis_scale)
+    caxis([-0.5 0.5])
     f.Position = [50 100 1300 400];
+     disp('saving image...')
     print([image_name '.png'], '-dpng', '-r600')
 else
+        disp('saving image...')
     print([image_name '.png'], '-dpng', '-r600')
+end
+
+if save_non_zeromatrix ==1
+    disp('saving...')
+
+    if only_save_abs_diff_dconn ==1
+        if exclude_zero_networks ==1
+        disp('saving smaller matrix that excludes the zero network assignments (unsorted)...')
+        diff_matrix =newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns);
+        else
+        end
+        diff_matrix = abs(diff_matrix);
+        save([image_name '_ABS_Diff_dconn1.mat'],'diff_matrix','assigns_sonly_assigned','-v7.3')
+    else
+        save([image_name '_dconn1.mat'],'sorted_dconn1','assigns_sonly_assigned','-v7.3')
+        if plot2dconns ==1
+            save([image_name '_dconn1.mat'],'sorted_dconn2','assigns_sonly_assigned','-v7.3')
+        end
+    end
+else
 end
 disp('Done plotting.')
 end

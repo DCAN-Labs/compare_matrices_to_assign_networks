@@ -72,7 +72,7 @@ if ~exist('minsize','var') || isempty(minsize)
 end
 
 if ~exist('groupnetworksfile','var') || isempty(groupnetworksfile)
-    groupnetworksfile = settings.path{10};
+    groupnetworksfile = settings.path{6}; %Networks_template_cleaned.dscalar.nii
     %groupnetworksfile = '/home/data/atlases/Networks_template.dscalar.nii';
 end
 
@@ -90,23 +90,22 @@ for i=1:length(dscalarwithassignments)
     
     cifti_data = ft_read_cifti_mod(regularized_ciftifile); assigns = cifti_data.data;
 
-    assigns(assigns<0) = 0;
-    
-    assigns(isnan(assigns)) = 0;
+    assigns(assigns<0) = 0; %Assignments that are eqaul to -1 (unassigned), set the to 0.
+    assigns(isnan(assigns)) = 0; % Set nans to 0.
     
     if make_consensus == 1
         groupfile = ft_read_cifti_mod(groupnetworksfile);
         groupdata = groupfile.data;
-        ncortverts = nnz(groupfile.brainstructure==1) + nnz(groupfile.brainstructure==2);
+        ncortverts = nnz(groupfile.brainstructure==1) + nnz(groupfile.brainstructure==2); %grab the cortical vetices of the template for jaccard.
         groupdata = groupdata(1:ncortverts,1);
         
         potential_colors = [1 2 10 9 3 5 11 16 15 7 8 12 14 13];%[1 2 10 9 3 5 6 11 16 15 7 8 17 12 4 14 13];
-        newcolors = setdiff(all_color_values,potential_colors);
+        newcolors = setdiff(all_color_values,potential_colors); % these are the potential network assignsment for "non-canonical " networks.
         
         unassigned_networks = cell(1,size(assigns,2));
         
-        all_recolored = zeros(size(assigns));
-        for c = 1:size(all_recolored,2)
+        all_recolored = zeros(size(assigns)); % preallocate columns
+        for c = 1:size(all_recolored,2) 
             col_consensusmap = assigns(:,c);
             
             

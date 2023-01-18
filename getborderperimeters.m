@@ -27,7 +27,7 @@ function [network_lengths_for_each_sub] = getborderperimeters(dlabel_conc,L_surf
 %compactness. Set to 0 you just want the border perimeters.
 
 %7) Varagin1 = Path to surface areas.  This can be a .mat file.  It is assumed that the .mat
-%file is the same length and the same order as the conc file.
+%file is the same length and the same order as the dlabel conc file.
 
 %Outputs are p x 2 a cell array where p is the number of subjects and the
 %first column is the left hemiphere and the right is the second

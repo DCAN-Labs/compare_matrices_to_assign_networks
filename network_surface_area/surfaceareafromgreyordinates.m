@@ -1,4 +1,4 @@
-function [all_areas_vec, network_surfarea, network_volume ] = surfaceareafromgreyordinates(Lmidthicknessfile,Rmidthicknessfile,output_only_greySA,dscalarwithassignments,outputname,output_folder,cleanupintermediatefiles,data_is_surface_only)
+function [all_areas_vec, network_surfarea, network_volume ] = surfaceareafromgreyordinates(Lmidthicknessfile_path,Rmidthicknessfile_path,output_only_greySA,dscalarwithassignments_path,outputname,output_folder,cleanupintermediatefiles,data_is_surface_only)
 
 %This wrapper create a surface area dscalar
 
@@ -26,12 +26,12 @@ wb_command=settings.path_wb_c; %path to wb_command
 
 %Lmidthicknessfile,Rmidthicknessfile,dscalarwithassignments
 
-conc = strsplit(dscalarwithassignments, '.');
+conc = strsplit(dscalarwithassignments_path, '.');
 conc = char(conc(end));
 if strcmp('conc',conc) == 1
-    dscalarwithassignments = importdata(dscalarwithassignments);
+    dscalarwithassignments = importdata(dscalarwithassignments_path);
 else
-    dscalarwithassignments = {dscalarwithassignments};
+    dscalarwithassignments = {dscalarwithassignments_path};
 end
 tic
 %check to make sure that surface files exist
@@ -49,12 +49,12 @@ tic
 disp('All series files exist continuing ...')
 
 
-conc = strsplit(Lmidthicknessfile, '.');
+conc = strsplit(Lmidthicknessfile_path, '.');
 conc = char(conc(end));
 if strcmp('conc',conc) == 1
-    Lmidthicknessfile = importdata(Lmidthicknessfile);
+    Lmidthicknessfile = importdata(Lmidthicknessfile_path);
 else
-    Lmidthicknessfile = {Lmidthicknessfile};
+    Lmidthicknessfile = {Lmidthicknessfile_path};
 end
 % check to make sure that surface files exist
 % for i = 1:length(Lmidthicknessfile)
@@ -71,12 +71,12 @@ end
 disp('All series files exist continuing ...')
 
 
-conc = strsplit(Rmidthicknessfile, '.');
+conc = strsplit(Rmidthicknessfile_path, '.');
 conc = char(conc(end));
 if strcmp('conc',conc) == 1
-    Rmidthicknessfile = importdata(Rmidthicknessfile);
+    Rmidthicknessfile = importdata(Rmidthicknessfile_path);
 else
-    Rmidthicknessfile = {Rmidthicknessfile};
+    Rmidthicknessfile = {Rmidthicknessfile_path};
 end
 % for i = 1:length(Rmidthicknessfile)
 %     if rem(i,100)==0
@@ -250,7 +250,7 @@ end
 
 if output_only_greySA  ==1
     disp('saving volumes and surface areas');
-    save( [output_folder '/' outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea')
+    save( [output_folder '/' outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Rmidthicknessfile','Rmidthicknessfile')
 else
 end
 

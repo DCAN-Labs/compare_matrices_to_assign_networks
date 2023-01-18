@@ -1,22 +1,53 @@
 function plot_surface_mesh
-close all
+%close all
 
-num_electrodes = 4;
 
-test_vertex(1,1) = 7998;
-electrode_array_orient(1,1) = 70; % in degrees 
-test_vertex(2,1) = 27078;
-electrode_array_orient(2,1) = 180; 
-test_vertex(3,1) = 39629;
-electrode_array_orient(3,1) = 0; 
-test_vertex(4,1) = 4;
-electrode_array_orient(4,1) = 230; 
+%% Settings
+% outputname_for_cifti_file = 'MSC01_electrode_mappings_BA46';
+% load('C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\MSC01_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz')
+% Lstl='C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\rh.MSC01.L.pial.32k_fs_LR.surf.stl';
+% Rstl='C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\rh.MSC01.R.pial.32k_fs_LR.surf.stl';
+% path_sulc_dscalar='C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\MNINonLinear_fsaverage_LR32K\MSC01.sulc.32k_fs_LR.dscalar.nii';
+% network_dscalar='C:\Users\hermosir\Documents\test_ciftis\MSC_to_DCAN\MSC01_half1_to_ADHD315Z_Zscored_recolored.dscalar.nii';
+
+outputname_for_cifti_file = 'PCS0001_electrode_mappings_BA46';
+%ABCD files
+% load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\sub-PCS0001_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz')
+% Lstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\T1w-fsaverage_LR32k-PCS0001.L.pial.32k_fs_LR.surf.stl';
+% Rstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\T1w-fsaverage_LR32k-PCS0001.R.pial.32k_fs_LR.surf.stl';
+path_sulc_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS0001.sulc.32k_fs_LR.dscalar.nii';
+
+%xcp
+load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\sub-PCS0001_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz');
+Lstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\resampled_sub-PCS0001_ses-01_hemi-L_pial.surf.stl';
+Rstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\resampled_sub-PCS0001_ses-01_hemi-R_pial.surf.stl';
+
+network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\TM_networks\ses-01to02_with_ses-01_bad_runs_excluded_smoothed2.55_withoutlier_detection\sub-PCS0001_ses-01to02_task-restMENORDICrmnoisevols_space-fsLR_den-91k_desc-denoisedDilated30mm_bold_SMOOTHED_2.55_bad_runs_excluded_Zscored_recolored.dscalar.nii';
+
+
+
+num_stim_paddels = 4;
+
+%ctscan_placements = [25995 27459 54809 56935]; %[ left medial; left lateral; right medial right lateral];
+%ctscan_placements = [26100 26885 55673 46458]; rough estimates
+ctscan_placements = [26323 27379 57246 55936]; %intial 46 bilateral BA9 placements
+
+ctscan_rotations = [-20 -40 80 -45];
+test_vertex(1,1) = ctscan_placements(1);
+
+electrode_array_orient(1,1) = ctscan_rotations(1); %70; % in degrees
+test_vertex(2,1) = ctscan_placements(2);
+electrode_array_orient(2,1) = ctscan_rotations(2); %180
+test_vertex(3,1) = ctscan_placements(3);
+electrode_array_orient(3,1) = ctscan_rotations(3); %0
+test_vertex(4,1) = ctscan_placements(4);
+electrode_array_orient(4,1) = ctscan_rotations(4); %230
 
 %test_vertex = 7998; %try 14533 27078 28155 %39629-Rhemi BA10-28481 BA46:27078:orient 180
 %electrode_array_orient = 70; % rotation in degrees
 
-r=14;
-sulc_depth_threshold =0.35; %larger numbers are more superficial. Recommend to set to 0.25 or greater
+r=14; % paddle lenth is 28mm, so we set the radius of the sphere to be half be half that length.
+sulc_depth_threshold =0.25; %typically use 0.35 %larger numbers are more superficial. Recommend to set to 0.15 or greater
 planar_radius=14;
 plot_l_mesh =1;
 plot_r_mesh =1;
@@ -27,10 +58,9 @@ num_electrode_contacts = 8;
 electrode_sphere_edge_color = 'none';
 electrode_sphere_face_color = [0.7 0.7 0.7];
 electrode_sphere_facealpha = 0.2;
-outputname_for_cifti_file = 'MSC01_electrode_mappings_BA46';
 run_locally =1;
 
-
+%% Add dependecies
 %add cifti paths
 if run_locally ==1
     %Some hardcodes:
@@ -76,34 +106,33 @@ netRGBs = [
     60 60 251
     200 200 200]/255;
 
-load('C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\MSC01_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz')
 xyz = allxyz(:,2:4);
 
- figure()
+figure()
 %subplot(1,3,1)
- % scatter3(xyz(1:59412,1),xyz(1:59412,2),xyz(1:59412,3),0.5,'k')
+% scatter3(xyz(1:59412,1),xyz(1:59412,2),xyz(1:59412,3),0.5,'k')
 % set(gca, 'XLim',[-120 100], 'YLim', [-120 100],'ZLim',[-120 100])
 % hold on
 
 if plot_l_mesh ==1
-disp('Importing brain geotric models...')
-model = createpde;
-gm =importGeometry(model,'C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\rh.MSC01.L.pial.32k_fs_LR.surf.stl');
-pdegplot(gm)
-hold on
+    disp('Importing brain geometric models...')
+    model = createpde;
+    gm =importGeometry(model,Lstl);
+    pdegplot(gm)
+    hold on
 end
 if plot_r_mesh ==1
-model2 = createpde;
-gm2 =importGeometry(model2,'C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\rh.MSC01.R.pial.32k_fs_LR.surf.stl');
-pdegplot(gm2)
-hold on
+    model2 = createpde;
+    gm2 =importGeometry(model2,Rstl);
+    pdegplot(gm2)
+    hold on
 end
-cii = ft_read_cifti_mod('C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\MNINonLinear_fsaverage_LR32K\MSC01.sulc.32k_fs_LR.dscalar.nii');
-sulc_depth_extra =cii.data;
+sulc_cii = ft_read_cifti_mod(path_sulc_dscalar);
+sulc_depth_extra =sulc_cii.data;
 
 %sulcal depth information do not contain greyordinate to
 %vertex maping.
-ciimappingscalar = ft_read_cifti_mod('C:\Users\hermosir\Documents\test_ciftis\MSC_to_DCAN\MSC01_half1_to_ADHD315Z_Zscored_recolored.dscalar.nii');
+ciimappingscalar = ft_read_cifti_mod(network_dscalar);
 mapping_idx = ciimappingscalar.brainstructure ==1 | ciimappingscalar.brainstructure ==2;
 TM_networks_full = ciimappingscalar.data;
 sulc_depth = sulc_depth_extra(mapping_idx);
@@ -132,7 +161,7 @@ set(gca,'Color','k')
 
 %% plot sphere
 
-for elec = 1:num_electrodes
+for elec = 1:num_stim_paddels
     %r=20;
     %define a 20x20 sphere.(20 segments from pole to pole and
     %20 segments around the equator).
@@ -146,26 +175,30 @@ for elec = 1:num_electrodes
     y=Y*r + Y0;
     z=Z*r + Z0;
     lightgrey=0.2*[1 1 1];
+    
+    %Plot sphere where the the diameter of the length of the array  
     surface(x,y,z,'FaceColor','none','EdgeColor',lightgrey)
+    
     hold on
     
     gyri_points = xyz_surface_only(sulcal_indx,1:3);
-    gyri_points_orig_mappings = find(sulcal_indx ==1);
+    gyri_points_orig_mappings{elec,1} = find(sulcal_indx ==1);
     
     disp('calculating between vertices distances...')
     for i = 1:size(gyri_points,1)
         distance_vec(i,1) = sqrt((sphere_all(1) - gyri_points(i,1))^2 + (sphere_all(2) - gyri_points(i,2))^2 + (sphere_all(3) - gyri_points(i,3))^2 );
     end
-        all_distance_vec{1,elec} = distance_vec;
+    all_distance_vec{1,elec} = distance_vec;
 end
 
 figure()
 %subplot(1,3,2)
 grey_surfacepoints = ones(size(xyz_surface_only,1),3)*0.3;
 scatter3(xyz_surface_only(sulcal_indx,1),xyz_surface_only(sulcal_indx,2),xyz_surface_only(sulcal_indx,3),6, grey_surfacepoints(sulcal_indx,1:3),'filled')
-set(gca,'Color','k'); hold on
+%Background color of target plot
+set(gca,'Color','w'); hold on
 
-for elec = 1:num_electrodes
+for elec = 1:num_stim_paddels
     distance_vec = cell2mat(all_distance_vec(1,elec));
     all_within_sphere_idx{elec,1} = find(distance_vec<r); %find the grayordinates that are within the sphere radius.
     within_sphere_idx = find(distance_vec<r);
@@ -177,11 +210,11 @@ for elec = 1:num_electrodes
     scatter3(xyz_surface_only(test_vertex(elec,1),1),xyz_surface_only(test_vertex(elec,1),2),xyz_surface_only(test_vertex(elec,1),3),50, netcolors_persulc(test_vertex(elec,1),1:3),'filled')
     set(gca,'Color','k')
     hold on;
-
-%within_sphere_xyz(elec,1) = [gyri_points(within_sphere_idx(elec,1),1) gyri_points(within_sphere_idx(elec,1),2) gyri_points(within_sphere_idx(elec,1),3)];
-
-[planar_idxs] = find(distance_vec<planar_radius); %find the grayordinates that are within the sphere radius.
-planar_xyzs{elec} = [gyri_points(planar_idxs,1) gyri_points(planar_idxs,2) gyri_points(planar_idxs,3)];
+    
+    %within_sphere_xyz(elec,1) = [gyri_points(within_sphere_idx(elec,1),1) gyri_points(within_sphere_idx(elec,1),2) gyri_points(within_sphere_idx(elec,1),3)];
+    
+    [planar_idxs] = find(distance_vec<planar_radius); %find the grayordinates that are within the sphere radius.
+    planar_xyzs{elec} = [gyri_points(planar_idxs,1) gyri_points(planar_idxs,2) gyri_points(planar_idxs,3)];
 end
 
 axis equal
@@ -190,7 +223,7 @@ box on
 
 %% Get normal plane
 %get normals
-for elec = 1:num_electrodes
+for elec = 1:num_stim_paddels
     
     [n_2,V_2,p_2] = affine_fit(cell2mat(planar_xyzs(elec)));
     n_2_all{elec} = n_2;
@@ -246,11 +279,11 @@ for elec = 1:num_electrodes
     surf(X_reshaped,Y_reshaped,Z_reshaped, 'FaceAlpha',0,'EdgeColor',[0.7 0.7 0.7])
 end
 
-    xlabel('x');
-    ylabel('y');
-    zlabel('z');
-    axis equal
-    
+xlabel('x');
+ylabel('y');
+zlabel('z');
+axis equal
+
 %% try to plot a cube
 % edges = [7,r*2,2];  %assume array with is 28 * 7 * 2
 % %origin = [0,0,0];
@@ -270,7 +303,7 @@ end
 %   [0 1 1 0]  [0 0 1 1]  [0 0 0 0] ; ...
 %   [0 1 1 0]  [0 0 1 1]  [1 1 1 1]   ...
 %   };
-% 
+%
 % XYZ = mat2cell(...
 %   cellfun( @(x,y,z) x*y+z , ...
 %     XYZ , ...
@@ -278,7 +311,7 @@ end
 %     repmat(mat2cell(origin,1,[1 1 1]),6,1) , ...
 %     'UniformOutput',false), ...
 %   6,[1 1 1]);
-% 
+%
 % % The origin offset has already been done, so the only the linear
 % % tranformation remains.
 % XYZ_prime = XYZ;
@@ -296,199 +329,212 @@ end
 %             XYZ_prime{1,2}{k,1} = Yprime';
 %             XYZ_prime{1,3}{k,1} = Zprime';
 %     end
-%plot electrode orientation    
+%plot electrode orientation
 %rg = cellfun(@patch,XYZ_prime{1},XYZ_prime{2},XYZ_prime{3},repmat({clr},6,1),repmat({'FaceAlpha'},6,1),repmat({alpha},6,1));
 
 %figure()
 %leed array spacing
-leed1 = polyshape([0 2.5 2.5 0],[0 0 4 4]);
-leed2 = polyshape([4.5 7 7 4.5],[3 3 7 7]);
-leed3 = polyshape([0 2.5 2.5 0],[7 7 11 11]);
-leed4 = polyshape([4.5 7 7 4.5],[10 10 14 14]);
-leed5 = polyshape([0 2.5 2.5 0],[14 14 18 18]);
-leed6 = polyshape([4.5 7 7 4.5],[17 17 21 21]);
-leed7 = polyshape([0 2.5 2.5 0],[21 21 25 25]);
-leed8 = polyshape([4.5 7 7 4.5],[24 24 28 28]);
+all_electrode_origins = cell(num_stim_paddels,1);
 
-array_center = [3.5 14]; % if the array started with the corner at (0,0) this would be the center, however, the center needs to moved to (0,0);
-lead_origin = [0,0];
+for elec = 1:num_stim_paddels
+    leed1 = polyshape([0 2.5 2.5 0],[0 0 4 4]);
+    leed2 = polyshape([4.5 7 7 4.5],[3 3 7 7]);
+    leed3 = polyshape([0 2.5 2.5 0],[7 7 11 11]);
+    leed4 = polyshape([4.5 7 7 4.5],[10 10 14 14]);
+    leed5 = polyshape([0 2.5 2.5 0],[14 14 18 18]);
+    leed6 = polyshape([4.5 7 7 4.5],[17 17 21 21]);
+    leed7 = polyshape([0 2.5 2.5 0],[21 21 25 25]);
+    leed8 = polyshape([4.5 7 7 4.5],[24 24 28 28]);
+    
+    array_center = [3.5 14]; % if the array started with the corner at (0,0) this would be the center, however, the center needs to moved to (0,0);
+    lead_origin = [0,0];
+    
+    leed1_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[0 0 4 4]-array_center(2));
+    leed2_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[3 3 7 7]-array_center(2));
+    leed3_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[7 7 11 11]-array_center(2));
+    leed4_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[10 10 14 14]-array_center(2));
+    leed5_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[14 14 18 18]-array_center(2));
+    leed6_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[17 17 21 21]-array_center(2));
+    leed7_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[21 21 25 25]-array_center(2));
+    leed8_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[24 24 28 28]-array_center(2));
+    
+    leed1prime = rotate(leed1_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed2prime = rotate(leed2_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed3prime = rotate(leed3_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed4prime = rotate(leed4_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed5prime = rotate(leed5_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed6prime = rotate(leed6_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed7prime = rotate(leed7_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    leed8prime = rotate(leed8_origin_adjusted_shape,electrode_array_orient(elec,1),lead_origin);
+    
+    leed1prime_verts = leed1prime.Vertices;
+    X1 = p_2_all{elec}(1)+ leed1prime_verts*V_2_all{elec}(1,:)';
+    Y1 = p_2_all{elec}(2)+ leed1prime_verts*V_2_all{elec}(2,:)';
+    Z1 = p_2_all{elec}(3)+ leed1prime_verts*V_2_all{elec}(3,:)';
+    % get mean for electrode sphere
+    X1_rotated_origin = mean(X1); all_electrode_origins{elec}(1,1) = X1_rotated_origin;
+    Y1_rotated_origin = mean(Y1); all_electrode_origins{elec}(1,2) = Y1_rotated_origin;
+    Z1_rotated_origin = mean(Z1); all_electrode_origins{elec}(1,3) = Z1_rotated_origin;
+    
+    leed2prime_verts = leed2prime.Vertices;
+    X2 = p_2_all{elec}(1)+ leed2prime_verts*V_2_all{elec}(1,:)';
+    Y2 = p_2_all{elec}(2)+ leed2prime_verts*V_2_all{elec}(2,:)';
+    Z2 = p_2_all{elec}(3)+ leed2prime_verts*V_2_all{elec}(3,:)';
+    X2_rotated_origin = mean(X2); all_electrode_origins{elec}(2,1) = X2_rotated_origin;
+    Y2_rotated_origin = mean(Y2); all_electrode_origins{elec}(2,2) = Y2_rotated_origin;
+    Z2_rotated_origin = mean(Z2); all_electrode_origins{elec}(2,3) = Z2_rotated_origin;
+    
+    leed3prime_verts = leed3prime.Vertices;
+    X3 = p_2_all{elec}(1)+ leed3prime_verts*V_2_all{elec}(1,:)';
+    Y3 = p_2_all{elec}(2)+ leed3prime_verts*V_2_all{elec}(2,:)';
+    Z3 = p_2_all{elec}(3)+ leed3prime_verts*V_2_all{elec}(3,:)';
+    X3_rotated_origin = mean(X3); all_electrode_origins{elec}(3,1) = X3_rotated_origin;
+    Y3_rotated_origin = mean(Y3); all_electrode_origins{elec}(3,2) = Y3_rotated_origin;
+    Z3_rotated_origin = mean(Z3); all_electrode_origins{elec}(3,3) = Z3_rotated_origin;
+    
+    leed4prime_verts = leed4prime.Vertices;
+    X4 = p_2_all{elec}(1)+ leed4prime_verts*V_2_all{elec}(1,:)';
+    Y4 = p_2_all{elec}(2)+ leed4prime_verts*V_2_all{elec}(2,:)';
+    Z4 = p_2_all{elec}(3)+ leed4prime_verts*V_2_all{elec}(3,:)';
+    X4_rotated_origin = mean(X4); all_electrode_origins{elec}(4,1) = X4_rotated_origin;
+    Y4_rotated_origin = mean(Y4); all_electrode_origins{elec}(4,2) = Y4_rotated_origin;
+    Z4_rotated_origin = mean(Z4); all_electrode_origins{elec}(4,3) = Z4_rotated_origin;
+    
+    leed5prime_verts = leed5prime.Vertices;
+    X5 = p_2_all{elec}(1)+ leed5prime_verts*V_2_all{elec}(1,:)';
+    Y5 = p_2_all{elec}(2)+ leed5prime_verts*V_2_all{elec}(2,:)';
+    Z5 = p_2_all{elec}(3)+ leed5prime_verts*V_2_all{elec}(3,:)';
+    X5_rotated_origin = mean(X5); all_electrode_origins{elec}(5,1) = X5_rotated_origin;
+    Y5_rotated_origin = mean(Y5); all_electrode_origins{elec}(5,2) = Y5_rotated_origin;
+    Z5_rotated_origin = mean(Z5); all_electrode_origins{elec}(5,3) = Z5_rotated_origin;
+    
+    leed6prime_verts = leed6prime.Vertices;
+    X6 = p_2_all{elec}(1)+ leed6prime_verts*V_2_all{elec}(1,:)';
+    Y6 = p_2_all{elec}(2)+ leed6prime_verts*V_2_all{elec}(2,:)';
+    Z6 = p_2_all{elec}(3)+ leed6prime_verts*V_2_all{elec}(3,:)';
+    X6_rotated_origin = mean(X6); all_electrode_origins{elec}(6,1) = X6_rotated_origin;
+    Y6_rotated_origin = mean(Y6); all_electrode_origins{elec}(6,2) = Y6_rotated_origin;
+    Z6_rotated_origin = mean(Z6); all_electrode_origins{elec}(6,3) = Z6_rotated_origin;
+    
+    leed7prime_verts = leed7prime.Vertices;
+    X7 = p_2_all{elec}(1)+ leed7prime_verts*V_2_all{elec}(1,:)';
+    Y7 = p_2_all{elec}(2)+ leed7prime_verts*V_2_all{elec}(2,:)';
+    Z7 = p_2_all{elec}(3)+ leed7prime_verts*V_2_all{elec}(3,:)';
+    X7_rotated_origin = mean(X7); all_electrode_origins{elec}(7,1) = X7_rotated_origin;
+    Y7_rotated_origin = mean(Y7); all_electrode_origins{elec}(7,2) = Y7_rotated_origin;
+    Z7_rotated_origin = mean(Z7); all_electrode_origins{elec}(7,3) = Z7_rotated_origin;
+    
+    leed8prime_verts = leed8prime.Vertices;
+    X8 = p_2_all{elec}(1)+ leed8prime_verts*V_2_all{elec}(1,:)';
+    Y8 = p_2_all{elec}(2)+ leed8prime_verts*V_2_all{elec}(2,:)';
+    Z8 = p_2_all{elec}(3)+ leed8prime_verts*V_2_all{elec}(3,:)';
+    X8_rotated_origin = mean(X8); all_electrode_origins{elec}(8,1) = X8_rotated_origin;
+    Y8_rotated_origin = mean(Y8); all_electrode_origins{elec}(8,2) = Y8_rotated_origin;
+    Z8_rotated_origin = mean(Z8); all_electrode_origins{elec}(8,3) = Z8_rotated_origin;
+    
+    fill3(X1,Y1,Z1,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X2,Y2,Z2,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X3,Y3,Z3,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X4,Y4,Z4,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X5,Y5,Z5,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X6,Y6,Z6,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X7,Y7,Z7,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    fill3(X8,Y8,Z8,[0.9 0.9 0.9],'FaceAlpha',0.5)
+    %A =plotcube(X,Y,Z);
+    
+    scatter3(X1_rotated_origin,Y1_rotated_origin,Z1_rotated_origin,4,'w','filled')
+    scatter3(X2_rotated_origin,Y2_rotated_origin,Z2_rotated_origin,4,'w','filled')
+    scatter3(X3_rotated_origin,Y3_rotated_origin,Z3_rotated_origin,4,'w','filled')
+    scatter3(X4_rotated_origin,Y4_rotated_origin,Z4_rotated_origin,4,'w','filled')
+    scatter3(X5_rotated_origin,Y5_rotated_origin,Z5_rotated_origin,4,'w','filled')
+    scatter3(X6_rotated_origin,Y6_rotated_origin,Z6_rotated_origin,4,'w','filled')
+    scatter3(X7_rotated_origin,Y7_rotated_origin,Z7_rotated_origin,4,'w','filled')
+    scatter3(X8_rotated_origin,Y8_rotated_origin,Z8_rotated_origin,4,'w','filled')
+    
+    %create spheres at electrodes
+    [sphere1X,sphere1Y,sphere1Z] = sphere(15);
+    sph1x=sphere1X*electrode_sphere_size + X1_rotated_origin;
+    sph1y=sphere1Y*electrode_sphere_size + Y1_rotated_origin;
+    sph1z=sphere1Z*electrode_sphere_size + Z1_rotated_origin;
+    surface(sph1x,sph1y,sph1z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    sph2x=sphere1X*electrode_sphere_size + X2_rotated_origin;
+    sph2y=sphere1Y*electrode_sphere_size + Y2_rotated_origin;
+    sph2z=sphere1Z*electrode_sphere_size + Z2_rotated_origin;
+    surface(sph2x,sph2y,sph2z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    sph3x=sphere1X*electrode_sphere_size + X3_rotated_origin;
+    sph3y=sphere1Y*electrode_sphere_size + Y3_rotated_origin;
+    sph3z=sphere1Z*electrode_sphere_size + Z3_rotated_origin;
+    surface(sph3x,sph3y,sph3z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    sph4x=sphere1X*electrode_sphere_size + X4_rotated_origin;
+    sph4y=sphere1Y*electrode_sphere_size + Y4_rotated_origin;
+    sph4z=sphere1Z*electrode_sphere_size + Z4_rotated_origin;
+    surface(sph4x,sph4y,sph4z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    sph5x=sphere1X*electrode_sphere_size + X5_rotated_origin;
+    sph5y=sphere1Y*electrode_sphere_size + Y5_rotated_origin;
+    sph5z=sphere1Z*electrode_sphere_size + Z5_rotated_origin;
+    surface(sph5x,sph5y,sph5z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    sph6x=sphere1X*electrode_sphere_size + X6_rotated_origin;
+    sph6y=sphere1Y*electrode_sphere_size + Y6_rotated_origin;
+    sph6z=sphere1Z*electrode_sphere_size + Z6_rotated_origin;
+    surface(sph6x,sph6y,sph6z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    sph7x=sphere1X*electrode_sphere_size + X7_rotated_origin;
+    sph7y=sphere1Y*electrode_sphere_size + Y7_rotated_origin;
+    sph7z=sphere1Z*electrode_sphere_size + Z7_rotated_origin;
+    surface(sph7x,sph7y,sph7z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+    [sphere1X,sphere1Y,sphere1Z] = sphere(15);
+    sph8x=sphere1X*electrode_sphere_size + X8_rotated_origin;
+    sph8y=sphere1Y*electrode_sphere_size + Y8_rotated_origin;
+    sph8z=sphere1Z*electrode_sphere_size + Z8_rotated_origin;
+    surface(sph8x,sph8y,sph8z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
+    hold on
+    
+end
 
-leed1_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[0 0 4 4]-array_center(2));
-leed2_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[3 3 7 7]-array_center(2));
-leed3_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[7 7 11 11]-array_center(2));
-leed4_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[10 10 14 14]-array_center(2));
-leed5_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[14 14 18 18]-array_center(2));
-leed6_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[17 17 21 21]-array_center(2));
-leed7_origin_adjusted_shape = polyshape([0 2.5 2.5 0]-array_center(1),[21 21 25 25]-array_center(2));
-leed8_origin_adjusted_shape = polyshape([4.5 7 7 4.5]-array_center(1),[24 24 28 28]-array_center(2));
-
-leed1prime = rotate(leed1_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed2prime = rotate(leed2_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed3prime = rotate(leed3_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed4prime = rotate(leed4_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed5prime = rotate(leed5_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed6prime = rotate(leed6_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed7prime = rotate(leed7_origin_adjusted_shape,electrode_array_orient,lead_origin);
-leed8prime = rotate(leed8_origin_adjusted_shape,electrode_array_orient,lead_origin);
-
-leed1prime_verts = leed1prime.Vertices;
-X1 = p_2(1)+ [leed1prime_verts]*V_2(1,:)'; 
-Y1 = p_2(2)+ [leed1prime_verts]*V_2(2,:)';
-Z1 = p_2(3)+ [leed1prime_verts]*V_2(3,:)';
-% get mean for electrode sphere
-X1_rotated_origin = mean(X1); all_electrode_origins(1,1) = X1_rotated_origin;
-Y1_rotated_origin = mean(Y1); all_electrode_origins(1,2) = Y1_rotated_origin;
-Z1_rotated_origin = mean(Z1); all_electrode_origins(1,3) = Z1_rotated_origin;
-
-leed2prime_verts = leed2prime.Vertices;
-X2 = p_2(1)+ [leed2prime_verts]*V_2(1,:)';
-Y2 = p_2(2)+ [leed2prime_verts]*V_2(2,:)';
-Z2 = p_2(3)+ [leed2prime_verts]*V_2(3,:)';
-X2_rotated_origin = mean(X2); all_electrode_origins(2,1) = X2_rotated_origin;
-Y2_rotated_origin = mean(Y2); all_electrode_origins(2,2) = Y2_rotated_origin;
-Z2_rotated_origin = mean(Z2); all_electrode_origins(2,3) = Z2_rotated_origin;
-
-leed3prime_verts = leed3prime.Vertices;
-X3 = p_2(1)+ [leed3prime_verts]*V_2(1,:)';
-Y3 = p_2(2)+ [leed3prime_verts]*V_2(2,:)';
-Z3 = p_2(3)+ [leed3prime_verts]*V_2(3,:)';
-X3_rotated_origin = mean(X3); all_electrode_origins(3,1) = X3_rotated_origin;
-Y3_rotated_origin = mean(Y3); all_electrode_origins(3,2) = Y3_rotated_origin;
-Z3_rotated_origin = mean(Z3); all_electrode_origins(3,3) = Z3_rotated_origin;
-
-leed4prime_verts = leed4prime.Vertices;
-X4 = p_2(1)+ [leed4prime_verts]*V_2(1,:)';
-Y4 = p_2(2)+ [leed4prime_verts]*V_2(2,:)';
-Z4 = p_2(3)+ [leed4prime_verts]*V_2(3,:)';
-X4_rotated_origin = mean(X4); all_electrode_origins(4,1) = X4_rotated_origin;
-Y4_rotated_origin = mean(Y4); all_electrode_origins(4,2) = Y4_rotated_origin;
-Z4_rotated_origin = mean(Z4); all_electrode_origins(4,3) = Z4_rotated_origin;
-
-leed5prime_verts = leed5prime.Vertices;
-X5 = p_2(1)+ [leed5prime_verts]*V_2(1,:)';
-Y5 = p_2(2)+ [leed5prime_verts]*V_2(2,:)';
-Z5 = p_2(3)+ [leed5prime_verts]*V_2(3,:)';
-X5_rotated_origin = mean(X5); all_electrode_origins(5,1) = X5_rotated_origin;
-Y5_rotated_origin = mean(Y5); all_electrode_origins(5,2) = Y5_rotated_origin;
-Z5_rotated_origin = mean(Z5); all_electrode_origins(5,3) = Z5_rotated_origin;
-
-leed6prime_verts = leed6prime.Vertices;
-X6 = p_2(1)+ [leed6prime_verts]*V_2(1,:)';
-Y6 = p_2(2)+ [leed6prime_verts]*V_2(2,:)';
-Z6 = p_2(3)+ [leed6prime_verts]*V_2(3,:)';
-X6_rotated_origin = mean(X6); all_electrode_origins(6,1) = X6_rotated_origin;
-Y6_rotated_origin = mean(Y6); all_electrode_origins(6,2) = Y6_rotated_origin;
-Z6_rotated_origin = mean(Z6); all_electrode_origins(6,3) = Z6_rotated_origin;
-
-leed7prime_verts = leed7prime.Vertices;
-X7 = p_2(1)+ [leed7prime_verts]*V_2(1,:)';
-Y7 = p_2(2)+ [leed7prime_verts]*V_2(2,:)';
-Z7 = p_2(3)+ [leed7prime_verts]*V_2(3,:)';
-X7_rotated_origin = mean(X7); all_electrode_origins(7,1) = X7_rotated_origin;
-Y7_rotated_origin = mean(Y7); all_electrode_origins(7,2) = Y7_rotated_origin;
-Z7_rotated_origin = mean(Z7); all_electrode_origins(7,3) = Z7_rotated_origin;
-
-leed8prime_verts = leed8prime.Vertices;
-X8 = p_2(1)+ [leed8prime_verts]*V_2(1,:)';
-Y8 = p_2(2)+ [leed8prime_verts]*V_2(2,:)';
-Z8 = p_2(3)+ [leed8prime_verts]*V_2(3,:)';
-X8_rotated_origin = mean(X8); all_electrode_origins(8,1) = X8_rotated_origin;
-Y8_rotated_origin = mean(Y8); all_electrode_origins(8,2) = Y8_rotated_origin;
-Z8_rotated_origin = mean(Z8); all_electrode_origins(8,3) = Z8_rotated_origin;
-
-fill3(X1,Y1,Z1,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X2,Y2,Z2,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X3,Y3,Z3,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X4,Y4,Z4,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X5,Y5,Z5,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X6,Y6,Z6,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X7,Y7,Z7,[0.9 0.9 0.9],'FaceAlpha',0.5)
-fill3(X8,Y8,Z8,[0.9 0.9 0.9],'FaceAlpha',0.5)
-%A =plotcube(X,Y,Z);
-
-scatter3(X1_rotated_origin,Y1_rotated_origin,Z1_rotated_origin,4,'w','filled')
-scatter3(X2_rotated_origin,Y2_rotated_origin,Z2_rotated_origin,4,'w','filled')
-scatter3(X3_rotated_origin,Y3_rotated_origin,Z3_rotated_origin,4,'w','filled')
-scatter3(X4_rotated_origin,Y4_rotated_origin,Z4_rotated_origin,4,'w','filled')
-scatter3(X5_rotated_origin,Y5_rotated_origin,Z5_rotated_origin,4,'w','filled')
-scatter3(X6_rotated_origin,Y6_rotated_origin,Z6_rotated_origin,4,'w','filled')
-scatter3(X7_rotated_origin,Y7_rotated_origin,Z7_rotated_origin,4,'w','filled')
-scatter3(X8_rotated_origin,Y8_rotated_origin,Z8_rotated_origin,4,'w','filled')
-
-%create spheres at electrodes
-[sphere1X,sphere1Y,sphere1Z] = sphere(15);
-sph1x=sphere1X*electrode_sphere_size + X1_rotated_origin;
-sph1y=sphere1Y*electrode_sphere_size + Y1_rotated_origin;
-sph1z=sphere1Z*electrode_sphere_size + Z1_rotated_origin;
-surface(sph1x,sph1y,sph1z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-sph2x=sphere1X*electrode_sphere_size + X2_rotated_origin;
-sph2y=sphere1Y*electrode_sphere_size + Y2_rotated_origin;
-sph2z=sphere1Z*electrode_sphere_size + Z2_rotated_origin;
-surface(sph2x,sph2y,sph2z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-sph3x=sphere1X*electrode_sphere_size + X3_rotated_origin;
-sph3y=sphere1Y*electrode_sphere_size + Y3_rotated_origin;
-sph3z=sphere1Z*electrode_sphere_size + Z3_rotated_origin;
-surface(sph3x,sph3y,sph3z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-sph4x=sphere1X*electrode_sphere_size + X4_rotated_origin;
-sph4y=sphere1Y*electrode_sphere_size + Y4_rotated_origin;
-sph4z=sphere1Z*electrode_sphere_size + Z4_rotated_origin;
-surface(sph4x,sph4y,sph4z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-sph5x=sphere1X*electrode_sphere_size + X5_rotated_origin;
-sph5y=sphere1Y*electrode_sphere_size + Y5_rotated_origin;
-sph5z=sphere1Z*electrode_sphere_size + Z5_rotated_origin;
-surface(sph5x,sph5y,sph5z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-sph6x=sphere1X*electrode_sphere_size + X6_rotated_origin;
-sph6y=sphere1Y*electrode_sphere_size + Y6_rotated_origin;
-sph6z=sphere1Z*electrode_sphere_size + Z6_rotated_origin;
-surface(sph6x,sph6y,sph6z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-sph7x=sphere1X*electrode_sphere_size + X7_rotated_origin;
-sph7y=sphere1Y*electrode_sphere_size + Y7_rotated_origin;
-sph7z=sphere1Z*electrode_sphere_size + Z7_rotated_origin;
-surface(sph7x,sph7y,sph7z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-[sphere1X,sphere1Y,sphere1Z] = sphere(15);
-sph8x=sphere1X*electrode_sphere_size + X8_rotated_origin;
-sph8y=sphere1Y*electrode_sphere_size + Y8_rotated_origin;
-sph8z=sphere1Z*electrode_sphere_size + Z8_rotated_origin;
-surface(sph8x,sph8y,sph8z,'FaceColor',electrode_sphere_face_color,'EdgeColor',electrode_sphere_edge_color,'FaceAlpha',electrode_sphere_facealpha)
-hold on
-
-
-for k = 1:num_electrode_contacts
-    for i = 1:size(gyri_points,1)
-        distance_vec(i,k) = sqrt((all_electrode_origins(k,1) - gyri_points(i,1))^2 + (all_electrode_origins(k,2) - gyri_points(i,2))^2 + (all_electrode_origins(k,3) - gyri_points(i,3))^2 );
+for elec = 1:num_stim_paddels
+    for k = 1:num_electrode_contacts
+        for i = 1:size(gyri_points,1)
+            distance_vec(i,k) = sqrt((all_electrode_origins{elec}(k,1) - gyri_points(i,1))^2 + (all_electrode_origins{elec}(k,2) - gyri_points(i,2))^2 + (all_electrode_origins{elec}(k,3) - gyri_points(i,3))^2 );
+        end
+        distance_vec_per_electrode{elec,1}= distance_vec;
     end
 end
 
-for k = 1:num_electrode_contacts
-    within_sphere_idx = find(distance_vec(:,k)<electrode_sphere_size);
-    within_sphere_gyralindices{k,1} = within_sphere_idx;
+clear within_sphere_idx %used earlier
+for elec = 1:num_stim_paddels
+    for k = 1:num_electrode_contacts
+        %within_sphere_idx = find(distance_vec(:,k)<electrode_sphere_size);
+        within_sphere_idx{elec,1} = find(distance_vec_per_electrode{elec,1}(:,k)<electrode_sphere_size);
+        within_sphere_gyralindices{elec,1}{k,1} = within_sphere_idx{elec,1};
+    end
 end
 
 sulcal_TM_networks = TM_networks(sulcal_indx);
 
-for k = 1:num_electrode_contacts
-    areinsphere = within_sphere_gyralindices{k,1};
+for elec = 1:num_stim_paddels
+    for k = 1:num_electrode_contacts
+        areinsphere = within_sphere_gyralindices{elec,1}{k,1};
+        electrode_nets{elec,1}{k,1} = sulcal_TM_networks(areinsphere);
+        electrode_nets_mode{elec,1}(k,1) = mode(electrode_nets{elec,1}{k,1});
+        electrode_nets_RGBcolors{elec,1}{k,1} = net_colors_surf(areinsphere,:);
+        this_net_mode_RGBcolors{elec,1}(k,1) = mode(net_colors_surf(areinsphere));
+    end
     
-    electrode_nets{k,1} = sulcal_TM_networks(areinsphere);
-    electrode_nets_mode(k,1) = mode(electrode_nets{k,1});
-    electrode_nets_RGBcolors{k,1} = net_colors_surf(areinsphere,:);
-    this_net_mode_RGBcolors(k,1) = mode(net_colors_surf(areinsphere));
 end
-%
+
 % plot(leed1prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
 % plot(leed2prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
 % plot(leed3prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
@@ -497,76 +543,111 @@ end
 % plot(leed6prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
 % plot(leed7prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
 % plot(leed8prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
-
-
 f  = figure();
-try
-    plot(leed1,'FaceColor',netRGBs(electrode_nets_mode(1,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed1,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
-
-try
-    plot(leed2,'FaceColor',netRGBs(electrode_nets_mode(2,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed2,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
-
-try
-    plot(leed3,'FaceColor',netRGBs(electrode_nets_mode(3,1),:),'FaceAlpha',1); hold on;
+for elec = 1:num_stim_paddels
     
-catch
-    plot(leed3,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    if mod(elec,2)==0 % iseven
+        tranlation_vec = [12,(elec*20)-40];
+    else %elec is odd
+        if elec ==1
+            tranlation_vec = [0,0];
+        else
+            tranlation_vec = [0,((elec+1)*20)-40];
+        end
+    end
+    
+    this_elec_lead1 = translate(leed1,tranlation_vec);
+    this_elec_lead2 = translate(leed2,tranlation_vec);
+    this_elec_lead3 = translate(leed3,tranlation_vec);
+    this_elec_lead4 = translate(leed4,tranlation_vec);
+    this_elec_lead5 = translate(leed5,tranlation_vec);
+    this_elec_lead6 = translate(leed6,tranlation_vec);
+    this_elec_lead7 = translate(leed7,tranlation_vec);
+    this_elec_lead8 = translate(leed8,tranlation_vec);
+    
+    
+    try
+        plot(this_elec_lead1,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(1,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead1,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead2,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(2,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead2,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead3,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(3,1),:),'FaceAlpha',1); hold on;
+        
+    catch
+        plot(this_elec_lead3,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead4,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(4,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead4,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead5,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(5,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead5,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead6,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(6,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead6,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead7,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(7,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead7,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    try
+        plot(this_elec_lead8,'FaceColor',netRGBs(electrode_nets_mode{elec,1}(8,1),:),'FaceAlpha',1); hold on;
+    catch
+        plot(this_elec_lead8,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
+    end
+    
+    if mod(elec,2)==0
+        text_location_x = ((this_elec_lead2.Vertices(4,1) - this_elec_lead1.Vertices(1,1))/2) + 7;
+    else
+        text_location_x = ((this_elec_lead2.Vertices(4,1) - this_elec_lead1.Vertices(1,1))/2) -4;
+    end
+    text_location_y = this_elec_lead1.Vertices(1,2)-5;
+    
+    text(text_location_x,text_location_y,['Array ' num2str(elec)])
+    
 end
 
-try
-    plot(leed4,'FaceColor',netRGBs(electrode_nets_mode(4,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed4,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
-
-try
-    plot(leed5,'FaceColor',netRGBs(electrode_nets_mode(5,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed5,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
-
-try
-    plot(leed6,'FaceColor',netRGBs(electrode_nets_mode(6,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed6,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
-
-try
-    plot(leed7,'FaceColor',netRGBs(electrode_nets_mode(7,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed7,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
-
-try
-    plot(leed8,'FaceColor',netRGBs(electrode_nets_mode(8,1),:),'FaceAlpha',1); hold on;
-catch
-    plot(leed8,'FaceColor',[0.7 0.7 0.7],'FaceAlpha',1); hold on;
-end
 
 axis equal
-xlim([-2 9])
-ylim([-2 30])
-set(gcf,'Position',[1000 100 100 400]);
+xlim([-5 (max(tranlation_vec(1)+12))]);
+ylim([-10 (max(tranlation_vec(2)+30))]);
+set(gcf,'Position',[1000 100 150 450]);
+set(gca,'visible','off');
 
-export_dscalar = zeros(size(TM_networks_full,1),1);
-gyral_networks = TM_networks_full(gyri_points_orig_mappings);
-
-%remap the networks to the orginal grayordinate indices.
-for m = 1:num_electrode_contacts
-this_electrodes_sulc_indxs = within_sphere_gyralindices{m};
-this_electrodes_greymappings = gyri_points_orig_mappings(this_electrodes_sulc_indxs);
-export_dscalar(this_electrodes_greymappings) = gyral_networks(this_electrodes_sulc_indxs);
+ %% remap the networks to the orginal grayordinate indices.
+for elec = 1:num_stim_paddels
+    export_dscalar = zeros(size(TM_networks_full,1),1);
+    gyral_networks = TM_networks_full(gyri_points_orig_mappings{elec,1});
+    
+    for m = 1:num_electrode_contacts
+        this_electrodes_sulc_indxs = within_sphere_gyralindices{elec,1}{m};
+        this_electrodes_greymappings = gyri_points_orig_mappings{elec,1}(this_electrodes_sulc_indxs);
+        export_dscalar(this_electrodes_greymappings) = gyral_networks(this_electrodes_sulc_indxs);
+    end
+    
+    saving_Cii = ciftiopen('C:\Users\hermosir\Documents\test_ciftis\MSC_to_DCAN\MSC01_half1_to_ADHD315Z_Zscored_recolored.dscalar.nii',wb_command);
+    saving_Cii.cdata = export_dscalar;
+    ciftisave(saving_Cii,[outputname_for_cifti_file '_array' num2str(elec) '.dscalar.nii'],wb_command);
 end
-
-saving_Cii = ciftiopen('C:\Users\hermosir\Documents\test_ciftis\MSC_to_DCAN\MSC01_half1_to_ADHD315Z_Zscored_recolored.dscalar.nii',wb_command);
-saving_Cii.cdata = export_dscalar;
-ciftisave(saving_Cii,[outputname_for_cifti_file '.dscalar.nii'],wb_command);
 
 
 % r = cellfun(@patch,XYZ{1},XYZ{2},XYZ{3},...
@@ -574,7 +655,7 @@ ciftisave(saving_Cii,[outputname_for_cifti_file '.dscalar.nii'],wb_command);
 %   repmat({'FaceAlpha'},6,1),...
 %   repmat({alpha},6,1)...
 %   );
-    
+
 % model = createpde;
 % gm =importGeometry(model,'C:\Users\hermosir\Downloads\lamitrode44C_v1.stl');
 % [F] = stlread('C:\Users\hermosir\Downloads\lamitrode44C_v1.stl');
@@ -582,7 +663,7 @@ ciftisave(saving_Cii,[outputname_for_cifti_file '.dscalar.nii'],wb_command);
 % patch(F.Points(:,1),F.Points(:,2),F.Points(:,3),'FaceColor',[0.8 0.8 1])
 % translate(g,10);
 
-% 
+%
 % figure()
 % drawarrayplot(modes) %modes should be 2 by 4 array with each network assignment in each array.
 

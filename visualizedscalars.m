@@ -1,11 +1,16 @@
-function [large_scalar_array,whole_brain_number_of_nets,integration_zone_number_of_nets] = visualizedscalars(dscalarswithassignments,outputname,output_map_type, plot_results,surface_only)
+function [large_scalar_array,whole_brain_number_of_nets,integration_zone_number_of_nets] = visualizedscalars(dscalarswithassignments,outputname,output_map_type, plot_results,surface_only,if_mode_which_network_number)
 
 %This code loads in a conc of dcalars to visualize them for all subjects.
 % It also can calculates the probability of a network assingment from the
 % list of subjects that you've provided.
 
-% dscalar_with_assingment = a .conc file of all your subject's dscalars (1 path per row).
-% Save  percentages = will save a file (dscalar for each network).
+% inputs are:
+% dscalarswithassignments= path(s) to dscalat with assignmnets. (i.e. a .conc file of all your subject's dscalars (1 path per row))
+% outputname= the output save name for the cifti and .mat file a full path is recommended. Do not include the file extension.
+% output_map_type=  case 'calc_percentage', 'number_of_networks','calc_probability', 'calc_mode'
+% plot_results. Set to 1 to plot results.
+% surface_only. Set to 1 if your cifti has no subcortical data;
+% if_mode_which_network_number.  Provide a numer (e.g. 1= Default mode) to build a mode map of only the default mode network;
 
 %Visualization Paremeters:
 %Downsample_scalar = if true, the dscalar with be down sampled (sampled
@@ -50,14 +55,18 @@ switch output_map_type
         calc_percentage =0;
         number_of_networks =0;
         calc_probability = 1;
-
-     case 'calc_mode'
+        
+    case 'calc_mode'
         
         calc_percentage =0;
         number_of_networks =0;
         calc_probability = 1;
         calc_mode =1;
         
+        if isnumeric(if_mode_which_netork_number) ==1 && if_mode_which_netork_number>0 ==1
+            mode_network_number=if_mode_which_netork_number;
+            
+        end
     otherwise
         disp('output map type not supported. check your inputs.')
 end
@@ -86,7 +95,7 @@ tic
 whole_brain_number_of_nets = [];
 integration_zone_number_of_nets =[];
 %check to make sure that surface files exist
-found_files_total=0; missing_files_total =0;% make a "found files counter" 
+found_files_total=0; missing_files_total =0;% make a "found files counter"
 for i = 1:length(dscalarswithassignments)
     if rem(i,100)==0
         disp([' Validating file existence ' num2str(i)]);toc;
@@ -146,7 +155,7 @@ warning('on')
 
 
 
-%use the first 
+%use the first
 disp('Using the first file to infer the number of greyordinates.')
 scalar_temp = ciftiopen(dscalarswithassignments{1},wb_command);
 grey_size=size(scalar_temp.cdata,1);
@@ -164,7 +173,7 @@ switch grey_size
         disp('Number of greyordinates is 59412.')
         %surface_only =1;
     otherwise
-        disp('Number of greyordinates is neither 91282 nor 59412.  You may run into saving issues...')    
+        disp('Number of greyordinates is neither 91282 nor 59412.  You may run into saving issues...')
         surface_only =0;
 end
 
@@ -175,7 +184,7 @@ else
 end
 
 for i=1:length(dscalarswithassignments)
-%for i=1:5 % for debugging
+    %for i=1:5 % for debugging
     disp(i)
     scalar_temp = ciftiopen(dscalarswithassignments{i},wb_command);
     scalar=scalar_temp.cdata;
@@ -188,11 +197,11 @@ for i=1:length(dscalarswithassignments)
             scalar_array(:,i,:) =scalar; %use scalar name despite it being a matrix.
         elseif calc_probability == 1
             scalar_array(:,i,:) =scalar; %use scalar name despite it being a matrix.
-        elseif  number_of_networks ==1
+        elseif number_of_networks ==1
             islabeled = scalar ~=0;
             scalar_array(:,i) = sum(islabeled,2);
         elseif calc_mode ==1
-           scalar_array(:,i,:) =scalar; %use scalar name despite it being a matrix.
+            scalar_array(:,i,:) =scalar; %use scalar name despite it being a matrix.
         end
     else
         scalar_array(:,i) = scalar;
@@ -200,24 +209,24 @@ for i=1:length(dscalarswithassignments)
     
 end
 if check_for_nets_greater_than_16 ==1
-%check for values greater than 16.
-for i=1:length(dscalarswithassignments)
-    if (overlap ==1 && calc_percentage == 1) || (overlap ==1 && calc_probability == 1)
-        for j=1:length(network_names)
-            isgreaterthan16 = scalar_array(:,i,j) > 16;
+    %check for values greater than 16.
+    for i=1:length(dscalarswithassignments)
+        if (overlap ==1 && calc_percentage == 1) || (overlap ==1 && calc_probability == 1)
+            for j=1:length(network_names)
+                isgreaterthan16 = scalar_array(:,i,j) > 16;
+                if sum(isgreaterthan16) ~= 0
+                    disp([dscalarswithassignments{i}])
+                else
+                end
+            end
+        else
+            isgreaterthan16 = scalar_array(:,i) > 16;
             if sum(isgreaterthan16) ~= 0
                 disp([dscalarswithassignments{i}])
             else
             end
         end
-    else
-        isgreaterthan16 = scalar_array(:,i) > 16;
-        if sum(isgreaterthan16) ~= 0
-            disp([dscalarswithassignments{i}])
-        else
-        end
     end
-end
 end
 %disp('extract number of unique networks from subject 1.')
 %num_networks=unique(scalar_array(:,1));
@@ -266,13 +275,13 @@ if overlap == 1
                 end
             end
         end
-    else %calculate number of networks
+    elseif  number_of_networks ==1 %calculate number of networks
         avg_num_networks =   mean(scalar_array,2);
         if save_results ==1
             temp_file.cdata=  avg_num_networks;
             disp('Saving average number of networks.')
             whole_brain_number_of_nets = mean(scalar_array,1);
-            whole_brain_number_of_nets = whole_brain_number_of_nets'; 
+            whole_brain_number_of_nets = whole_brain_number_of_nets';
             integration_zonesscalarpath = '/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/ABCD_number_of_nets/ABCD_GRP1_overlap_number_of_nets_avg_number_of_network_2.2_thres_sz60_clusters.dscalar.nii';
             intcii = ciftiopen(integration_zonesscalarpath,wb_command);
             intmask = intcii.cdata;
@@ -290,37 +299,56 @@ if overlap == 1
             save([outputname '.mat'],'whole_brain_number_of_nets','integration_zone_number_of_nets');
             ciftisave(temp_file,[outputname '_avg_number_of_networks.dscalar.nii'],wb_command);
         end
+    else %alculated mode
+        if calc_mode ==1
+            mode_scalar = mode(scalar_array');
+            mode_scalar = mode_scalar';
+            temp_file.cdata=mode_scalar;
+            ciftisave(temp_file,[outputname '_population_mode.dscalar.nii'],wb_command);
+        else
+        end
     end
+    
+    
+    
 else % files are dscalars.
-    for i=1:length(network_names)
-        disp(i)
-        if  i~=4 && i~=6
-            for j=1:size(scalar_array,1)
-                if rem(j,5000)==0
-                    %disp([' Calculating voxel proportion ' num2str(j)]);
+    if calc_mode ==1
+        mode_scalar = mode(scalar_array');
+        mode_scalar = mode_scalar';
+        temp_file.cdata=mode_scalar;
+        ciftisave(temp_file,[outputname '_population_mode.dscalar.nii'],wb_command);
+    else
+        
+        for i=1:length(network_names)
+            disp(i)
+            if  i~=4 && i~=6
+                for j=1:size(scalar_array,1)
+                    if rem(j,5000)==0
+                        %disp([' Calculating voxel proportion ' num2str(j)]);
+                    end
+                    is_in_network = find(scalar_array(j,:) == i);
+                    num_subjects_network_true = length(is_in_network);
+                    if calc_percentage ==1
+                        network_percentage(i,j) = (num_subjects_network_true/length(dscalarswithassignments))*100;
+                    else
+                        network_percentage(i,j) = (num_subjects_network_true/length(dscalarswithassignments));
+                    end
                 end
-                is_in_network = find(scalar_array(j,:) == i);
-                num_subjects_network_true = length(is_in_network);
-                if calc_percentage ==1
-                    network_percentage(i,j) = (num_subjects_network_true/length(dscalarswithassignments))*100;
-                else
-                    network_percentage(i,j) = (num_subjects_network_true/length(dscalarswithassignments));
-                end
-            end
-            if save_results ==1
-                temp_file.cdata=network_percentage(i,:)';
-                disp('Saving percentages for each network.')
-                if calc_percentage == 1
-                    
-                    ciftisave(temp_file,[outputname '_' network_names{i} '_network_percentage.dscalar.nii'],wb_command);
-                else
-                    ciftisave(temp_file,[outputname '_' network_names{i} '_network_probability.dscalar.nii'],wb_command);
-                end
-                if found_files_total ==num_orig_files
-                else
-                    disp('Saving list of found files.')
-                    T = table(found_files,'VariableNames',{'found_files'});
-                    writetable(T,[outputname '_found_files.txt']);
+                if save_results ==1
+                    temp_file.cdata=network_percentage(i,:)';
+                    disp('Saving percentages for each network.')
+                    if calc_percentage == 1
+                        
+                        ciftisave(temp_file,[outputname '_' network_names{i} '_network_percentage.dscalar.nii'],wb_command);
+                    else
+                        ciftisave(temp_file,[outputname '_' network_names{i} '_network_probability.dscalar.nii'],wb_command);
+                    end
+                    if found_files_total ==num_orig_files
+                    else
+                        disp('Saving list of found files.')
+                        T = table(found_files,'VariableNames',{'found_files'});
+                        writetable(T,[outputname '_found_files.txt']);
+                    end
                 end
             end
         end
