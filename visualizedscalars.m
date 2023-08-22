@@ -43,18 +43,21 @@ switch output_map_type
         calc_percentage =1;
         number_of_networks =0;
         calc_probability = 0;
+        calc_mode =0;
         
     case 'number_of_networks'
         
         calc_percentage =0;
         number_of_networks=1;
         calc_probability = 0;
+        calc_mode =0;
         
     case 'calc_probability'
         
         calc_percentage =0;
         number_of_networks =0;
         calc_probability = 1;
+        calc_mode =0;
         
     case 'calc_mode'
         
@@ -63,8 +66,8 @@ switch output_map_type
         calc_probability = 1;
         calc_mode =1;
         
-        if isnumeric(if_mode_which_netork_number) ==1 && if_mode_which_netork_number>0 ==1
-            mode_network_number=if_mode_which_netork_number;
+        if isnumeric(if_mode_which_network_number) ==1 && if_mode_which_network_number>0 ==1
+            mode_network_number=if_mode_which_network_number;
             
         end
     otherwise
@@ -299,7 +302,7 @@ if overlap == 1
             save([outputname '.mat'],'whole_brain_number_of_nets','integration_zone_number_of_nets');
             ciftisave(temp_file,[outputname '_avg_number_of_networks.dscalar.nii'],wb_command);
         end
-    else %alculated mode
+    else %calculate mode
         if calc_mode ==1
             mode_scalar = mode(scalar_array');
             mode_scalar = mode_scalar';
@@ -317,6 +320,17 @@ else % files are dscalars.
         mode_scalar = mode_scalar';
         temp_file.cdata=mode_scalar;
         ciftisave(temp_file,[outputname '_population_mode.dscalar.nii'],wb_command);
+        
+        %Build mode proportion map
+        mode_proportion=zeros(size(mode_scalar,1),1);
+        for gray =1:size(scalar_array,1) % go through each grayordinate
+            num_subjects_with_this_mode = find(scalar_array(gray,:) ==mode_scalar(gray));
+            mode_proportion(gray) = size(num_subjects_with_this_mode,2)/size(scalar_array,2);
+        end
+        temp_file.cdata=mode_proportion;
+ciftisave(temp_file,[outputname '_population_mode_proportion.dscalar.nii'],wb_command);
+        
+        
     else
         
         for i=1:length(network_names)

@@ -2,10 +2,15 @@
 
 
 ## Matlab command and usage
-#OLDCOMMAND:mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,method, cifti_enhancement,other_half_networks_cii)
-#mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,community_detection, method, cifti_enhancement,other_half_networks_cii,num_interval_reps,indepen_time_series,remove_outliers, additional_mask,make_dconn_conc, output_directory, dtseries_conc,use_continous_minutes,transform_data,surface_only,already_surface_only,template_path,memory_limit_value)
+#OLDERCOMMAND:mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,method, cifti_enhancement,other_half_networks_cii)
+#OLDCOMMAND:mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,community_detection, method, cifti_enhancement,other_half_networks_cii,num_interval_reps,indepen_time_series,remove_outliers, additional_mask,make_dconn_conc, output_directory, dtseries_conc,use_continous_minutes,transform_data,surface_only,already_surface_only,template_path,memory_limit_value)
 #e.g.mutualinfofromnetworks('/mnt/max/shared/projects/midnight_scan_club/data/MSC02_half1/MSC02_rfMRI_REST_FNL_preproc_Atlas.dtseries.nii','dtseries','/mnt/max/shared/projects/midnight_scan_club/data/MSC02_half1/power_2014_FD_only.mat', 0.2, 2.2,[1 2 3 4 5 10 15 20 25], 1 ,2.55,'/mnt/max/shared/projects/midnight_scan_club/data/MSC02_half1/MSC02.L.midthickness.32k_fs_LR.surf.gii','/mnt/max/shared/projects/midnight_scan_club/data/MSC02_half1/MSC02.R.midthickness.32k_fs_LR.surf.gii',0 , 'MSC02a_to_ADHD315_template_NE_MSC02b','template_matching',1,'MSC02_half2_matchedto_ADHD315_template_method_template_matching.dscalar.nii')
+
+#[muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file(1),series(2),motion_file(3), FD_threshold(4), TR(5), minutes_vector(6),include_all_frames(7), smoothing_kernal(8),left_surface_file(9), right_surface_file(10), bit8(11), output_cifti_name(12),community_detection(13), method(14), cifti_enhancement(15),other_half_networks_cii(16),num_interval_reps(17),indepen_time_series(18),remove_outliers(19), additional_mask(20),make_dconn_conc(21), output_directory(22), dtseries_conc(23),use_continous_minutes(24),transform_data(25),surface_only(26),already_surface_only(27),template_path(28),memory_limit_value(29))
+
 X="addpath(genpath('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/')); mutualinfofromnetworks('${1}', '${2}', '${3}', '${4}', '${5}', '${6}' , '${7}', '${8}', '${9}', '${10}', '${11}', '${12}', '${13}', '${14}', '${15}', '${16}', '${17}', '${18}' , '${19}', '${20}', '${21}', '${22}', '${23}', '${24}', '${25}', '${26}', '${27}', '${28}', '${29}')"
+
+
 ## This code then runs template matching or infomap on subjects and calculate the mututal information to a specifided dscalar.
 ##This code is designed to make correlation matrix from a subject's dtseries, and motion, and surface files (if smoothing is desired) See documentation for cifti_conn_matrix.
 # Correlation matrices are automatically Z-scored.

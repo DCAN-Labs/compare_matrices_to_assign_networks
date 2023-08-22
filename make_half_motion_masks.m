@@ -1,14 +1,14 @@
 
-function make_half_motion_masks(outputfilename,frames)
+function make_half_motion_masks(outputfilename,num_frames)
 
 % This function makes "additional masks" ( i.e. a vector 1s and 0s). to use
 % with the cifti_conn_matrix function.
 
-maska = ones(frames,1);
-maskb = ones(frames,1);
+maska = ones(num_frames,1);
+maskb = ones(num_frames,1);
 
-maska(round((frames/2))+1:end) = 0;
-maskb(round(1:frames/2)) = 0; 
+maska(round((num_frames/2))+1:end) = 0;
+maskb(round(1:num_frames/2)) = 0; 
 
 fileID = fopen([outputfilename '_additionalmaska.txt'],'w');
 fprintf(fileID,'%d\n',maska);

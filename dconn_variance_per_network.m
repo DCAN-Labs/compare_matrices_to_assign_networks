@@ -1,4 +1,4 @@
-function [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(dconn, assignments_vector,output_name)
+function [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(dconn_file, assignments_vector_file,output_name,parcel_file)
 
 %This function gets the variance of the dconn, after is's been sorted by
 %each network, then gets the variance per network.
@@ -22,16 +22,36 @@ addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
 
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
+if strcmp(dconn_file(end-3:end),'.nii') ==1
+    cii = ciftiopen(dconn_file,wb_command);
+    dconn = cii.cdata;
+    clear cii;
+else
+    load(dconn_file,'avg_cifti');
+    dconn = avg_cifti;
+    clear avg_cifti
+end
 
-%cii = ciftiopen('/panfs/roc/groups/3/rando149/shared/projects/ADHD_MedChal/example_dconns/absdiff_dconns/sub-1016_ses-both_merged_tasks_SMOOTHED_2.55.dtseries.nii_all_frames_at_FD_0.2_ABSDIFF.dconn.nii',wb_command);
-%dconn = cii.cdata;
-%clear cii;
 %cii = ciftiopen('/panfs/roc/groups/3/rando149/shared/projects/ADHD_MedChal/template_matching_all_minutes/sub-1016_ses-both_merged_tasks_template_matched_Zscored_recolored.dscalar.nii',wb_command);
 %assings = cii.cdata;
-if exists([output_name 'normed.mat'],'file') == 1
+if strcmp(assignments_vector_file(end-3:end),'.nii') ==1
+    
+elseif strcmp(assignments_vector_file(end-3:end),'.csv') ==1
+    assigns_only_assigned_struct = importdata(assignments_vector_file);
+    assigns_only_assigned =assigns_only_assigned_struct.data;
+else
+    load(assignments_vector_file,'assigns_only_assigned');
+end
+
+if exist([output_name 'normed.mat'],'file') == 1
     disp(['Network .mat file found. It will not be remade: ' output_name 'normed.mat'])
 else
-    assigns = assignments_vector;
+    
+    
+    assigns = assigns_only_assigned;
+    
+    
+    %assigns = assignments_vector;
     [sorted_networks,I] = sort(assigns); % get sorted indices;
     networks = unique(assigns); % get network assingments from template.
     disp('Sorting dconn...')
@@ -40,21 +60,21 @@ else
     
     net_start_idx = zeros(1, size(networks,1)); % preallocate for speed
     net_end_idx = zeros(1, size(networks,1)); % preallocate for speed
-    netRGBs = [
-        255 0 0;
-        0 0 153
-        255 255 0
-        0 255 0
-        13 133 160
-        50 50 50
-        102 0 204
-        102 255 255
-        255 128 0
-        178 102 153
-        0 102 153
-        102 255 102
-        60 60 251
-        200 200 200]/255;
+%     netRGBs = [
+%         255 0 0;
+%         0 0 153
+%         255 255 0
+%         0 255 0
+%         13 133 160
+%         50 50 50
+%         102 0 204
+%         102 255 255
+%         255 128 0
+%         178 102 153
+%         0 102 153
+%         102 255 102
+%         60 60 251
+%         200 200 200]/255;
     %matlab variance
     for i=1:size(networks,1)
         netidices = find(sorted_networks == networks(i));
@@ -66,6 +86,7 @@ else
     net_variance_mat = zeros(size(networks,1),size(networks,1));
     net_mean_mat = zeros(size(networks,1),size(networks,1));
     counts = cell(size(networks,1),size(networks,1));
+    countsnorm = cell(size(networks,1),size(networks,1));
     for i=1:size(networks,1)
         for j=1:size(networks,1)
             small_mat = sorted_dconn1(net_start_idx(i)+1:net_end_idx(i),net_start_idx(j)+1:net_end_idx(j));
@@ -90,8 +111,18 @@ else
             close all
         end
     end
+    load(parcel_file, 'parcel')
+    if isfield(parcel,'power_val')
+        [~, alpha_sort]=sort([parcel.power_val],'ascend');
+    else
+        disp('networks are already sorted alphanumerically hopefully.')
+        alpha_sort = 1:size([parcel.n],2);
+    end
+    disp('Saving mean and variance matrices sorted alphabetically too so they can match showM plots. ')
+    net_variance_mat_alpha_sorted = net_variance_mat(alpha_sort,alpha_sort);
+    net_mean_mat_alpha_sorted = net_mean_mat(alpha_sort,alpha_sort);
     %save([output_name '.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins')
-    save([output_name 'normed.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins','countsnorm')
+    save([output_name 'normed.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins','countsnorm', 'net_variance_mat_alpha_sorted', 'net_mean_mat_alpha_sorted')
 end
 
 end

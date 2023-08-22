@@ -1,4 +1,4 @@
-function [output_name ] = simple_cifti_average(cifti_conc,output_name, method, plot_data, TMprobability_modules,check_for_nans,remove_subjects_with_nans)
+function [output_name ] = simple_cifti_average(cifti_conc,output_name, method, plot_data, TMprobability_modules,gordon_modules,check_for_nans,remove_subjects_with_nans,average_of_diff_of_cifti_pairs,cifti_conc2)
 
 %this code simple loads in already built ciftis (one at a time) rom your conc file and averages
 %them.
@@ -18,7 +18,7 @@ for i=1:np
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
+addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
 addpath(genpath('/home/faird/shared/code/internal/utilities/Nan_checker'));
 
 warning('on')
@@ -34,6 +34,9 @@ elseif istable(cifti_conc)
     ciftis = cifti_conc;
 else % assume outside text file
     ciftis =importdata(cifti_conc);
+    if average_of_diff_of_cifti_pairs ==1
+     ciftis2 =importdata(cifti_conc2);
+    end
 end
 
 tic
@@ -74,7 +77,6 @@ else
     end
 end
 
-cifti_cii = ciftiopen(ciftis{1},wb_command);
 
 
 cifti_type = strsplit(ciftis{1}, '.');
@@ -91,12 +93,25 @@ elseif strcmp('ptseries',cifti_exten) == 1
 elseif strcmp('pscalar',cifti_exten) == 1
     
 elseif strcmp('pconn',cifti_exten) == 1
-    
+        ismatfile = 0;
+ elseif strcmp('mat',char(cifti_type(end))) == 1 
+     %assume that data is d/pconn.
+     cifti_exten = 'pconn';
+     ismatfile = 1;
 else
+    
     disp('filetype not supported by nan checker: ')
 end
 
-current_cifti = cifti_cii.cdata;
+if ismatfile == 1
+    load(ciftis{i},'unsorted_reduced_dconn');
+    current_cifti = unsorted_reduced_dconn;
+    clear unsorted_reduced_dconn
+else
+    cifti_cii = ciftiopen(ciftis{1},wb_command);
+    current_cifti = cifti_cii.cdata;
+end
+
 avg_cifti = zeros(size(current_cifti,1),size(current_cifti,2)); % this should be symmtrical
 if size(current_cifti,1) ~= size(current_cifti,2)
     disp('Did you know that you correlation matrix is not symmetrical? Maybe youre not using matrices.')
@@ -142,14 +157,35 @@ else
         case 'average_cifti'
             for i = 1:length(ciftis)
                 disp(i)
-                current_gii_obj = ciftiopen(ciftis{i},wb_command);
-                current_cifti = current_gii_obj.cdata;
+                if ismatfile==1
+                    load(ciftis{i},'unsorted_reduced_dconn');
+                    current_cifti = unsorted_reduced_dconn;
+                    clear unsorted_reduced_dconn;
+                else
+                    current_gii_obj = ciftiopen(ciftis{i},wb_command);
+                    current_cifti = current_gii_obj.cdata;
+                end
                 
                 if check_for_nans ==1
-                   hasnan(i,1) =  cifti_nancheck(ciftis{i});
+                    hasnan(i,1) =  cifti_nancheck(ciftis{i});
+                else
+                    disp('Not checking for nans.')
+                    hasnan(i,1) = 0;
                 end
                 if remove_subjects_with_nans ==1 
                     if hasnan(i,1) ==0
+                     if average_of_diff_of_cifti_pairs ==1
+                          if ismatfile ==1
+                          load(ciftis2{i},'unsorted_reduced_dconn');
+                          current_cifti2 = unsorted_reduced_dconn;
+                          clear unsorted_reduced_dconn
+                          else
+                            current_gii_obj2 = ciftiopen(ciftis2{i},wb_command);
+                            current_cifti2 = current_gii_obj2.cdata;
+                          end
+                            current_cifti=current_cifti-current_cifti2;
+                            clear current_cifti2;
+                     end
                     avg_cifti = avg_cifti + current_cifti;
                     else
                         %don't add subject
@@ -158,6 +194,9 @@ else
                 else
                     if hasnan(i,1) ==1
                         warning('Subject has nans and is being added to average.')
+                      if average_of_diff_of_cifti_pairs ==1
+                      error('Do not add subjet with nans to average of difference, unless both pairs are removed.')
+                      end
                     end
                     avg_cifti = avg_cifti + current_cifti;
                 end
@@ -165,6 +204,7 @@ else
             disp('Now to simply divide')
             if remove_subjects_with_nans ==1
                 avg_cifti = avg_cifti/(length(ciftis)-sum(hasnan));
+
             else
                 avg_cifti = avg_cifti/length(ciftis);
             end
@@ -187,24 +227,45 @@ else
             avg_cifti = avg_cifti';
         otherwise
             error('Method is not supported.')
+            clear current_cifti
             
     end
     
 end
+if strcmp('pconn',cifti_exten) == 1 || strcmp('dconn',cifti_exten) == 1
+    if plot_data ==1
+        if TMprobability_modules ==1
+%             modules = importdata('TMprobability_modules.csv');
+%             nets_assigns = modules.data;
+%             networks = unique(nets_assigns);
+%             [sorted_networks, netsortindx ] = sort(nets_assigns);
+%             
+%             imagesc(avg_cifti(netsortindx,netsortindx))
+load('/panfs/jay/groups/6/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel');
 
-if plot_data ==1
-    if TMprobability_modules ==1
-        modules = importdata('TMprobability_modules.csv');
-        nets_assigns = modules.data;
-        networks = unique(nets_assigns);
-        [sorted_networks, netsortindx ] = sort(nets_assigns);
+        end
+        if gordon_modules ==1
+            load('/home/rando149/shared/projects/Polyvertexscore/HumanGordon_parcel.mat','parcel')
+        end
+        if average_of_diff_of_cifti_pairs ==1
+            showM(avg_cifti,'parcel',parcel,'clims',[-0.20 0.20],'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',7,'one_side_labels',1,'fig_tall',8);
+            load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+            colormap(pos_neg_cmap);
+        else
+            showM(avg_cifti,'parcel',parcel,'clims',[-0.5 1],'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',7,'one_side_labels',1,'fig_tall',8);
+            colormap jet
+        end
+        disp('saving image...')
+        print([output_name '.png'], '-dpng', '-r300')
         
-        imagesc(avg_cifti(netsortindx,netsortindx))
     end
 end
 
 %current_cponn.cdata = avg_cifti;
 %ciftisave(current_cponn,avg_cifti_output_name,wb_command);
+if ismatfile ==1
+    save([output_name '.mat'],'avg_cifti','-v7.3')
+else
 current_gii_obj.cdata = avg_cifti;
 ciftisave(current_gii_obj,output_name,wb_command)
 end

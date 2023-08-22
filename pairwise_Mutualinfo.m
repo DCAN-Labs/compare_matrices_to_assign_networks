@@ -22,6 +22,8 @@
 %infomap_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/bothhalvesdsclars.conc');
 %infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/MSC_to_DCAN/analyses/infomap_scott/infomap_dscalars.conc');
 
+%templ_match_dscalarwithassignments = '/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_templ.conc';
+
 %cross-method comparison for infomap and template matching
 %templ_match_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/MSC_to_DCAN/analyses/cross-method/MSC_to_DCAN_all_frames_templ_match_half1_infomap_half1.conc');
 %infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/MSC_to_DCAN/analyses/cross-method/MSC_to_DCAN_all_frames_templ_match_half2_infomap_half2.conc');
@@ -44,7 +46,10 @@
 %infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/infomap/merged_densities/infomap_both_halves.conc');
 %ABCD 2 example_subs 
 %templ_match_dscalarwithassignments = importdata('/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_singlenet_dscalar_2examplesubs.conc');
-templ_match_dscalarwithassignments = importdata('/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_overlapping_dtseries_2examplesubs.conc');
+%templ_match_dscalarwithassignments = importdata('/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/split_halves/best10_ABCDsubs_TM_overlapping_dtseries_2examplesubs.conc');
+
+%Subpop
+%templ_match_dscalarwithassignments = importdata('/home/rando149/hermosir/subpop_subjects/conc_files/template_matching_nets_surface_only_bothhalves.conc');
 
 %ABCD FD03_subs:
 %templ_match_dscalarwithassignments = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/lower_FD_thresholds/FD03/ABCD_templ_matched_FD03AandB_10_min.conc');
@@ -54,13 +59,14 @@ templ_match_dscalarwithassignments = importdata('/panfs/roc/groups/3/rando149/sh
 %templ_match_dscalarwithassignments = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/best10_ABCDsubs/lower_FD_thresholds/FD05/ABCD_templ_matched_FD05_10_min.conc');
 
 twins=0;
-surface_only =0; ncortgrey = 59412;
+surface_only =1; ncortgrey = 59412;
 omnibus =1; %for overlapping networks, set to true if you want to concatenate all networks together and run an omnibus mutual information.  Otherwise MuI will be calculated for each network seperately.
 %note: network names listed below have empty networks removed (e.g. 4 and 6 are revmoed from the data.)
+
 network_names = {   'DMN'    'Vis'    'FP'      'DAN'       'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 %% Add necessary paths
-addpath ('/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks')
+addpath ('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks')
 addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'))
 
 this_code = which('pairwise_Mutualinfo');
@@ -81,6 +87,8 @@ warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
 tic
+
+templ_match_dscalarwithassignments=importdata(templ_match_dscalarwithassignments);
 
 %check to make sure that surface files exist
 if exist('templ_match_dscalarwithassignments','var') == 1

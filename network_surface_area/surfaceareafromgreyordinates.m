@@ -108,10 +108,10 @@ surfscalar = ones(size(network_assignments,1),1);
 surfscalar = surfscalar*8000;
 newcii.cdata = surfscalar;
 if data_is_surface_only ==1
-    ciftisave(newcii, [output_folder '/' outputname '_59412.dscalar.nii'],wb_command)
+    ciftisave(newcii, [output_folder filesep outputname '_59412.dscalar.nii'],wb_command)
     
 else
-    ciftisave(newcii, [output_folder '/' outputname '8000s_91282.dscalar.nii'],wb_command)
+    ciftisave(newcii, [output_folder filesep outputname '8000s_91282.dscalar.nii'],wb_command)
     
 end
 
@@ -129,14 +129,14 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
     
     if data_is_surface_only
     else
-        cmd = ['wb_command -cifti-separate ' [output_folder '/' outputname '8000s_91282.dscalar.nii'] ' COLUMN -volume-all ' output_folder '/8000s_volume.nii'];
+        cmd = [wb_command ' -cifti-separate ' [output_folder filesep outputname '8000s_91282.dscalar.nii'] ' COLUMN -volume-all ' output_folder filesep '8000s_volume.nii'];
         system(cmd); clear cmd
     end
     
     [~, A] = fileparts(Lmidthicknessfile{i});
     [~, B] = fileparts(A);
     C = [B '.vertexarea.func.gii'];
-    cmd = ['wb_command -surface-vertex-areas '  Lmidthicknessfile{i} ' ' output_folder '/' C];
+    cmd = [wb_command ' -surface-vertex-areas '  Lmidthicknessfile{i} ' ' output_folder filesep C];
     disp(cmd)
     system(cmd);
     clear cmd
@@ -144,17 +144,17 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
     [~, D] = fileparts(Rmidthicknessfile{i});
     [~, E] = fileparts(D);
     F = [E '.vertexarea.func.gii'];
-    cmd = ['wb_command -surface-vertex-areas '  Rmidthicknessfile{i} ' ' output_folder '/' F];
+    cmd = [wb_command ' -surface-vertex-areas '  Rmidthicknessfile{i} ' ' output_folder filesep F];
     disp(cmd)
     system(cmd);
     clear cmd
     
     if data_is_surface_only ==1
-        cmd = ['wb_command -cifti-create-dense-from-template ' [output_folder '/' outputname '_59412.dscalar.nii'] ' ' [outputname 'surfaceareas.dscalar.nii'] ' -metric CORTEX_LEFT  ' output_folder '/' C ' -metric CORTEX_RIGHT ' output_folder '/' F];
+        cmd = [wb_command ' -cifti-create-dense-from-template ' [output_folder filesep outputname '_59412.dscalar.nii'] ' ' [outputname 'surfaceareas.dscalar.nii'] ' -metric CORTEX_LEFT  ' output_folder filesep C ' -metric CORTEX_RIGHT ' output_folder filesep F];
         disp(cmd)
         system(cmd); clear cmd
     else
-        cmd = ['wb_command -cifti-create-dense-from-template ' [output_folder '/' outputname '8000s_91282.dscalar.nii'] ' ' [outputname 'surfaceareas.dscalar.nii'] ' -volume-all ' output_folder '/8000s_volume.nii -metric CORTEX_LEFT  ' output_folder '/' C ' -metric CORTEX_RIGHT ' output_folder '/' F];
+        cmd = [wb_command ' -cifti-create-dense-from-template ' [output_folder filesep outputname '8000s_91282.dscalar.nii'] ' ' [outputname 'surfaceareas.dscalar.nii'] ' -volume-all ' output_folder filesep '8000s_volume.nii -metric CORTEX_LEFT  ' output_folder filesep C ' -metric CORTEX_RIGHT ' output_folder filesep F];
         disp(cmd)
         system(cmd); clear cmd
     end
@@ -234,7 +234,7 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
     end
     
     if cleanupintermediatefiles ==1
-        cmd = ['rm ' output_folder '/' C ' ' output_folder '/' F ' ' ];
+        cmd = ['rm ' output_folder filesep C ' ' output_folder filesep F ' ' ];
         system(cmd);
     else
     end
@@ -243,14 +243,14 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
 end
 
 if cleanupintermediatefiles ==1
-    cmd = ['rm ' output_folder '/' outputname '8000s_91282.dscalar.nii ' output_folder '/8000s_volume.nii'];
+    cmd = ['rm ' output_folder filesep outputname '8000s_91282.dscalar.nii ' output_folder filesep '8000s_volume.nii'];
     system(cmd)
 else
 end
 
 if output_only_greySA  ==1
     disp('saving volumes and surface areas');
-    save( [output_folder '/' outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Rmidthicknessfile','Rmidthicknessfile')
+    save( [output_folder filesep outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Rmidthicknessfile','Rmidthicknessfile')
 else
 end
 

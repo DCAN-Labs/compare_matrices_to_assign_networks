@@ -91,14 +91,19 @@ end
     disp(['Final perimeter file (.mat) not found. Expected name: ' output_folder filesep output_name '_perimeters.mat'])
     disp('Starting from the beginning...')   
     
+    tic
     for i = 1:length(input_cifti_list)
+        if rem(i,100)==0
+            disp(['Checking participant ' num2str(i)]);toc;
+        end
         if exist(input_cifti_list{i},'file') == 0
-             error(['Subject Series ' num2str(i) ' does not exist'])
+            error(['Subject Series ' num2str(i) ' does not exist'])
             %return
         else
         end
     end
     disp('All dlabel files exist continuing ...')
+    toc
     
     if strcmp('conc',conc) == 1
         Lsurfs = importdata(L_surf_conc);
@@ -106,13 +111,18 @@ end
         Lsurfs = {L_surf_conc};
     end
     
+    tic
     for i = 1:length(Lsurfs)
+        if rem(i,100)==0
+            disp(['Checking participant ' num2str(i)]);toc;
+        end
         if exist(Lsurfs{i},'file') == 0
             error(['Subject left surface ' num2str(i) ' does not exist'])
             %return
         else
         end
     end
+    toc
     disp('All left surface files exist continuing ...')
     
     if strcmp('conc',conc) == 1

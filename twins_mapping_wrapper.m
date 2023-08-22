@@ -1,4 +1,4 @@
-function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,output_directory, dtseries_conc,use_continous_minutes,memory_limit_value,clean_up_intermed_files,wb_command,additional_mask,remove_outliers)
+function twins_mapping_wrapper(dt_or_ptseries_conc_file,motion_file,left_surface_file, right_surface_file, output_file_name, cifti_output_folder,TR,minutes_limit,FD_threshold,transform_data,template_path,surface_only,already_surface_only,use_all_ABCD_tasks, run_infomap_too,working_directory, dtseries_conc,use_continous_minutes,memory_limit_value,clean_up_intermed_files,wb_command,additional_mask,remove_outliers)
 %R. Hermosillo 1/8/2019
 % this code takes in dtseries, motion, surfaces, for subject pairs and
 % caluclates mtual information between individualized network assignments.
@@ -131,10 +131,10 @@ if use_all_ABCD_tasks == 1
     [dt_conc_name,motion_conc_names,~] = make_scan_conc(dtpath,1,0,1); %use dtseries file name and location to find other tasks.
      %[dt_conc_name,motion_conc_names,~] = make_scan_conc(dtpath,0,0,1); %use dtseries file name and location to find other tasks.
   
-    MergeTimeSeries('TimeSeriesFiles',dt_conc_name,'MotionFiles',motion_conc_names,'OutputFile',[output_directory filesep subID '_merged_tasks.dtseries.nii'],'MotionOutputFile',[output_directory filesep subID '_merged_tasks_motion.mat'])
+    MergeTimeSeries('TimeSeriesFiles',dt_conc_name,'MotionFiles',motion_conc_names,'OutputFile',[working_directory filesep subID '_merged_tasks.dtseries.nii'],'MotionOutputFile',[working_directory filesep subID '_merged_tasks_motion.mat'])
     %Set time series and motion files to the newly merged data.
-    dt_or_ptseries_conc_file= [output_directory filesep subID '_merged_tasks.dtseries.nii'];
-    motion_file=[output_directory filesep subID '_merged_tasks_motion.mat'];
+    dt_or_ptseries_conc_file= [working_directory filesep subID '_merged_tasks.dtseries.nii'];
+    motion_file=[working_directory filesep subID '_merged_tasks_motion.mat'];
 else
 end
 
@@ -309,10 +309,10 @@ for i = 1:length(dtseries_file) %number of subjects
                     dtseries=dtseries(1:59412,:);
                     cii.cdata = dtseries;
                     
-                    ciftisave(cii, [output_directory filesep filename_short '_surf_only.dtseries.nii'], wb_command);
+                    ciftisave(cii, [working_directory filesep filename_short '_surf_only.dtseries.nii'], wb_command);
                     %ciftisave(cii, [path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'], wb_command)
                     
-                    subject_dt_series = [output_directory filesep filename_short '_surf_only.dtseries.nii'];
+                    subject_dt_series = [working_directory filesep filename_short '_surf_only.dtseries.nii'];
                     %subject_dt_series = [path_to_orig_dtseries filesep filename_short '_surf_only.dtseries.nii'];
                     
                             motion_exten = strsplit(motion, '.');
@@ -320,15 +320,15 @@ for i = 1:length(dtseries_file) %number of subjects
                             other_motion_mask = ~strcmp('mat', motion_exten);
                             
                             if other_motion_mask ==0
-                                cmd =(['cp ' motion ' ' output_directory filesep motion_name_only 'surf_only.mat']);
+                                cmd =(['cp ' motion ' ' working_directory filesep motion_name_only 'surf_only.mat']);
                                 disp([cmd '. This file is only copied so that an existing saved mask will not be overwritten.'])
                                 system(cmd);
-                                motion = [output_directory filesep motion_name_only 'surf_only.mat'];
+                                motion = [working_directory filesep motion_name_only 'surf_only.mat'];
                             else
-                                cmd =(['cp ' motion ' ' output_directory filesep motion_name_only 'surf_only.txt']);
+                                cmd =(['cp ' motion ' ' working_directory filesep motion_name_only 'surf_only.txt']);
                                 disp([cmd '. This file is only copied so that an existing saved mask will not be overwritten.'])
                                 system(cmd);
-                                motion = [output_directory filesep motion_name_only 'surf_only.txt'];
+                                motion = [working_directory filesep motion_name_only 'surf_only.txt'];
                             end
                             
                 elseif num_greys == 59412
@@ -354,8 +354,8 @@ for i = 1:length(dtseries_file) %number of subjects
         
         %% BUILD DCONN
         %subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
-        disp(['calling cifti_conn_matrixfor_wrapper_continous as follows: cifti_conn_matrix_for_wrapper_continous(' wb_command ',' subject_dt_series ',' series ',' motion ',' num2str(FD_threshold) ',' num2str(TR) ',' num2str(minutes_limit) ',' num2str(smoothing_kernal) ',' left_surface_file ',' right_surface_file ',' num2str(bit8) ',' num2str(remove_outliers) ',' additional_mask ',' num2str(make_dconn_conc) ',' [output_directory filesep] ',' subject_dt_series ',' num2str(use_continous_minutes) ',' num2str(memory_limit_value)])
-        subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [output_directory filesep], subject_dt_series, use_continous_minutes, memory_limit_value);
+        disp(['calling cifti_conn_matrixfor_wrapper_continous as follows: cifti_conn_matrix_for_wrapper_continous(' wb_command ',' subject_dt_series ',' series ',' motion ',' num2str(FD_threshold) ',' num2str(TR) ',' num2str(minutes_limit) ',' num2str(smoothing_kernal) ',' left_surface_file ',' right_surface_file ',' num2str(bit8) ',' num2str(remove_outliers) ',' additional_mask ',' num2str(make_dconn_conc) ',' [working_directory filesep] ',' subject_dt_series ',' num2str(use_continous_minutes) ',' num2str(memory_limit_value)])
+        subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [working_directory filesep], subject_dt_series, use_continous_minutes, memory_limit_value);
         %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         [path_to_dconn, dconn_name] = fileparts(subjectdconn);
@@ -447,7 +447,7 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
         %Step 2: get network assingments via template matching.
-        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results, allow_overlap,overlap_method,surface_only,already_surface_only);
+        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path, transform_data, output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results, allow_overlap,overlap_method,surface_only,already_surface_only);
         
         
         if clean_up_intermed_files ==1 % RH added in case filespace becomes an limited.
@@ -456,7 +456,7 @@ for i = 1:length(dtseries_file) %number of subjects
             disp(cmd);
             system(cmd);
             if use_all_ABCD_tasks == 1
-                cmd = ['rm -f ' output_directory filesep filename_short '.dtseries.nii'];
+                cmd = ['rm -f ' working_directory filesep filename_short '.dtseries.nii'];
                 disp([cmd ' . Removing merged time series that created as part of the twins_mapping_wrapper.']);
                 system(cmd);
                 
@@ -476,15 +476,15 @@ for i = 1:length(dtseries_file) %number of subjects
                     system(cmd);
                 end
                 
-                cmd = ['rm -f ' output_directory filesep filename_short '_surf_only.dtseries.nii'];
+                cmd = ['rm -f ' working_directory filesep filename_short '_surf_only.dtseries.nii'];
                 disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
                 
-                cmd = ['rm -f ' output_directory filesep filename_short '_surf_only_SMOOTHED_' num2str(smoothing_kernal) '.dtseries.nii'];
+                cmd = ['rm -f ' working_directory filesep filename_short '_surf_only_SMOOTHED_' num2str(smoothing_kernal) '.dtseries.nii'];
                 disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
                 if other_motion_mask ==0
-                    cmd = ['rm -f ' output_directory filesep motion_name_only 'surf_only.mat'];
+                    cmd = ['rm -f ' working_directory filesep motion_name_only 'surf_only.mat'];
                     disp([cmd ' . This file will only be removed if it was created as part of the twins_mapping_wrapper.']);
                     system(cmd);
                 else

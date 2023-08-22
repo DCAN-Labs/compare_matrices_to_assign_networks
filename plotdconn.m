@@ -1,4 +1,4 @@
-function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap,exclude_zero_networks,save_non_zeromatrix,only_save_abs_diff_dconn)
+function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap,exclude_zero_networks,save_processed_matrix,only_save_abs_diff_dconn,use_showM,shoM_diff_range_option,output_dir,use_only_cortical_connections)
 
 %R.Hermosillo 08/20/2019
 
@@ -23,7 +23,16 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 %set to 1. 0 uses color map jet.
 %15) exclude_zero_networks = to 1 if your dscalar has zeros and you want to
 %exclude those grarordinates.
-
+%16) save_processed_matrix - Set to 1 if you want to save the matrix that
+%has been reduced in size or if you want to save the difference matrix
+%17) only_save_abs_diff_dconn. Set 1 if you don't want to save the original
+%reduced matrix, but you still want to save the difference matrix.
+%18) Use the showM function.  SET to 0.  THis funcationality still needs to
+%be created.
+%19) output_directory= provide a path to the output directory for the
+%pictures.
+%20) use_only_cortical_connections= if set to 1, then the code will remove
+%subcortical connections.
 %net_order = [12 9 5 1 3 14 15 16 8 10 11 13 7 2];
 
 %net_order = [10 7 4 1 3 12 13 14 6 8 9 11 5 2];
@@ -37,9 +46,14 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 wb_command='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
 addpath(genpath('/panfs/jay/groups/6/faird/shared/code/external/utilities/gifti-1.6'))
 addpath(genpath('/panfs/jay/groups/6/faird/shared/code/internal/utilities/Matlab_CIFTI'))
+addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools/showM'))
+
 %load('/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
 %load('parcel_probability_map.mat','parcel'); [~,index] = sortrows([parcel.power_val].'); parcel = parcel(index); clear index
-
+if isnumeric(DS_factor)==1
+else
+    allow_overlap = str2double(DS_factor);
+end
 if downsample_dconn == 1
     if isnumeric(DS_factor) ==1
         if DS_factor <=0
@@ -49,13 +63,73 @@ if downsample_dconn == 1
         error('DS_factor must be numeric')
     end
 end
+downsample_dconn
 
+if isnumeric(apply_Zscore_dconn)==1
+else
+    apply_Zscore_dconn = str2double(apply_Zscore_dconn);
+end
+apply_Zscore_dconn
+if isnumeric(plot2dconns)==1
+else
+    plot2dconns = str2double(plot2dconns);
+end
+plot2dconns
+if isnumeric(use_nets1)==1
+else
+    use_nets1 = str2double(use_nets1);
+end
+apply_Zscore_dconn
+% if isnumeric(caxis_scale)==1
+% else
+%         caxis_scale = str2double(caxis_scale);
+%
+% end
+caxis_scale = [-0.5 1]
+
+if isnumeric(use_nets1)==1
+else
+    use_nets1 = str2double(use_nets1);
+end
+use_nets1
+if isnumeric(Pos_neg_colormap)==1
+else
+    Pos_neg_colormap = str2double(Pos_neg_colormap);
+end
+Pos_neg_colormap
+if isnumeric(exclude_zero_networks)==1
+else
+    exclude_zero_networks = str2double(exclude_zero_networks);
+end
+exclude_zero_networks
+if isnumeric(save_processed_matrix)==1
+else
+    save_processed_matrix = str2double(save_processed_matrix);
+end
+save_processed_matrix
+if isnumeric(only_save_abs_diff_dconn)==1
+else
+    only_save_abs_diff_dconn = str2double(only_save_abs_diff_dconn);
+end
+only_save_abs_diff_dconn
+if isnumeric(use_showM)==1
+else
+    use_showM = str2double(use_showM);
+end
+
+use_showM
+
+if isnumeric(use_only_cortical_connections)==1
+else
+    use_only_cortical_connections = str2double(use_only_cortical_connections);
+end
+use_only_cortical_connections
 %load assignments
 
 if strcmp(net_assigns(end-3:end),'.csv')
     assigns = table2array(readtable(net_assigns));
 elseif strcmp(net_assigns(end-3:end),'.txt')
-    assigns = table2array(readtable(net_assigns)); 
+    assigns = table2array(readtable(net_assigns));
 elseif strcmp(net_assigns(end-10:end),'pscalar.nii')
     net_assigns = ciftiopen(net_assigns,wb_command);
     assigns = net_assigns.cdata;
@@ -65,10 +139,15 @@ elseif strcmp(net_assigns(end-10:end),'dscalar.nii')
 elseif isnumeric(net_assigns)
     assigns = net_assigns;
 else
-    
+
     error('What kind of file are you trying touse to import assignments? Use a dscalar.nii, pscalar.nii, .txt, or .csv (1 assingment per line.)')
 end
 
+
+if use_only_cortical_connections==1
+    disp('Assuming dense data');
+    assigns = assigns(1:59412,1);
+end
 
 %load dconn
 disp('Loading dconn and assignments...')
@@ -76,6 +155,7 @@ if isnumeric(dconn_cifti_path) ==1
     dconn = dconn_cifti_path;
     clear dconn_cifti_path
 else
+    disp(dconn_cifti_path)
     dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);
     dconn = single(dconn_cifti.cdata);
 end
@@ -87,6 +167,11 @@ if apply_Zscore_dconn ==1
     newdconn = Zscore_dconn_var(dconn);
 else
     newdconn = dconn;
+end
+
+if use_only_cortical_connections==1
+    disp('Assuming dense data');
+    newdconn = newdconn(1:59412,1:59412);
 end
 
 clear dconn_cifti dconn
@@ -109,10 +194,13 @@ clear dconn
 
 if plot2dconns ==1
     if isnumeric(dconn_cifti_path2) ==0
-    dconn_cifti2=ciftiopen(dconn_cifti_path2,wb_command);
-    dconn2 = single(dconn_cifti2.cdata);
+
+        disp('Loading dconn and assignments...')
+        disp(dconn_cifti_path2)
+        dconn_cifti2=ciftiopen(dconn_cifti_path2,wb_command);
+        dconn2 = single(dconn_cifti2.cdata);
     else
-      dconn2 = dconn_cifti_path2; 
+        dconn2 = dconn_cifti_path2;
     end
     clear dconn_cifti2
     if apply_Zscore_dconn ==1
@@ -120,6 +208,12 @@ if plot2dconns ==1
     else
         newdconn2 = dconn2;
     end
+
+    if use_only_cortical_connections==1
+        disp('Assuming dense data');
+        newdconn2 = newdconn2(1:59412,1:59412);
+    end
+
     if use_nets1 ==1
         sorted_dconn2 =  newdconn2(I,I);
     else
@@ -139,28 +233,59 @@ set(gcf, 'color','w')
 if plot2dconns ==1
     ax1 = subplot(1,3,1);
 end
+
 if use_showM ==1
-    
-else
-if downsample_dconn == 1
-    if exclude_zero_networks ==1
-        assigns_sonly_assigned= assigns(find(assigns~=0));
-        assigns_small = assigns_sonly_assigned(1:DS_factor:end);
-        
+
+    if use_only_cortical_connections ==1
+        parcel_output_name = [output_dir filesep image_name '_cortex_only'];
+        parcel = build_high_density_parcel_file(assigns,parcel_output_name);
+
     else
-        assigns_small = assigns(1:DS_factor:end);
+        parcel_output_name = [output_dir filesep image_name];
+        parcel = build_high_density_parcel_file(assigns,parcel_output_name);
+
     end
-    
-    [sort1small,~] = sort(assigns_small);
-    
-    sorted_small1 = sorted_dconn1(1:DS_factor:end,1:DS_factor:end);
-    imagesc(sorted_small1); hold on;
-    insert_net_lines(networks,sort1small,1);
-    
+
+
+    %load(parcel_file, 'parcel')
+    %     if isfield(parcel,'power_val')
+    %         [~, alpha_sort]=sort([parcel.power_val],'ascend');
+    %     else
+    %         disp('networks are already sorted alphanumerically hopefully.')
+    %         alpha_sort = 1:size([parcel.n],2);
+    %     end
+    showM(newdconn,'parcel', parcel,'clims',[-0.5 1],'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1); colormap jet
+    colormap jet
+    disp('saving image...')
+    if use_only_cortical_connections ==1
+        print([output_dir filesep image_name '1_cortex_only.png'], '-dpng', '-r300')
+
+    else
+        print([output_dir filesep  image_name '1_including_subcortex.png'], '-dpng', '-r300')
+
+    end
+
+
 else
-    imagesc(sorted_dconn1); hold on;
-    insert_net_lines(networks,sort1,1)
-end
+    if downsample_dconn == 1
+        if exclude_zero_networks ==1
+            assigns_sonly_assigned= assigns(find(assigns~=0));
+            assigns_small = assigns_sonly_assigned(1:DS_factor:end);
+
+        else
+            assigns_small = assigns(1:DS_factor:end);
+        end
+
+        [sort1small,~] = sort(assigns_small);
+
+        sorted_small1 = sorted_dconn1(1:DS_factor:end,1:DS_factor:end);
+        imagesc(sorted_small1); hold on;
+        insert_net_lines(networks,sort1small,1);
+
+    else
+        imagesc(sorted_dconn1); hold on;
+        insert_net_lines(networks,sort1,1)
+    end
 end
 set(gca,'FontSize',9)
 set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
@@ -171,89 +296,186 @@ if Pos_neg_colormap==1
     load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
     colormap(pos_neg_cmap);
 else
-colormap jet
+    colormap jet
 end
 colorbar;
+%caxis_scale
 caxis(caxis_scale);
 %f.Position = [100 100 600 600];
-
+disp(['plot2dconns equals: ' plot2dconns']);
 if plot2dconns ==1
     ax2=subplot(1,3,2);
-    
-    if downsample_dconn == 1
-        sorted_small2 = sorted_dconn2(1:DS_factor:end,1:DS_factor:end);
-        imagesc(sorted_small2); hold on;
-        if use_nets1 ==0
-            if exclude_zero_networks ==1
-                assigns_sonly_assigned= assigns2(find(assigns2~=0));
-                assigns_small2 = assigns_sonly_assigned(1:DS_factor:end);
-                
-            else
-                assigns_small2 = assigns2(1:DS_factor:end);
-            end
-            
-            [sort2small,~] = sort(assigns_small2);
-            insert_net_lines(networks,sort2small,1);
-        else
-            
-            insert_net_lines(networks,sort1small,1);
+
+    if use_showM ==1
+        if use_nets1 ==1
+            assigns2 = assigns;
         end
-        
-    else
-        imagesc(sorted_dconn2); hold on;
-        insert_net_lines(networks,sort2,1)
-    end
-    
-    set(gca,'FontSize',9)
-    set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
-    %xlim([0 1]);ylim([0 1]);
-    %f.PaperPositionMode   = 'auto';
-    title('Correlation matrix sorted by network','FontSize',9);
-    colormap jet
-    colorbar;
-    caxis(caxis_scale)
-    %f.Position = [100 100 600 600];
-    
-    ax3 = subplot(1,3,3);
-    if downsample_dconn == 1
-        diff_matrix = sorted_small1-sorted_small2;
-    else
-        diff_matrix = sorted_dconn1-sorted_dconn2;
-    end
-    imagesc(diff_matrix); hold on;
-    insert_net_lines(networks,sort1small,1);
-    
-    set(gca,'FontSize',9)
-    set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
-    title('Matrix Difference','FontSize',9);
-    %colormap jet
-    load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
-    colormap(ax3,pos_neg_cmap);
-    colorbar;
-    caxis([-0.5 0.5])
-    f.Position = [50 100 1300 400];
-     disp('saving image...')
-    print([image_name '.png'], '-dpng', '-r600')
-else
+        if use_only_cortical_connections ==1
+            parcel_output_name = [output_dir filesep image_name '_cortex_only'];
+            parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
+
+        else
+            parcel_output_name = [output_dir filesep image_name];
+            parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
+
+        end
+
+        %load(parcel_file, 'parcel')
+        %     if isfield(parcel,'power_val')
+        %         [~, alpha_sort]=sort([parcel.power_val],'ascend');
+        %     else
+        %         disp('networks are already sorted alphanumerically hopefully.')
+        %         alpha_sort = 1:size([parcel.n],2);
+        %     end
+        showM(newdconn2,'parcel', parcel,'clims',[-0.5 1],'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1); colormap jet
+        colormap jet
         disp('saving image...')
-    print([image_name '.png'], '-dpng', '-r600')
+        if use_only_cortical_connections ==1
+            print([output_dir filesep image_name '2_cortex_only.png'], '-dpng', '-r300')
+
+        else
+            print([output_dir filesep  image_name '2_including_subcortex.png'], '-dpng', '-r300')
+
+        end
+        close all
+
+    else
+
+        if downsample_dconn == 1
+            sorted_small2 = sorted_dconn2(1:DS_factor:end,1:DS_factor:end);
+            imagesc(sorted_small2); hold on;
+            if use_nets1 ==0
+                if exclude_zero_networks ==1
+                    assigns_sonly_assigned= assigns2(find(assigns2~=0));
+                    assigns_small2 = assigns_sonly_assigned(1:DS_factor:end);
+
+                else
+                    assigns_small2 = assigns2(1:DS_factor:end);
+                end
+
+                [sort2small,~] = sort(assigns_small2);
+                insert_net_lines(networks,sort2small,1);
+            else
+
+                insert_net_lines(networks,sort1small,1);
+            end
+
+        else
+            if use_nets1 ==1
+                imagesc(sorted_dconn2); hold on;
+                insert_net_lines(networks,sort1,1)
+            else
+                imagesc(sorted_dconn2); hold on;
+                insert_net_lines(networks,sort2,1)
+            end
+        end
+
+        set(gca,'FontSize',9)
+        set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
+        %xlim([0 1]);ylim([0 1]);
+        %f.PaperPositionMode   = 'auto';
+        title('Correlation matrix sorted by network','FontSize',9);
+        colormap jet
+        colorbar;
+        caxis(caxis_scale)
+        %f.Position = [100 100 600 600];
+    end
+
+    disp('plotting difference...')
+    ax3 = subplot(1,3,3);
+    disp('Difference maps use pos-neg color maps.')
+    disp('subtracting dconn2 minues dconn1')
+    if downsample_dconn == 1
+        diff_matrix = sorted_small2-sorted_small1;
+    else
+        if use_showM==1
+            diff_matrix = newdconn2-newdconn;
+        else
+            diff_matrix = sorted_dconn2-sorted_dconn1;
+        end
+    end
+
+    if use_showM==1
+        load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+        colormap(pos_neg_cmap);
+
+        if isnumeric(shoM_diff_range_option) ==1
+            diff_clims=shoM_diff_range_option;
+        else
+            switch shoM_diff_range_option
+                case 'percentile_95'
+                    P=prctile(diff_matrix,[5 95],"all");
+                    P=P';
+                    disp(num2str(P));
+                    diff_clims = P;
+                case 'preset'
+                    diff_clims = [-0.5 0.5];
+                case 'max_range'
+                    Pmin=min(foo,[],"all");
+                    Pmax=max(foo,[],"all");
+                    diff_clims =[Pmin Pmax];
+                otherwise
+                    diff_clims
+                    error('Not sure what do to with these difference color limits. Options are: percentile_95,preset,max_range. Otherwise provide a vector of the colorlimits.' );
+            end
+        end
+
+        showM(diff_matrix,'parcel', parcel,'clims',diff_clims,'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1);
+        load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+        colormap(pos_neg_cmap);
+        colorbar;
+        disp('saving image diff image post minus pre...')
+        if use_only_cortical_connections ==1
+            print([output_dir filesep image_name '_diff_cortex_only.png'], '-dpng', '-r600')
+        else
+            print([output_dir filesep  image_name '_diff_including_subcortex.png'], '-dpng', '-r300')
+        end
+
+    else
+        imagesc(diff_matrix); hold on;
+
+        if downsample_dconn == 1
+            insert_net_lines(networks,sort1small,1);
+        else
+            insert_net_lines(networks,sort1,1);
+        end
+
+        set(gca,'FontSize',9)
+        set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
+        title('Matrix Difference','FontSize',9);
+        %colormap jet
+        load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+        colormap(ax3,pos_neg_cmap);
+        colorbar;
+        caxis([-0.5 0.5])
+        f.Position = [50 100 1300 400];
+        disp('saving image...')
+
+        print([output_dir filesep image_name '_diff.png'], '-dpng', '-r600')
+    end
+
+else
+    disp('saving image...')
+    print([output_dir filesep image_name '.png'], '-dpng', '-r600')
 end
 
-if save_non_zeromatrix ==1
+if save_processed_matrix ==1
     disp('saving...')
 
     if only_save_abs_diff_dconn ==1
         if exclude_zero_networks ==1
-        disp('saving smaller matrix that excludes the zero network assignments (unsorted)...')
-        diff_matrix =newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns);
+            disp('saving smaller matrix that excludes the zero network assignments (unsorted)...')
+            diff_matrix = newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns);
+            %diff_matrix =newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns);
+            disp('saving post minus pre dconn')
         else
         end
         diff_matrix = abs(diff_matrix);
-        save([image_name '_ABS_Diff_dconn1.mat'],'diff_matrix','assigns_sonly_assigned','-v7.3')
+        save([output_dir filesep image_name '_ABS_Diff_dconn1.mat'],'diff_matrix','assigns_sonly_assigned','-v7.3')
     else
-        save([image_name '_dconn1.mat'],'sorted_dconn1','assigns_sonly_assigned','-v7.3')
+        save([output_dir filesep image_name '_dconn1.mat'],'sorted_dconn1','assigns_sonly_assigned','-v7.3')
         if plot2dconns ==1
-            save([image_name '_dconn1.mat'],'sorted_dconn2','assigns_sonly_assigned','-v7.3')
+            save([output_dir filesep image_name '_dconn1.mat'],'sorted_dconn2','assigns_sonly_assigned','-v7.3')
         end
     end
 else
@@ -286,19 +508,19 @@ for i=1:size(networks,1)
     net_end_idx (i)= max(netidices);
 end
 
-    for j = 1:size(networks,1)
-        line([net_start_idx(j)-0.5  net_start_idx(j)-0.5], [0.5 size(sorted_networks,1)+0.5],'Color','black','LineWidth',0.5)
-        line([0.5 size(sorted_networks,1)+0.5 ],[net_start_idx(j)-0.5  net_start_idx(j)-0.5],'Color','black','LineWidth',0.5)
-    end
-% 
-%     
+for j = 1:size(networks,1)
+    line([net_start_idx(j)-0.5  net_start_idx(j)-0.5], [0.5 size(sorted_networks,1)+0.5],'Color','black','LineWidth',0.5)
+    line([0.5 size(sorted_networks,1)+0.5 ],[net_start_idx(j)-0.5  net_start_idx(j)-0.5],'Color','black','LineWidth',0.5)
+end
+%
+%
 %     for i = 0:size(H,2)+1
 %         line([i-0.5 i-0.5], [0.5 size(H,2)+0.5],'Color','black','LineWidth',2)
 %     end
 %     for i = 0:size(H,1)+1
 %         line([0.5 size(H,1)+0.5],[i-0.5 i-0.5] ,'Color','black','LineWidth',2)
 %     end
-    
+
 
 if usenet_colors ==1
     for j = 1:size(networks,1)

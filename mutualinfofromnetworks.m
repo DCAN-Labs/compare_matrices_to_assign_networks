@@ -1,4 +1,4 @@
-function [muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,community_detection, method, cifti_enhancement,other_half_networks_cii,num_interval_reps,indepen_time_series,remove_outliers, additional_mask,make_dconn_conc, output_directory, dtseries_conc,use_continous_minutes,transform_data,surface_only,already_surface_only,template_path,memory_limit_value)
+function [muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector,include_all_frames, smoothing_kernal,left_surface_file, right_surface_file, bit8, output_cifti_name,community_detection, method, cifti_enhancement,other_half_networks_cii,num_interval_reps,indepen_time_series,remove_outliers, additional_mask,make_dconn_conc, output_directory, dtseries_conc,use_continous_minutes,transform_data,surface_only,already_surface_only,template_path,memory_limit_value,working_dir)
 %% This code then runs template matching or infomap on subjects and calculate the mututal information to a specifided dscalar.
 %%This code is designed to make correlation matrix from a subject's dtseries, and motion, and surface files (if smoothing is desired) See documentation for cifti_conn_matrix.
 % Correlation matrices are automatically Z-scored.
@@ -47,7 +47,7 @@ else
     if strcmp(minutes_vector,'none') == 1
         minutes_vector = cellstr('none');
     elseif strcmp(minutes_vector,'typical_minutes') == 1
-        minutes_vector = {1 2 3 4 5 10 15 20 25};
+        minutes_vector = {1 2 3 4 5 10 15 20};
     else
         minutes_vector = str2double(minutes_vector);
     end
@@ -61,8 +61,10 @@ if isempty(minutes_vector) %determine if minutes vector includes a 'none' option
         return
     end
 else
-    
-    minutes_vector = num2cell(minutes_vector);
+    if iscell(minutes_vector) ==0
+        minutes_vector = num2cell(minutes_vector);
+    else
+    end
     if include_all_frames == 1
         nonecell = cellstr('none');
         minutes_vector = [minutes_vector nonecell]; % concatenate cells with numbers and cell with 'none'
@@ -124,7 +126,9 @@ if indepen_time_series == 1
             if strcmp(minutes_vector{i},'none') == 1
                 minutes_andreps_name = 'none';
             else
+                %minutes_andreps_name = [num2str(minutes_vector{1,i}{1}) 'reps' num2str(num_reps_vector(r))];
                 minutes_andreps_name = [num2str(minutes_vector{i}) 'reps' num2str(num_reps_vector(r))];
+
             end
             
                     data_type = 'dense';
@@ -133,7 +137,11 @@ if indepen_time_series == 1
                     %else
                     templ_dscalar_out_dir = output_directory;                    
                     %template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_method_' method '.dscalar.nii'];
-                    template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_Zscored_recolored.dscalar.nii'];
+                    if strcmp(transform_data,'Convert_to_Zscores')==1
+                        template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_Zscored_recolored.dscalar.nii'];
+                    else
+                        template_output_cifti_scalar_name  = [output_cifti_name minutes_andreps_name '_recolored.dscalar.nii'];
+                    end
                     %end
                     
             if  exist([templ_dscalar_out_dir filesep template_output_cifti_scalar_name],'file') == 0
@@ -147,7 +155,7 @@ if indepen_time_series == 1
                 %additional_mask = 'none';
                 %orig_temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector{i}, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers,additional_mask);
                 %orig_temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_vector{i}, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers,additional_mask);
-                orig_temp_name = cifti_conn_matrix_for_wrapper_continous(wb_command,dt_or_ptseries_conc_file, series, motion_file, FD_threshold, TR,minutes_vector{i},smoothing_kernal, left_surface_file,right_surface_file, bit8, remove_outliers, additional_mask,make_dconn_conc, output_directory, dtseries_conc,use_continous_minutes,memory_limit_value);
+                orig_temp_name = cifti_conn_matrix_for_wrapper_continous(wb_command,dt_or_ptseries_conc_file, series, motion_file, FD_threshold, TR,minutes_vector{i},smoothing_kernal, left_surface_file,right_surface_file, bit8, remove_outliers, additional_mask,make_dconn_conc, working_dir, dtseries_conc,use_continous_minutes,memory_limit_value);
                 temp_short = orig_temp_name(1:end-10); %remove dconn.nii
                 
                 %Build symlinks first
