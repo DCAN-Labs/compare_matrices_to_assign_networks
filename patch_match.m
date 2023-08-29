@@ -1,18 +1,69 @@
-function patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile, output_subject_path,output_file_name,distance_matrix_to_use)
+function [final_patch_path] = patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile, output_subject_path,output_file_name,distance_matrix_to_use)
 
-%This function work trying to match up a subjects invidualized clusters
+%This function work trying to match up a subjects individualized clusters
 %with the clusters observed in the group.
 
 %R. Hermosillo 09/29/2021
 
+% inputs are:
+% "subject_input_cifti_file" =  the full path to the subject dscalar with their template matching networks that you
+%                               are going to try to match against some template.
+% "template_input_cifti_file" = this is template that you wish to match
+%                               the cluster to.  ABCD has around 200 patches depending on how the
+%                               clusters are defined using the parameteres specified below.  Use 'default
+%                               to use the ABCD_consesus map.
+% "output_template_path" =      path to where you want to write the template patches file. 
+% "path_to_Lmidthicknessfile" = path to the LEFT midthickness file that you will use to find the clusters
+% "path_to_Rmidthicknessfile" = path to the RIGHT midthickness file that you will use to find the clusters
+% "output_subject_path" =       path to output the subject's files. Several 
+%                               intermediate files are written (e.g.
+%                               patches are identified per network, and
+%                               the final files).
+% "output_file_name" =          Some output file name to use (E.g. "SUBJECT1234")
+% "distance_matrix_to_use" =    Path to a  geodesic+euclidean distance 
+%                               matrix.  If you haven't created one before you can use the code found
+%                               here: /home/faird/shared/code/internal/utilities/distance-matrix or 
+%                                at https://gitlab.com/Fair_lab/distance-matrix.git
+% 
+% 
+% An Example call to this functin would be as follows:
+% patch_match('/path/to/my/TM_networks.dscalar.nii','default','/path/to/my/output_folder/,'/path/to/my/L_midthickness_file.surf.gii','/path/to/my/R_midthickness_file.surf.gii','the_best_subject_ever','/path/to/my/huge/distance_matrix_file.mat');
+
+% HOW DOES THE CODE WORK?
+
+%First both small islands are removed from both the template and the
+%subject using a size exclusion or 80mm^3.  because combinations of patches
+%can be used, don't consider clusters that are less than 10 grayordinates
+%in this calculation.
+
+%In the first step cluster files are created for each network.  Then the
+%jaccard similiarty is calculated for each patch again sthe the patches in
+%the template.  AFter that, combinations of patches are also tested against
+%the template patches.  Most grayordinates are assigned at this step.
+
+%In the second step For small islands Distance to unassigned group-patches of the same
+%network.  This allows for patches that are very close to the template (but
+%maybe missed in step 1) to be assigned.  The code works by calculating the
+%distance between each grayordinate to the unassigned template patches.
+
+%Lastly, The code the assigns the remaining small islands to the patches that have already been previously assigned based on distance.
+%If the distance is too large, those islands will remain unassigned.
+
+
+
+%% Start with some hardcoded parameters.
 tic
 %Hardcodes
 %subject_input_cifti_file='C:\Users\hermosir\Documents\test_ciftis\sub-33005b_task-rest_DCANBOLDProc_v4.0.0_Atlas_template_matched_Zscored_recolored.dscalar.nii';
 %template_input_cifti_file=('C:\Users\hermosir\Documents\repos\support_folder\91282_Greyordinates.dscalar.nii');
 %template_input_cifti_file=('C:\Users\hermosir\Documents\test_ciftis\ABCD_GROUP_AVERAGES\ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii');
 %template_input_cifti_file='C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
-template_input_cifti_file='/panfs/roc/groups/8/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
-
+switch template_input_cifti_file
+    case 'default'
+        template_input_cifti_file='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
+    otherwise
+        disp(['Using template file: ' template_input_cifti_file]);
+end
 %output_template_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
 %output_subject_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
 %output_file_name = 'sub-33005b';
@@ -877,7 +928,8 @@ unmatched_indices = template_unique_adjusted_patches(unmatchable_log);
 disp(['The number of patches that could not be matched is ' num2str(unmatchable_num) '/' num2str(max(template_unique_adjusted_patches)) ]);
 disp(['The subject did not have the following networks: ' num2str(unmatched_indices')])
 subject_cifti_obj.cdata=subject_patch_label_vector;
-ciftisave(subject_cifti_obj,[output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post3.dscalar.nii'],wb_command);
+final_patch_path=[output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post3.dscalar.nii'];
+ciftisave(subject_cifti_obj,final_patch_path,wb_command);
 
 disp('removing files')
 for net_num =net_list

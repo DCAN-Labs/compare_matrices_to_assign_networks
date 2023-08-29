@@ -1,4 +1,4 @@
-function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap,exclude_zero_networks,save_processed_matrix,only_save_abs_diff_dconn,use_showM,shoM_diff_range_option,output_dir,use_only_cortical_connections)
+function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap,exclude_zero_networks,save_processed_matrix,save_diff_dconn,use_showM,shoM_diff_range_option,output_dir,use_only_cortical_connections)
 
 %R.Hermosillo 08/20/2019
 
@@ -64,7 +64,7 @@ if downsample_dconn == 1
     end
 end
 downsample_dconn
-
+get_abs_value=0;
 if isnumeric(apply_Zscore_dconn)==1
 else
     apply_Zscore_dconn = str2double(apply_Zscore_dconn);
@@ -107,11 +107,11 @@ else
     save_processed_matrix = str2double(save_processed_matrix);
 end
 save_processed_matrix
-if isnumeric(only_save_abs_diff_dconn)==1
+if isnumeric(save_diff_dconn)==1
 else
-    only_save_abs_diff_dconn = str2double(only_save_abs_diff_dconn);
+    save_diff_dconn = str2double(save_diff_dconn);
 end
-only_save_abs_diff_dconn
+save_diff_dconn
 if isnumeric(use_showM)==1
 else
     use_showM = str2double(use_showM);
@@ -130,6 +130,14 @@ if strcmp(net_assigns(end-3:end),'.csv')
     assigns = table2array(readtable(net_assigns));
 elseif strcmp(net_assigns(end-3:end),'.txt')
     assigns = table2array(readtable(net_assigns));
+elseif strcmp(net_assigns(end-3:end),'.mat')
+    load(net_assigns,'parcel');
+    disp('Converting .mat parcel data into cortical vector. assuming 59412 grayordinates.')
+    assigns = zeros(59412,1);
+    for i=1:size(parcel,2)
+        netidx=parcel(i).ix;
+        assigns(netidx)=parcel(i).power_val;
+    end
 elseif strcmp(net_assigns(end-10:end),'pscalar.nii')
     net_assigns = ciftiopen(net_assigns,wb_command);
     assigns = net_assigns.cdata;
@@ -139,15 +147,16 @@ elseif strcmp(net_assigns(end-10:end),'dscalar.nii')
 elseif isnumeric(net_assigns)
     assigns = net_assigns;
 else
-
+    
     error('What kind of file are you trying touse to import assignments? Use a dscalar.nii, pscalar.nii, .txt, or .csv (1 assingment per line.)')
 end
-
 
 if use_only_cortical_connections==1
     disp('Assuming dense data');
     assigns = assigns(1:59412,1);
 end
+
+
 
 %load dconn
 disp('Loading dconn and assignments...')
@@ -194,7 +203,7 @@ clear dconn
 
 if plot2dconns ==1
     if isnumeric(dconn_cifti_path2) ==0
-
+        
         disp('Loading dconn and assignments...')
         disp(dconn_cifti_path2)
         dconn_cifti2=ciftiopen(dconn_cifti_path2,wb_command);
@@ -208,12 +217,12 @@ if plot2dconns ==1
     else
         newdconn2 = dconn2;
     end
-
+    
     if use_only_cortical_connections==1
         disp('Assuming dense data');
         newdconn2 = newdconn2(1:59412,1:59412);
     end
-
+    
     if use_nets1 ==1
         sorted_dconn2 =  newdconn2(I,I);
     else
@@ -235,18 +244,20 @@ if plot2dconns ==1
 end
 
 if use_showM ==1
-
+    
     if use_only_cortical_connections ==1
         parcel_output_name = [output_dir filesep image_name '_cortex_only'];
-        parcel = build_high_density_parcel_file(assigns,parcel_output_name);
-
+        if exist('parcel','var')~=1
+            parcel = build_high_density_parcel_file(assigns,parcel_output_name);
+        end
     else
         parcel_output_name = [output_dir filesep image_name];
-        parcel = build_high_density_parcel_file(assigns,parcel_output_name);
-
+        if exist('parcel','var')~=1
+            parcel = build_high_density_parcel_file(assigns,parcel_output_name);
+        end
     end
-
-
+    
+    
     %load(parcel_file, 'parcel')
     %     if isfield(parcel,'power_val')
     %         [~, alpha_sort]=sort([parcel.power_val],'ascend');
@@ -254,34 +265,38 @@ if use_showM ==1
     %         disp('networks are already sorted alphanumerically hopefully.')
     %         alpha_sort = 1:size([parcel.n],2);
     %     end
+    
+    if exclude_zero_networks ==1
+        newdconn=newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns); % reduce dconn without sorting it.
+    end
     showM(newdconn,'parcel', parcel,'clims',[-0.5 1],'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1); colormap jet
     colormap jet
     disp('saving image...')
     if use_only_cortical_connections ==1
         print([output_dir filesep image_name '1_cortex_only.png'], '-dpng', '-r300')
-
+        
     else
         print([output_dir filesep  image_name '1_including_subcortex.png'], '-dpng', '-r300')
-
+        
     end
-
-
+    
+    
 else
     if downsample_dconn == 1
         if exclude_zero_networks ==1
             assigns_sonly_assigned= assigns(find(assigns~=0));
             assigns_small = assigns_sonly_assigned(1:DS_factor:end);
-
+            
         else
             assigns_small = assigns(1:DS_factor:end);
         end
-
+        
         [sort1small,~] = sort(assigns_small);
-
+        
         sorted_small1 = sorted_dconn1(1:DS_factor:end,1:DS_factor:end);
         imagesc(sorted_small1); hold on;
         insert_net_lines(networks,sort1small,1);
-
+        
     else
         imagesc(sorted_dconn1); hold on;
         insert_net_lines(networks,sort1,1)
@@ -305,21 +320,23 @@ caxis(caxis_scale);
 disp(['plot2dconns equals: ' plot2dconns']);
 if plot2dconns ==1
     ax2=subplot(1,3,2);
-
+    
     if use_showM ==1
         if use_nets1 ==1
             assigns2 = assigns;
         end
         if use_only_cortical_connections ==1
             parcel_output_name = [output_dir filesep image_name '_cortex_only'];
-            parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
-
+            if exist('parcel','var')~=1
+                parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
+            end
         else
             parcel_output_name = [output_dir filesep image_name];
-            parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
-
+            if exist('parcel','var')~=1
+                parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
+            end
         end
-
+        
         %load(parcel_file, 'parcel')
         %     if isfield(parcel,'power_val')
         %         [~, alpha_sort]=sort([parcel.power_val],'ascend');
@@ -327,20 +344,25 @@ if plot2dconns ==1
         %         disp('networks are already sorted alphanumerically hopefully.')
         %         alpha_sort = 1:size([parcel.n],2);
         %     end
+        
+        if exclude_zero_networks ==1
+            newdconn2=newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns); % reduce dconn without sorting it.
+        end
+        
         showM(newdconn2,'parcel', parcel,'clims',[-0.5 1],'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1); colormap jet
         colormap jet
         disp('saving image...')
         if use_only_cortical_connections ==1
             print([output_dir filesep image_name '2_cortex_only.png'], '-dpng', '-r300')
-
+            
         else
             print([output_dir filesep  image_name '2_including_subcortex.png'], '-dpng', '-r300')
-
+            
         end
         close all
-
+        
     else
-
+        
         if downsample_dconn == 1
             sorted_small2 = sorted_dconn2(1:DS_factor:end,1:DS_factor:end);
             imagesc(sorted_small2); hold on;
@@ -348,18 +370,18 @@ if plot2dconns ==1
                 if exclude_zero_networks ==1
                     assigns_sonly_assigned= assigns2(find(assigns2~=0));
                     assigns_small2 = assigns_sonly_assigned(1:DS_factor:end);
-
+                    
                 else
                     assigns_small2 = assigns2(1:DS_factor:end);
                 end
-
+                
                 [sort2small,~] = sort(assigns_small2);
                 insert_net_lines(networks,sort2small,1);
             else
-
+                
                 insert_net_lines(networks,sort1small,1);
             end
-
+            
         else
             if use_nets1 ==1
                 imagesc(sorted_dconn2); hold on;
@@ -369,7 +391,7 @@ if plot2dconns ==1
                 insert_net_lines(networks,sort2,1)
             end
         end
-
+        
         set(gca,'FontSize',9)
         set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
         %xlim([0 1]);ylim([0 1]);
@@ -380,25 +402,38 @@ if plot2dconns ==1
         caxis(caxis_scale)
         %f.Position = [100 100 600 600];
     end
-
+    
     disp('plotting difference...')
     ax3 = subplot(1,3,3);
     disp('Difference maps use pos-neg color maps.')
     disp('subtracting dconn2 minues dconn1')
     if downsample_dconn == 1
-        diff_matrix = sorted_small2-sorted_small1;
+        if get_abs_value ==1
+            diff_matrix = abs(sorted_small2-sorted_small1);
+        else
+            diff_matrix = sorted_small2-sorted_small1;
+        end
     else
         if use_showM==1
-            diff_matrix = newdconn2-newdconn;
+            if get_abs_value ==1
+                diff_matrix = abs(newdconn2-newdconn);
+            else
+                diff_matrix = newdconn2-newdconn;
+            end
         else
-            diff_matrix = sorted_dconn2-sorted_dconn1;
+            if get_abs_value ==1
+                diff_matrix = abs(sorted_dconn2-sorted_dconn1);
+                
+            else
+                diff_matrix = sorted_dconn2-sorted_dconn1;
+            end
         end
     end
-
+    
     if use_showM==1
         load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
         colormap(pos_neg_cmap);
-
+        
         if isnumeric(shoM_diff_range_option) ==1
             diff_clims=shoM_diff_range_option;
         else
@@ -419,7 +454,7 @@ if plot2dconns ==1
                     error('Not sure what do to with these difference color limits. Options are: percentile_95,preset,max_range. Otherwise provide a vector of the colorlimits.' );
             end
         end
-
+        
         showM(diff_matrix,'parcel', parcel,'clims',diff_clims,'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1);
         load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
         colormap(pos_neg_cmap);
@@ -430,16 +465,16 @@ if plot2dconns ==1
         else
             print([output_dir filesep  image_name '_diff_including_subcortex.png'], '-dpng', '-r300')
         end
-
+        
     else
         imagesc(diff_matrix); hold on;
-
+        
         if downsample_dconn == 1
             insert_net_lines(networks,sort1small,1);
         else
             insert_net_lines(networks,sort1,1);
         end
-
+        
         set(gca,'FontSize',9)
         set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
         title('Matrix Difference','FontSize',9);
@@ -450,10 +485,10 @@ if plot2dconns ==1
         caxis([-0.5 0.5])
         f.Position = [50 100 1300 400];
         disp('saving image...')
-
+        
         print([output_dir filesep image_name '_diff.png'], '-dpng', '-r600')
     end
-
+    
 else
     disp('saving image...')
     print([output_dir filesep image_name '.png'], '-dpng', '-r600')
@@ -461,25 +496,29 @@ end
 
 if save_processed_matrix ==1
     disp('saving...')
-
-    if only_save_abs_diff_dconn ==1
-        if exclude_zero_networks ==1
-            disp('saving smaller matrix that excludes the zero network assignments (unsorted)...')
-            diff_matrix = newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns);
-            %diff_matrix =newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns);
-            disp('saving post minus pre dconn')
-        else
-        end
-        diff_matrix = abs(diff_matrix);
-        save([output_dir filesep image_name '_ABS_Diff_dconn1.mat'],'diff_matrix','assigns_sonly_assigned','-v7.3')
-    else
-        save([output_dir filesep image_name '_dconn1.mat'],'sorted_dconn1','assigns_sonly_assigned','-v7.3')
-        if plot2dconns ==1
-            save([output_dir filesep image_name '_dconn1.mat'],'sorted_dconn2','assigns_sonly_assigned','-v7.3')
-        end
+    save([output_dir filesep image_name '_dconn1.mat'],'sorted_dconn1','assigns_sonly_assigned','-v7.3')
+    if plot2dconns ==1
+        save([output_dir filesep image_name '_dconn2.mat'],'sorted_dconn2','assigns_sonly_assigned','-v7.3')
     end
-else
 end
+
+if save_diff_dconn ==1
+    if exclude_zero_networks ==1
+        disp('saving smaller matrix that excludes the zero network assignments (unsorted)...')
+        diff_matrix = newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns);
+        %diff_matrix =newdconn(nonzerounsorted_assigns,nonzerounsorted_assigns) - newdconn2(nonzerounsorted_assigns,nonzerounsorted_assigns);
+        disp('saving post minus pre dconn')
+    else
+    end
+    if get_abs_value ==1
+        diff_matrix = abs(diff_matrix);
+        get_abs_option='_ABS';
+    else
+        get_abs_option='';
+    end
+    save([output_dir filesep image_name get_abs_option '_Diff_dconn1.mat'],'diff_matrix','assigns_sonly_assigned','-v7.3')
+end
+
 disp('Done plotting.')
 end
 
