@@ -298,6 +298,10 @@ else
         insert_net_lines(networks,sort1small,1);
         
     else
+        if exclude_zero_networks ==1
+            assigns_sonly_assigned= assigns(find(assigns~=0));
+        end
+        
         imagesc(sorted_dconn1); hold on;
         insert_net_lines(networks,sort1,1)
     end
