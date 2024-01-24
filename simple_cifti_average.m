@@ -1,4 +1,4 @@
-function [output_name ] = simple_cifti_average(cifti_conc,output_name, method, plot_data, TMprobability_modules,gordon_modules,check_for_nans,remove_subjects_with_nans,average_of_diff_of_cifti_pairs,cifti_conc2)
+function [output_name ] = simple_cifti_average(cifti_conc,output_name, method, plot_data, TMprobability_modules,gordon_modules,other_modules,check_for_nans,remove_subjects_with_nans,average_of_diff_of_cifti_pairs,cifti_conc2,matrix_color_limits_vector)
 
 %this code simple loads in already built ciftis (one at a time) rom your conc file and averages
 %them.
@@ -83,15 +83,15 @@ cifti_type = strsplit(ciftis{1}, '.');
 cifti_exten = char(cifti_type(end-1));
 
 if strcmp('dtseries',cifti_exten) == 1
-    
+     ismatfile = 0;
 elseif strcmp('dconn',cifti_exten) == 1
-    
+     ismatfile = 0;
 elseif strcmp('dscalar',cifti_exten) == 1
-    
+     ismatfile = 0;
 elseif strcmp('ptseries',cifti_exten) == 1
-    
+     ismatfile = 0;
 elseif strcmp('pscalar',cifti_exten) == 1
-    
+     ismatfile = 0;
 elseif strcmp('pconn',cifti_exten) == 1
         ismatfile = 0;
  elseif strcmp('mat',char(cifti_type(end))) == 1 
@@ -104,9 +104,25 @@ else
 end
 
 if ismatfile == 1
-    load(ciftis{i},'unsorted_reduced_dconn');
-    current_cifti = unsorted_reduced_dconn;
+    
+%     load(ciftis{i},'unsorted_reduced_dconn');
+%     current_cifti = unsorted_reduced_dconn;
+try
+    load(ciftis{i},'diff_matrix');
+    current_cifti = diff_matrix;
+    
     clear unsorted_reduced_dconn
+catch
+    disp('couldnt find diffdconn variable')
+    try
+        disp('looking for matrix data...')
+        load(ciftis{i},'sorted_dconn1');
+       current_cifti = sorted_dconn1;     
+    catch
+        error('unclear what vairable name contains matrix...');
+    end
+end
+
 else
     cifti_cii = ciftiopen(ciftis{1},wb_command);
     current_cifti = cifti_cii.cdata;
@@ -142,9 +158,11 @@ if strcmp('dtseries',cifti_exten) == 1
                 all_ciftis(:,:,i) = current_cifti(:,:);
             end
             disp('Getting mode.')
-            for n = size(all_ciftis,2)
-            all_modes_cifti(n) = mode(all_ciftis(:,n,:)'); 
-            avg_cifti(n) = all_modes_cifti(n)'; % call it all_ciftis just to make things easy.
+            for n = 1:size(all_ciftis,2)
+            all_modes_cifti = mode(squeeze(all_ciftis(:,n,:))'); 
+            %avg_cifti(n) = all_modes_cifti(n)'; % call it all_ciftis just to make things easy.
+            avg_cifti(:,n) = all_modes_cifti; % call it all_ciftis just to make things easy.
+            
             end
         otherwise
             error('Method is not supported.')
@@ -158,9 +176,16 @@ else
             for i = 1:length(ciftis)
                 disp(i)
                 if ismatfile==1
-                    load(ciftis{i},'unsorted_reduced_dconn');
-                    current_cifti = unsorted_reduced_dconn;
-                    clear unsorted_reduced_dconn;
+%                     load(ciftis{i},'unsorted_reduced_dconn');
+%                     current_cifti = unsorted_reduced_dconn;
+%                    clear unsorted_reduced_dconn;
+try
+     load(ciftis{i},'diff_matrix');
+     current_cifti = diff_matrix; 
+catch
+     load(ciftis{i},'sorted_dconn1');
+     current_cifti = sorted_dconn1;                    
+end
                 else
                     current_gii_obj = ciftiopen(ciftis{i},wb_command);
                     current_cifti = current_gii_obj.cdata;
@@ -247,16 +272,23 @@ load('/panfs/jay/groups/6/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabi
         if gordon_modules ==1
             load('/home/rando149/shared/projects/Polyvertexscore/HumanGordon_parcel.mat','parcel')
         end
+        
+        if isnumeric(other_modules) ~=1
+            load(other_modules,'parcel')
+        end
         if average_of_diff_of_cifti_pairs ==1
-            showM(avg_cifti,'parcel',parcel,'clims',[-0.20 0.20],'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',7,'one_side_labels',1,'fig_tall',8);
+            showM(avg_cifti,'parcel',parcel,'clims',matrix_color_limits_vector,'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',7,'one_side_labels',1,'fig_tall',8);
             load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
             colormap(pos_neg_cmap);
         else
-            showM(avg_cifti,'parcel',parcel,'clims',[-0.5 1],'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',7,'one_side_labels',1,'fig_tall',8);
-            colormap jet
+            showM(avg_cifti,'parcel',parcel,'clims',matrix_color_limits_vector,'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',7,'one_side_labels',1,'fig_tall',8);
+            load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+            colormap(pos_neg_cmap);           
+            
+            %colormap jet
         end
         disp('saving image...')
-        print([output_name '.png'], '-dpng', '-r300')
+        print([output_name method '.png'], '-dpng', '-r300')
         
     end
 end

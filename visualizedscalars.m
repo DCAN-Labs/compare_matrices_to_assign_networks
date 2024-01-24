@@ -285,7 +285,7 @@ if overlap == 1
             disp('Saving average number of networks.')
             whole_brain_number_of_nets = mean(scalar_array,1);
             whole_brain_number_of_nets = whole_brain_number_of_nets';
-            integration_zonesscalarpath = '/panfs/roc/groups/3/rando149/shared/projects/ABCD_net_template_matching/ABCD_number_of_nets/ABCD_GRP1_overlap_number_of_nets_avg_number_of_network_2.2_thres_sz60_clusters.dscalar.nii';
+            integration_zonesscalarpath = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_number_of_nets/ABCD_GRP1_overlap_number_of_nets_avg_number_of_network_2.2_thres_sz60_clusters.dscalar.nii';
             intcii = ciftiopen(integration_zonesscalarpath,wb_command);
             intmask = intcii.cdata;
             if surface_only ==1

@@ -1,4 +1,4 @@
-function [outname] = clean_dscalars_by_size(dscalarwithassignments,manualset,groupnetworksfile,dostripes,mincol,minsize,orig_parcelsfile,make_consensus,assign_unassigned,remove46)
+function [outname] = clean_dscalars_by_size(dscalarwithassignments,manualset,groupnetworksfile,dostripes,mincol,minsize,orig_parcelsfile,make_consensus,assign_unassigned,remove46,removescan17)
 %consensus_maker_knowncolors(regularized_ciftifile,[manualset],[groupnetworksfile],[dostripes],[mincol],[minsize],[orig_parcelsfile])
 
 %This function cleans up networks.
@@ -194,6 +194,9 @@ for i=1:length(dscalarwithassignments)
 
             all_recolored(all_recolored==4) = 0;
             all_recolored(all_recolored==6) = 0;
+        end
+        if removescan17 == 1 
+            all_recolored(all_recolored==17) = 0;
 
         end
 
@@ -266,10 +269,10 @@ for i=1:length(dscalarwithassignments)
         end
 
         for j = 1:size(out,2)
-            if j==4 || j ==6
-                continue
-            end
-
+                if j==4 || j ==6
+                    continue
+                end
+            
             allcolors= unique(out(:,j));
             if assign_unassigned == 1
                 %allcolors = [allcolors(2:end)' allcolors(1)']'; % move unsigned networks to the end, so they're likely to be already assinged.
@@ -398,8 +401,7 @@ for i=1:length(dscalarwithassignments)
                                     borderverts=borderverts(~isnan(borderverts));
 
                                 end
-
-
+                                
                                 bordererassigns = temp_out(borderverts);
                                 int_clusterassings = bordererassigns > 0;
                                 mode_neighborval = mode(bordererassigns(int_clusterassings));

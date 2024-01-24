@@ -36,7 +36,9 @@ function [all_subjects_minutes,all_mean_FD,allrestlist] = check_twins_motion(all
 save_split_motion_vectors = 1;
 get_FDnumbers =1;
 find_subjects_with_most_data=1;
-minimum_frames_threshold = 750; % if find_subjects_with_most_data is ==1, then subset subjects with at least this many frames.
+%minimum_frames_threshold = 750; % if find_subjects_with_most_data is ==1, then subset subjects with at least this many frames.
+minimum_frames_threshold = 1500; % if find_subjects_with_most_data is ==1, then subset subjects with at least this many frames (@TR=0.8, 1500=20 minutes).
+
 use_all_frames_in_splits = 1; % set to 1 if you want to use all available frames.  (eg. if have 6000 good frames, and you want to make 6 splits of 1000).  Setting this value to zero will make X splits where each is randomly sampled to fit the minimum threshold criteria (e.g you have 6000 frames and you want 2 splits of 80 frames.  In this instance you have way more available frames, so the code will cut data in half then randomly sample 80 frames.
 
 if iscell(all_motion_conc_file) ==1
@@ -197,17 +199,15 @@ if exist('find_subjects_with_most_data', 'var') == 1 && find_subjects_with_most_
     
     
     j = 1;
-    
-         f1=figure;
-         f2=figure;
-         f3=figure;
-    
     %To generate a random mask with exactly 10 minutes in each split half, we first half to ...
     %1)find the mid point of good frames.
     %2)randomly sample the frames to make exactly x minutes (for each half)
     %3)build write those 1s to en empty mask.
     
     if exist('split_motion', 'var') == 1 && split_motion == 1
+                 f1=figure;
+         f2=figure;
+         f3=figure;
         for i = 1:length(lots_o_data_subs)
             load(lots_o_data_subs{i})
             %FD_vector_1isbad =  motion_data{31}.frame_removal;
@@ -320,8 +320,11 @@ if exist('find_subjects_with_most_data', 'var') == 1 && find_subjects_with_most_
     else
     end
     allrestlist = {};
-    save([output_dir filesep  output_name 'best_subs_split' num2str(k) '_FD' num2str(motion_data{1,FD_column}.FD_threshold) '_masks.mat'],'allrestlist','all_best_masks','all_subjects_minutes','all_mean_FD','allrestlist')
-    
+    if exist('split_motion', 'var') == 1 && split_motion == 1
+    save([output_dir filesep  output_name 'best_subs_split' num2str(splits) '_FD' num2str(motion_data{1,FD_column}.FD_threshold) '_masks.mat'],'allrestlist','all_best_masks','all_subjects_minutes','all_mean_FD','allrestlist','all_motion_conc_file')
+    else
+     save([output_dir filesep  output_name '_masks_summary.mat'],'minimum_frames_threshold','lots_o_data_subs','allrestlist', 'all_poss_frames', 'all_possible_minutes', 'all_subjects_minutes','all_mean_FD','allrestlist','all_motion_conc_file')       
+    end
 else
     
     save([output_dir filesep  output_name '_summary.mat'],'good_frames', 'all_subjects_minutes', 'all_mean_FD', 'all_poss_frames', 'all_possible_minutes', 'all_motion_conc_file')

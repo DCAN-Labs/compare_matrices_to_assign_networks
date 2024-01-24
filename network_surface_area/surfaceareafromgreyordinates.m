@@ -250,7 +250,7 @@ end
 
 if output_only_greySA  ==1
     disp('saving volumes and surface areas');
-    save( [output_folder filesep outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Rmidthicknessfile','Rmidthicknessfile')
+    save( [output_folder filesep outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Lmidthicknessfile','Rmidthicknessfile')
 else
 end
 

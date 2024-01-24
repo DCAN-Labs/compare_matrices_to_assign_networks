@@ -88,6 +88,8 @@ for i=1:size(pathsAlist,1)
         case 'common'
             diff_net= find(Adscalar == Bdscalar);
             outscalar(diff_net)=Bdscalar(diff_net);
+        otherwise
+            error('outputmap_type variable must be set to "difference" or "common" (as strings).')
     end
     Bcii.cdata = outscalar;
     if strcmp('conc', conc)
@@ -95,7 +97,7 @@ for i=1:size(pathsAlist,1)
     else
         
         alloutscalar = [];
-        ciftisave(Bcii,[outname '.dscalar.nii'],wb_command)
+        ciftisave(Bcii,[outname '_' outputmap_type '.dscalar.nii'],wb_command)
     end
     clear outscalar
     
@@ -107,7 +109,7 @@ end
         count_diff = sum(isnanarray,2);
         outscalar = count_diff/size(pathsAlist,1);
         Bcii.cdata = outscalar;
-        ciftisave(Bcii,[outname '.dscalar.nii'],wb_command)
+        ciftisave(Bcii,[outname '_' outputmap_type '.dscalar.nii'],wb_command)
   end
   
 end

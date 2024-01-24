@@ -1,4 +1,4 @@
-function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,TR,all_motion_conc_file,project_dir,Zscore_regions,power_motion,remove_outliers, surface_only,use_only_subjects_that_pass_motion_criteria,combined_outliermask_provided)
+function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,TR,all_motion_conc_file,project_dir,Zscore_regions,power_motion,remove_outliers, surface_only,use_only_subjects_that_pass_motion_criteria,combined_outliermask_provided,include_scan_net)
 %%% load consensus, subjects, networks
 %consen = ft_read_cifti_mod('/data/cn6/allyd/variants/120_colorassn_minsize400_manualconsensus.dtseries.nii');
 %consen = ft_read_cifti_mod('/mnt/max/shared/code/internal/utilities/community_detection/fair/120_colorassn_minsize400_manualconsensus.dtseries.nii');
@@ -43,8 +43,11 @@ addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/U
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
+if include_scan_net ==1
+network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'     ''    'SCAN'};
+else
 network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
-
+end
 %% Check timeseries and motion files
 conc = strsplit(dt_or_ptseries_conc_file, '.');
 conc = char(conc(end));
@@ -54,17 +57,17 @@ else
     subs = {dt_or_ptseries_conc_file};
 end
 
-j=0;
+subsfound=0;
 for i = 1:length(subs)
     if exist(subs{i},'file') == 0
         NOTE = ['Subject Series ' num2str(i) ' does not exist']
         disp(num2str(subs{i}))
         return
     else
-        j=j+1;
+        subsfound=subsfound+1;
     end
 end
-disp([num2str(j) ' of ' num2str(length(subs)) ' timeseries files found.  All series files exist continuing ...'])
+disp([num2str(subsfound) ' of ' num2str(length(subs)) ' timeseries files found.  All series files exist continuing ...'])
 
 if strcmp('conc',conc) == 1
     B = importdata(all_motion_conc_file);
@@ -79,17 +82,17 @@ else
 end
 
 % Check that all motion files in conc file exist
-j=0;
+subsfound_motion=0;
 for i = 1:length(B)
     if exist(B{i},'file') == 0
         NOTE = ['motion file ' num2str(i) ' does not exist']
         disp(num2str(B{i}))
         %return
     else
-        j=j+1;
+        subsfound_motion=subsfound_motion+1;
     end
 end
-disp([num2str(j) ' of ' num2str(length(B)) 'motion files found. All motion files exist continuing ...'])
+disp([num2str(subsfound_motion) ' of ' num2str(length(B)) ' motion files found. All motion files exist continuing ...'])
 
 file_dir = dt_or_ptseries_conc_file;
 file_split = strsplit(file_dir,'/');
@@ -106,12 +109,22 @@ end
 
 %consen_file = ciftiopen(settings.path{6}, wb_command); %path to dscalar with template labels.
 %consen = consen_file.cdata;
+if include_scan_net ==1
+%consen = ft_read_cifti_mod('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned_wHCPscan.dscalar.nii');    
+consen = ft_read_cifti_mod('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned_wABCDscan.dscalar.nii');    
+else
 consen = ft_read_cifti_mod(settings.path{6}); %path to dscalar with template labels.
+end
+
 %subs = textread('/data/cn6/allyd/TRsurfaces/allTRlist.txt','%s');
 %subs = textread('/mnt/max/shared/projects/midnight_scan_club/template_matching/MSC_subjects.txt','%s');
 %consen.data=consen.data(1:59412); %%% if surface only
 if check_motion_first ==1
-[all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, FD_column,[],0,1);
+    % check_twins_motion(all_motion_conc_file, TR_or_TR_conc, output_dir, output_name, FD_column,FD_conc_file,get_mean_FD,use_outlierdetection_mask_if_possible,split_motion,splits)
+[~,output_name] = fileparts(all_motion_conc_file);
+   %[all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, FD_column,[],0,1);
+    [all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, project_dir, output_name ,FD_column,[],0,1,0,0);
+
          good_subs_idx = find(minutes_to_use<=all_subjects_minutes); %use these subjects
          bad_subs_idx = find(minutes_to_use>all_subjects_minutes); %dont' use these subjects
          really_bad_subs_idx= find(0.5>=all_subjects_minutes); %these subjects have very little data.
@@ -142,6 +155,7 @@ if exist([project_dir filesep 'seedmaps_' file_root_no_ext '.mat'],'file') == 2
     load([project_dir filesep 'seedmaps_' file_root_no_ext '.mat'])
 else
     for i=1:length(subs)
+        tic
         %for    i=good_subs
         disp(num2str(i));
         disp(['subject ' subs{i}]);
@@ -160,8 +174,8 @@ else
             %use power method
             load(B{i})
             allFD = zeros(1,length(motion_data));
-            for j = 1:length(motion_data)
-                allFD(j) = motion_data{j}.FD_threshold;
+            for motion_colum = 1:length(motion_data)
+                allFD(motion_colum) = motion_data{motion_colum}.FD_threshold;
             end
             FDidx = find(round(allFD,3) == round(FD_threshold,3));
             if combined_outliermask_provided ==1
@@ -230,7 +244,7 @@ else
         %timeseries.data = timeseries.data(:,tmask>0); % censor time series with mask.
                 timeseries.data = timeseries.data(:,tmask); 
         for j=1:length(network_names)
-            if j==4 || j==6
+            if j==4 || j==6 || j==17
                 continue
             end
             %disp(['  network ' network_names{j}]);
@@ -252,6 +266,7 @@ else
         clear timeseries tmask
         seedmapstimeseries{i} = corrs;
         clear subNetAvg cii
+        toc
     end
     save(['seedmaps_' file_root_no_ext '.mat'],'seedmapstimeseries','allmasks_outliers_removed_FD02','allmasks_before_outliers_removed_FD02', '-v7.3')
 end
@@ -315,11 +330,12 @@ for i=1:length(subs)
 end
 
 if exist('badsubidx','var') == 0
-    disp('Congratulations, your data has no nans.')
+    disp('Congratulations, your data has no nans.');
+    badsubidx = [];
 else
     badsubidx = unique(badsubidx);
     cleansubs(badsubidx,:) = [];
-    subs = cleansubs;
+    %subs = cleansubs;
     cleanseedmapstimeseries = seedmapstimeseries;
     cleanseedmapstimeseries(badsubidx) = [];
     seedmapstimeseries = cleanseedmapstimeseries;
@@ -332,10 +348,10 @@ for j=1:length(network_names)
         continue
     end
     grpNetAve= zeros(size(seedmapstimeseries{1},1),1);
-    for i=1:length(subs)
+    for i=1:length(cleansubs)
         grpNetAve=grpNetAve + atanh(seedmapstimeseries{i}(:,j));
     end
-    grpNetAve=grpNetAve ./ length(subs);
+    grpNetAve=grpNetAve ./ length(cleansubs);
     %avgSeedmaps{j}=inverseFisherTransform(grpNetAve);
     avgSeedmaps{j}=tanh(grpNetAve);
     
@@ -372,10 +388,10 @@ for j=1:length(network_names)
     %temp=ft_read_cifti_mod(subs{i});
     %temp.data=avgSeedmaps{j};
     
-    temp_file=ciftiopen(subs{i},wb_command);
+    temp_file=ciftiopen(cleansubs{i},wb_command);
     if surface_only ==1
         %temp_file=ciftiopen('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dtseries.nii',wb_command);
-        temp_file= ciftiopen(settings.path{10},wb_command);
+        temp_file= ciftiopen(settings.path{10},wb_command); % path to a surface_only dtseries.nii
         reset_temp_file = zeros(size(temp_file.cdata,1),1);
         temp_file.cdata = reset_temp_file;
     else
@@ -404,9 +420,9 @@ for j=1:length(network_names)
 end
 %save all maps
 if Zscore_regions == 1
-    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'seed_matrix');
+    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'B','seed_matrix','subs','Zscore_regions','power_motion','remove_outliers','surface_only','use_only_subjects_that_pass_motion_criteria','combined_outliermask_provided','include_scan_net','bad_subs_idx','good_subs_idx','cleansubs');
 else
-    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networks.mat'],'seed_matrix');
+    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networks.mat'],'B','seed_matrix','subs','Zscore_regions','power_motion','remove_outliers','surface_only','use_only_subjects_that_pass_motion_criteria','combined_outliermask_provided','include_scan_net','bad_subs_idx','good_subs_idx','cleansubs');
 end
 
 disp('Done making network templates based on the subjects you provided.');

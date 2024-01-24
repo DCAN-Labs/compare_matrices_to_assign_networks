@@ -30,7 +30,7 @@ addpath(genpath(support_folder));
 settings=settings_comparematrices;%
 np=size(settings.path,2);
 
-amIdeployed = isdeployed(); 
+amIdeployed = isdeployed();
 amIdeployed=num2str(double(amIdeployed));
 disp(['is deployed equals: ' amIdeployed]);
 
@@ -40,7 +40,7 @@ else
     disp('Attempting to add neccesaary paths and functions.')
     warning('off') %supress addpath warnings to nonfolders.
     for i=1:np
-       addpath(genpath(settings.path{i}));
+        addpath(genpath(settings.path{i}));
     end
     %rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
     %rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
@@ -55,8 +55,6 @@ else
     wb_command=settings.path_wb_c; %path to wb_command
 end
 
-network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
-
 if isnumeric(make_cifti_from_results)==1
 else
     if strcmp(make_cifti_from_results,'none') == 1
@@ -67,17 +65,17 @@ end
 
 if isnumeric(allow_overlap)==1
 else
-        allow_overlap = str2double(allow_overlap);
+    allow_overlap = str2double(allow_overlap);
 end
 
 if isnumeric(surface_only)==1
 else
-        surface_only = str2double(surface_only);
+    surface_only = str2double(surface_only);
 end
 
 if isnumeric(already_surface_only)==1
 else
-        already_surface_only = str2double(already_surface_only);
+    already_surface_only = str2double(already_surface_only);
 end
 
 switch data_type
@@ -99,16 +97,29 @@ switch transform_data
         TEMPLATEMINIMUM = 0.37;
     case 'Convert_to_Zscores'
         TEMPLATEMINIMUM = 1.00;
+        %SCANTEMPLATEMINIMUM_thresholds = 2.75;
+        SCANTEMPLATEMINIMUM_thresholds = [1.75: 0.125: 3.5]; % step through thresholds by intervals of 0.125
     otherwise
         TEMPLATEMINIMUM = 0.37;
 end
 
 disp(['template minimum is set at ' num2str(TEMPLATEMINIMUM)]);
 
-
-
 %load('/data/cn6/allyd/TRsurfaces/templatemat_fullCortex.mat'); %template matrix
-load(template_path);
+load(template_path,'seed_matrix'); % specify the seedmatrix variable to load just in case there is a variable with the same name.
+
+if size(seed_matrix,2) == 16
+    disp([' Your network template has ' num2str(size(seed_matrix,2)) ' networks in it.']);
+    disp('Using the following network list: ')
+    network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
+    disp(network_names)
+else % assume the seed matrix has 18 columns
+    disp([' Your network template has ' num2str(size(seed_matrix,2)) ' networks in it.']);
+    disp('Using the following network list: ')
+    network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'     ''    'SCAN'};
+    disp(network_names)
+end
+
 cifti_template_mat_full =seed_matrix;
 cifti_template_mat_full(cifti_template_mat_full<= TEMPLATEMINIMUM) = nan;
 
@@ -127,7 +138,7 @@ for sub = 1:length(dconn_filename)
     
     if exist([cifti_output_folder '/' output_cifti_name '.dscalar.nii' ], 'file') == 2
         disp('Template_matching dscalar already found for this subject. loading...')
-        disp([cifti_output_folder filesep output_cifti_name '.dscalar.nii']); 
+        disp([cifti_output_folder filesep output_cifti_name '.dscalar.nii']);
         subject_cii =ciftiopen([cifti_output_folder '/' output_cifti_name '.dscalar.nii'], wb_command);
         new_subject_labels = subject_cii.cdata;
         
@@ -143,9 +154,11 @@ for sub = 1:length(dconn_filename)
         if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
             disp('.mat file already reated.  loading...');
             load([cifti_output_folder '/' output_cifti_name '.mat']);
-            new_subject_labels = eta_subject_index;
+            if exist('eta_subject_index','var') ==1
+                new_subject_labels = eta_subject_index;
+            end
         else
- 
+            
             %%% if template-matching using correlation %%%
             %     for i=1:size(corr_mat_full,1)
             %        goodvox = ~isnan(corr_mat_full(i,:));
@@ -231,34 +244,92 @@ for sub = 1:length(dconn_filename)
             
             disp('Calculating similarity (eta) to template')
             %%% compute eta similarity value b/w each vertex and template %%%
-            eta_to_template_vox = single(zeros(size(corr_mat_full,1),length(network_names)));
-            for i=1:size(corr_mat_full,1)
-                if rem(i,5000)==0
-                    disp([' Calculating voxel ' num2str(i)]);toc;
-                end
-                for j=1:length(network_names)
-                    if j==4 || j ==6
-                        continue
+            if exist('eta_to_template_vox','var') ~=1
+                eta_to_template_vox = single(zeros(size(corr_mat_full,1),length(network_names)));
+                for i=1:size(corr_mat_full,1)
+                    if rem(i,5000)==0
+                        disp([' Calculating voxel ' num2str(i)]);toc;
                     end
-                    %%% compute an eta value for each voxel for each network (from fran's etacorr script) %%%
-                    %goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(j,:)));
-                    goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(:,j))');
-                    cmap = corr_mat_full(i,goodvox)';
-                    %tmap = cifti_template_mat_full(j,goodvox)';
-                    tmap = cifti_template_mat_full(goodvox,j);
-                    Mgrand  = (mean(mean(tmap)) + mean(mean(cmap)))/2;
-                    Mwithin = (tmap+cmap)/2;
-                    SSwithin = sum(sum((tmap-Mwithin).*(tmap-Mwithin))) + sum(sum((cmap-Mwithin).*(cmap-Mwithin)));
-                    SStot    = sum(sum((tmap-Mgrand ).*(tmap-Mgrand ))) + sum(sum((cmap-Mgrand ).*(cmap-Mgrand )));
-                    eta_to_template_vox(i,j) = 1 - SSwithin/SStot;
+                    for j=1:length(network_names)
+                        if j==4 || j ==6 || j==17
+                            continue
+                        end
+                        %%% compute an eta value for each voxel for each network (from fran's etacorr script) %%%
+                        %goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(j,:)));
+                        goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(:,j))');
+                        cmap = corr_mat_full(i,goodvox)';
+                        %tmap = cifti_template_mat_full(j,goodvox)';
+                        tmap = cifti_template_mat_full(goodvox,j);
+                        Mgrand  = (mean(mean(tmap)) + mean(mean(cmap)))/2;
+                        Mwithin = (tmap+cmap)/2;
+                        SSwithin = sum(sum((tmap-Mwithin).*(tmap-Mwithin))) + sum(sum((cmap-Mwithin).*(cmap-Mwithin)));
+                        SStot    = sum(sum((tmap-Mgrand ).*(tmap-Mgrand ))) + sum(sum((cmap-Mgrand ).*(cmap-Mgrand )));
+                        eta_to_template_vox(i,j) = 1 - SSwithin/SStot;
+                        
+                        clear cmap tmap Mgrand Mwithin SSwithin SStot goodvox
+                    end
+                end
+            end
+            
+            %%% winner-take-all: highest eta value is network that voxel will be assigned to %%%
+            [~, new_subject_labels] = max(eta_to_template_vox,[],2); %find max for template matching
+            clear i
+            
+            
+            % increase the Z-score threshold to identify the scan network.
+            if size(eta_to_template_vox,2) == 18
+                %make copies of the winner-take-all-results and put them
+                %into an array:
+                new_subject_labels_scan_thresholds=repmat(new_subject_labels,size(SCANTEMPLATEMINIMUM_thresholds),1);
+                
+                for t=1:size(SCANTEMPLATEMINIMUM_thresholds,2)
+                    disp(['testing scan threshold: ' num2str(SCANTEMPLATEMINIMUM_thresholds(t))]);
+                    motor_grays=find(new_subject_labels_scan_thresholds(:,t) == 10 | new_subject_labels_scan_thresholds(:,t) == 11 | new_subject_labels_scan_thresholds(:,t) == 18); % find the networks that belong to SMd(10), SMl(11), or SCAN (18).
                     
-                    clear cmap tmap Mgrand Mwithin SSwithin SStot goodvox
+                    % recalculate the seed map usng a higher threshold.
+                    cifti_template_mat_full_scan =seed_matrix;
+                    cifti_template_mat_full_scan(cifti_template_mat_full_scan<= SCANTEMPLATEMINIMUM_thresholds(t)) = nan;
+                    
+                    disp(['Recalculating similarity (eta) to template using only motor networks: n= ' num2str(size(motor_grays,1)) ' grayordinates.'])
+                    %%% compute eta similarity value b/w each vertex and template %%%
+                    eta_to_template_vox_scan = single(zeros(size(motor_grays,1),length(network_names)));
+                    for i=1:size(eta_to_template_vox_scan,1)
+                        if rem(i,5000)==0
+                            disp([' Calculating voxel ' num2str(i)]);toc;
+                        end
+                        for j=1:length(network_names)
+                            if j==4 || j ==6 || j==17
+                                continue
+                            end
+                            %%% compute an eta value for each voxel for each network (from fran's etacorr script) %%%
+                            %goodvox = (~isnan(corr_mat_full(i,:)) & ~isnan(cifti_template_mat_full(j,:)));
+                            goodvox = (~isnan(corr_mat_full(motor_grays(i),:)) & ~isnan(cifti_template_mat_full_scan(:,j))');
+                            cmap = corr_mat_full(motor_grays(i),goodvox)';
+                            %tmap = cifti_template_mat_full(j,goodvox)';
+                            tmap = cifti_template_mat_full_scan(goodvox,j);
+                            Mgrand  = (mean(mean(tmap)) + mean(mean(cmap)))/2;
+                            Mwithin = (tmap+cmap)/2;
+                            SSwithin = sum(sum((tmap-Mwithin).*(tmap-Mwithin))) + sum(sum((cmap-Mwithin).*(cmap-Mwithin)));
+                            SStot    = sum(sum((tmap-Mgrand ).*(tmap-Mgrand ))) + sum(sum((cmap-Mgrand ).*(cmap-Mgrand )));
+                            eta_to_template_vox_scan(i,j) = 1 - SSwithin/SStot;
+                            
+                            clear cmap tmap Mgrand Mwithin SSwithin SStot goodvox
+                        end
+                    end
+                    
+                    disp('Modifying motor grayordinates with the new higher threshold results...' )
+                    eta_to_template_vox_modified=eta_to_template_vox;
+                    eta_to_template_vox_modified(motor_grays,:) = eta_to_template_vox_scan;
+                    
+                    %%% winner-take-all: highest eta value is network that voxel will be assigned to %%%
+                    [~, new_subject_labels] = max(eta_to_template_vox_modified,[],2); %find max for template matching
+                    [~, new_subject_labels_scan_thresholds(:,t)] = max(eta_to_template_vox_modified,[],2);
                 end
             end
             
             clear corr_mat_full goodvox i temp
             
-            %%% winner-take-all: highest eta value is network that voxel will be assigned to %%%
+            
             if exist('allow_overlap','var') == 1 && allow_overlap == 1
                 if allow_overlap == 1
                     disp('Calculating overlap')
@@ -267,7 +338,6 @@ for sub = 1:length(dconn_filename)
                 end
             else
             end
-            [x, new_subject_labels] = max(eta_to_template_vox,[],2); %find max for template matching
             
             %%% if requiring a minimum eta value for assignment %%%
             %     for j=1:size(eta_subject_index,1)
@@ -285,9 +355,14 @@ for sub = 1:length(dconn_filename)
             
             toc
             disp(['Saving .mat file: ' cifti_output_folder '/' output_cifti_name '.mat'])
-             save([cifti_output_folder '/' output_cifti_name '.mat'],'eta_to_template_vox','new_subject_labels','network_names','-v7.3')
-%             new_subject_labels = eta_subject_index;
-            
+            if size(eta_to_template_vox,2) == 18
+                save([cifti_output_folder '/' output_cifti_name '.mat'],'eta_to_template_vox','new_subject_labels','network_names','new_subject_labels_scan_thresholds','-v7.3')
+                
+            else
+                save([cifti_output_folder '/' output_cifti_name '.mat'],'eta_to_template_vox','new_subject_labels','network_names','-v7.3')
+                %             new_subject_labels = eta_subject_index;
+                
+            end
             switch transform_data
                 case 'Convert_to_Zscores'
                     unix(['rm -f ' char(Zdconn) ])
@@ -305,23 +380,44 @@ for sub = 1:length(dconn_filename)
                 saving_template =ciftiopen(settings.path{8}, wb_command); % don't forget to load in a gifti object, or  else saving_template will be interpreted as a struct.
             end
             
-            saving_template.cdata = single(new_subject_labels);
-            
-            %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
-            disp('Saving new scalar')
-            save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary')
-            %save(saving_template, output_cifti_scalar_name, wb_command)
-            switch data_type
-                case 'parcellated'
-                    output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
-                case 'dense'
-                    output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+            if  size(eta_to_template_vox,2) == 18
+                new_subject_labels = new_subject_labels_scan_thresholds;
             end
-            disp('Converting scalar .gii to .nii')
-            unix([wb_command ' -cifti-convert -from-gifti-ext ' cifti_output_folder '/' output_cifti_name '.gii ' output_cifti_scalar_name ]);
-            disp('Removing .gii')
-            unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.gii']);
-            unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.dat']);
+            
+                      output_cifti_name_orig=output_cifti_name;
+                      
+            for t=1:size(new_subject_labels,2)
+                if  size(eta_to_template_vox,2) == 18
+                    new_subject_labels = new_subject_labels_scan_thresholds(:,t);
+                end
+                
+                saving_template.cdata = single(new_subject_labels);
+                
+                %addpath('/mnt/max/shared/code/internal/utilities/corr_pt_dt/support_files');
+                disp('Saving new scalar')
+                if  size(eta_to_template_vox,2) == 18
+                    %output_cifti_name_orig=output_cifti_name;
+                    output_cifti_name = [output_cifti_name_orig '_scanthresh' num2str(SCANTEMPLATEMINIMUM_thresholds(t))];
+                else
+                    output_cifti_name_orig=output_cifti_name;
+                    
+                end
+                save(saving_template, [cifti_output_folder '/' output_cifti_name '.gii'],'ExternalFileBinary')
+                %save(saving_template, output_cifti_scalar_name, wb_command)
+                switch data_type
+                    case 'parcellated'
+                        output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
+                        
+                    case 'dense'
+                        output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+                end
+                disp('Converting scalar .gii to .nii')
+                unix([wb_command ' -cifti-convert -from-gifti-ext ' cifti_output_folder '/' output_cifti_name '.gii ' output_cifti_scalar_name ]);
+                disp('Removing .gii')
+                unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.gii']);
+                unix(['rm -f ' cifti_output_folder '/' output_cifti_name '.dat']);
+                
+            end
             
             if exist('allow_overlap','var') == 1 && allow_overlap == 1
                 %open example dtseries.nii
@@ -337,7 +433,7 @@ for sub = 1:length(dconn_filename)
                 switch overlap_method
                     case'hist_localmin'
                         for j=1:length(network_names)
-                            if j==4 || j ==6
+                            if j==4 || j ==6 || j==17
                                 continue
                             end
                             
@@ -351,7 +447,7 @@ for sub = 1:length(dconn_filename)
                         
                     case 'smooth_then_derivative'
                         for j=1:length(network_names)
-                            if j==4 || j ==6
+                            if j==4 || j ==6 || j==17
                                 continue
                             end
                             
@@ -374,7 +470,7 @@ for sub = 1:length(dconn_filename)
                 end
                 % make sure that"assign_unassinged is set to zero" for
                 % overlapping networks. Otherwise the whole brain will be assinged to every network.
-                clean_dscalars_by_size([cifti_output_folder '/' output_cifti_name '_overlap_' overlap_method '.dtseries.nii'],[],[],[],[],30,[],0,0,0);
+                clean_dscalars_by_size([cifti_output_folder '/' output_cifti_name '_overlap_' overlap_method '.dtseries.nii'],[],[],[],[],30,[],0,0,1,0);
             else
             end
             
@@ -385,9 +481,19 @@ for sub = 1:length(dconn_filename)
     end
 end
 
-disp(['Cleaning: ' output_cifti_scalar_name]);
-[outname] = clean_dscalars_by_size(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
-disp(['Clean file: ' outname '.dscalar.nii'])
+if  size(eta_to_template_vox,2) == 18
+    for t=1:size(new_subject_labels_scan_thresholds,2)
+        output_cifti_name = [output_cifti_name_orig '_scanthresh' num2str(SCANTEMPLATEMINIMUM_thresholds(t))];
+        output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+        disp(['Cleaning: ' output_cifti_scalar_name]);
+        [outname] = clean_dscalars_by_size_copy_jm_msi(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
+        disp(['Clean file: ' outname '.dscalar.nii'])
+    end
+else
+    disp(['Cleaning: ' output_cifti_scalar_name]);
+    [outname] = clean_dscalars_by_size_copy_jm_msi(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
+    disp(['Clean file: ' outname '.dscalar.nii'])
+end
 
 % cmd = ['mv ' cifti_output_folder '/' output_cifti_scalar_name];
 % unix(cmd)

@@ -135,7 +135,7 @@ if exist([output_template_path filesep 'template_net_all_unique_patches.dscalar.
     load([output_template_path filesep 'template_net_all_unique_patches.mat']);
 else
     disp('Template data cannot be found.')
-    error('You probably do not want to remake the template')
+    %error('You probably do not want to remake the template')
     template_cifti_obj = ciftiopen(template_input_cifti_file,wb_command);
     template_nets = template_cifti_obj.cdata;
     

@@ -57,7 +57,7 @@ for i=1:size(group1_conc)
         end
     end
     
-    [rho_wzero,pval_wzero] = corr(dscalar_GRP1,dscalar_GRP2);
+    [rho_wzero,pval_wzero] = corr(double(dscalar_GRP1),double(dscalar_GRP2));
     
     %get indices of nonzero elements.
     log_nonZgrp1 = (dscalar_GRP1 ~=0);
@@ -86,11 +86,17 @@ for i=1:size(group1_conc)
     
     figure();scatter(x, y, 10,c,'filled');
     
-    
+    %clims([ 1 20])
     set(gcf,'color','white')
     set(gca,'FontSize',20)
-    set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
+    %set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
+    caxis([ 1 20])
     %xlim([0 1]);ylim([0 1]);
+    cb = colorbar();
+    colormap jet
+    %caxis([ 1 20]);
+    %cb.Ruler.Exponent = 3;
+    
     fig.PaperPositionMode   = 'auto';
     title('Correlation without Zeros')
     [rho,pval] = corr(x,y);
