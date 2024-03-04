@@ -1,23 +1,32 @@
-function [new_subject_labels, output_cifti_scalar_name] = template_matching_RH(dconn_filename, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results,allow_overlap,overlap_method,surface_only,already_surface_only)
+function [new_subject_labels, cleaned_outname, corr_mat_full] = template_matching_RH(dconn_filename, data_type, template_path,transform_data,output_cifti_name, cifti_output_folder, wb_command, make_cifti_from_results,allow_overlap,overlap_method,surface_only,already_surface_only)
 
+%This code assigns each grayordinate a network based on the sptialally
+%similiarty to a previously defined independent template. (Look at
+%Make_Cifti_template_RH.m).  
+
+%inputs are:
 %subjectlist = subject (e.g. dconn.nii)
 %data_type = "parcellated" or "dense" connectivity matrix
 %template_path = path to .mat file that has th network templates.
-%transform_data =  if you want to convert you data before comparing to your template, use can use 1 of 2 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearons' or 'Convert_to_Zscores' or use no tranformation
-%output_cifti_name = output_cifti_name pretty clear
+%transform_data =  if you want to convert you data before comparing to your template, use can use 1 of 2 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearons' or 'Convert_to_Zscores' or use no tranformation.
+%output_cifti_name = output_cifti_name pretty clear.
 %cifti_output_folder = your project directory
 %wb_command = path to run HCP workbench command.
 %make_cifti_from_results = set to 1 if you want to save your results as a cifti. 0 will not save anything.
 %allow_overlap = set to 1 if you're using overlapping networks in your cifti (Your input networks file will likely be a .dtseries.nii)
-%overlap_method =  currently, the only supported method is
-%"smooth_then_derivative"
+%overlap_method =  currently, the only supported method is "smooth_then_derivative"
+%surface_only = set to 1 if you only want to generate assignments for the
+%cortex (asssuming 59412 grayordinates.), otherwise set to zero and
+%the output will be a dsclar of the standard size (91282).
+%already_surface_only = set to 1 if your dconn is already 59412 x 59412.
 
-%%% load subjects, network info %%%
-%load /data/cn6/allyd/kelleyData/pnm_list_revised.mat
-%load /data/cn6/allyd/kelleyData/allSubjects.mat %%% allSubjects
-%load /data/cn6/allyd/kelleyData/subjectswith20min.mat %%% subs_25min
+% outputs are
+% dscalar file of the assignments  and a cleaned file with the small islands removed.
+% a dtseries file with the overlapping networks.
+% a .mat file of the weights.
 
 
+% parameters
 %allow_overlap = 1;
 %overlap_method = 'smooth_then_derivative';
 %thresholds = [1:0.25:3.5];
@@ -97,8 +106,8 @@ switch transform_data
         TEMPLATEMINIMUM = 0.37;
     case 'Convert_to_Zscores'
         TEMPLATEMINIMUM = 1.00;
-        %SCANTEMPLATEMINIMUM_thresholds = 2.75;
-        SCANTEMPLATEMINIMUM_thresholds = [1.75: 0.125: 3.5]; % step through thresholds by intervals of 0.125
+        SCANTEMPLATEMINIMUM_thresholds = 3;
+        %SCANTEMPLATEMINIMUM_thresholds = [1.75: 0.125: 3.5]; % step through thresholds by intervals of 0.125
     otherwise
         TEMPLATEMINIMUM = 0.37;
 end
@@ -133,10 +142,12 @@ if strcmp(transform_data,'Convert_to_Zscores') ==1
     output_cifti_name = [output_cifti_name '_Zscored'];
 else
 end
-
+output_cifti_name_orig=output_cifti_name;
+corr_mat_full =[]; % set this to empty in case the correlation matrix is being requested as an output/
+   
 for sub = 1:length(dconn_filename)
     
-    if exist([cifti_output_folder '/' output_cifti_name '.dscalar.nii' ], 'file') == 2
+    if exist([cifti_output_folder '/' output_cifti_name '.dscalar.nii' ], 'file') ~= 0 % ==2 Not sure why this was set to 2 before.
         disp('Template_matching dscalar already found for this subject. loading...')
         disp([cifti_output_folder filesep output_cifti_name '.dscalar.nii']);
         subject_cii =ciftiopen([cifti_output_folder '/' output_cifti_name '.dscalar.nii'], wb_command);
@@ -148,7 +159,8 @@ for sub = 1:length(dconn_filename)
             case 'dense'
                 output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
         end
-        
+                %output_cifti_name_orig=output_cifti_name;
+                corr_mat_full =[]; % set this to empty in case the correlation matrix is being requested as an output/
     else
         
         if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
@@ -327,7 +339,7 @@ for sub = 1:length(dconn_filename)
                 end
             end
             
-            clear corr_mat_full goodvox i temp
+            clear goodvox i temp
             
             
             if exist('allow_overlap','var') == 1 && allow_overlap == 1
@@ -384,7 +396,7 @@ for sub = 1:length(dconn_filename)
                 new_subject_labels = new_subject_labels_scan_thresholds;
             end
             
-                      output_cifti_name_orig=output_cifti_name;
+                      %output_cifti_name_orig=output_cifti_name;
                       
             for t=1:size(new_subject_labels,2)
                 if  size(eta_to_template_vox,2) == 18
@@ -486,18 +498,17 @@ if  size(eta_to_template_vox,2) == 18
         output_cifti_name = [output_cifti_name_orig '_scanthresh' num2str(SCANTEMPLATEMINIMUM_thresholds(t))];
         output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
         disp(['Cleaning: ' output_cifti_scalar_name]);
-        [outname] = clean_dscalars_by_size_copy_jm_msi(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
-        disp(['Clean file: ' outname '.dscalar.nii'])
+        [cleaned_outname_short] = clean_dscalars_by_size_copy_jm_msi(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
+        cleaned_outname = [cleaned_outname_short '.dscalar.nii'];
+        disp(['Clean file: ' cleaned_outname])
     end
 else
     disp(['Cleaning: ' output_cifti_scalar_name]);
-    [outname] = clean_dscalars_by_size_copy_jm_msi(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
-    disp(['Clean file: ' outname '.dscalar.nii'])
+    [cleaned_outname_short] = clean_dscalars_by_size_copy_jm_msi(output_cifti_scalar_name,[],[],[],[],30,[],0,1,1); %do not change the make concensus to 1 here. It will ruin your network assingments.
+    cleaned_outname = [cleaned_outname_short '.dscalar.nii'];
+    disp(['Clean file: ' cleaned_outname])
 end
 
-% cmd = ['mv ' cifti_output_folder '/' output_cifti_scalar_name];
-% unix(cmd)
-% clear cmd
 
 clear subs nets tmask i
 end

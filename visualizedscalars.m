@@ -22,7 +22,7 @@ function [large_scalar_array,whole_brain_number_of_nets,integration_zone_number_
 DS_factor = 50; %downsample factor.  Reduce the 91282 vector by this factor to reduce the load on matlab visualiztion tools.
 %(e.g. DS = 2, sample every other greyordinate.  visualizetion will have
 %45641 data points per subject).
-downsample_scalar = 1;
+downsample_scalar = 0;
 save_results = 1;
 check_for_nets_greater_than_16 = 0; % Set to 0 if running infomap. Otherwise the code will warn you that for each subject  than 16.
 try_resort_on_subject = 0;
@@ -75,7 +75,8 @@ switch output_map_type
 end
 %load colormap
 load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
-network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
+
+
 conc = strsplit(dscalarswithassignments, '.');
 conc = char(conc(end));
 if strcmp('conc',conc) == 1
@@ -163,6 +164,11 @@ disp('Using the first file to infer the number of greyordinates.')
 scalar_temp = ciftiopen(dscalarswithassignments{1},wb_command);
 grey_size=size(scalar_temp.cdata,1);
 
+if ismember(18,scalar_temp.cdata) ==1
+    network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'  '' 'SCAN'};
+else
+    network_names = {   'DMN'    'Vis'    'FP'    ''    'DAN'     ''      'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
+end
 if surface_only==1
     grey_size =59412;
 else
@@ -328,14 +334,14 @@ else % files are dscalars.
             mode_proportion(gray) = size(num_subjects_with_this_mode,2)/size(scalar_array,2);
         end
         temp_file.cdata=mode_proportion;
-ciftisave(temp_file,[outputname '_population_mode_proportion.dscalar.nii'],wb_command);
+        ciftisave(temp_file,[outputname '_population_mode_proportion.dscalar.nii'],wb_command);
         
         
-    else
+    else %calclate proportion or percentage
         
         for i=1:length(network_names)
             disp(i)
-            if  i~=4 && i~=6
+            if  i~=4 && i~=6 && i~=17
                 for j=1:size(scalar_array,1)
                     if rem(j,5000)==0
                         %disp([' Calculating voxel proportion ' num2str(j)]);

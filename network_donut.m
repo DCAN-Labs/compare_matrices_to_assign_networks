@@ -1,4 +1,4 @@
-function network_donut(numdat, sorted_labels_a, sorted_labels_b, chart_title,sort_mat,Eidx, Fidx, isanet_in_current_setC, isanet_in_current_setD,skip_plotting)
+function network_donut(numdat, sorted_labels_a, sorted_labels_b, chart_title,sort_mat,Eidx, Fidx, isanet_in_current_setC, isanet_in_current_setD,skip_plotting,add_label_percentages,donut_label_font_size)
 
 %Some hardcodes:
 % wb_command = ('C:\Users\hermosir\Desktop\workbench\bin_windows64\wb_command');
@@ -6,7 +6,7 @@ function network_donut(numdat, sorted_labels_a, sorted_labels_b, chart_title,sor
 % addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\utilities')
 % addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\gifti')
 % addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\fileio')
-add_label_percentages = 1;
+%add_label_percentages = 1;
 label_threshold = 5; %only label networks greater than 1%  setting this to zero will label all networks (and probably look messy).
 %OPTIONS
 % close all
@@ -160,6 +160,11 @@ for i = 1:rings
         polsect(a0,a1,r0,r1,cl,skip_plotting);
         saved_polysect_values{i,j} = [a0,a1,r0,r1,cl];
     end
+        set(gca,'YTickLabel',[]);
+    set(gca,'XTickLabel',[]);
+    set(gca,'XTick',[], 'YTick', []); 
+    %set(gca,'Visible','off')
+    axis off
     title(chart_title, 'Interpreter', 'none');
     
     %     if i==rings
@@ -193,7 +198,7 @@ if add_label_percentages ==1
                 [xtext,ytext] = pol2cart(centerTheta,labelRadius);
                 
                 % raw counts
-                text(xtext,ytext,sprintf('%s',num2str(numdat_percentage{i}(j),3)),'fontsize',8,'HorizontalAlignment',halign,'VerticalAlignment',valign);
+                text(xtext,ytext,sprintf('%s',num2str(numdat_percentage{i}(j),3)),'fontsize',donut_label_font_size,'HorizontalAlignment',halign,'VerticalAlignment',valign);
             end
             catch
             end
@@ -244,7 +249,7 @@ a4 = linspace(th1,th0);
 r4 = linspace(rh0,rh0);
 [X,Y]=pol2cart([a1,a2,a3,a4],[r1,r2,r3,r4]);
 
-if skip_plotting ==1
+if skip_plotting ==0
     
     p=patch(X,Y,cl); % Note: patch function takes text or matrix color def
     axis equal

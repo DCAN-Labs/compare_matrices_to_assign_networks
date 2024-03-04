@@ -210,6 +210,8 @@ for i = 1:length(dtseries_file) %number of subjects
     
     if strcmp(transform_data,'Convert_to_Zscores') == 1
         output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '_Zscored.dscalar.nii' ];
+         output_cifti_scalar_name_wscan  = [cifti_output_folder '/' output_cifti_name '_Zscored_scanthresh3_recolored.dscalar.nii' ];
+       
     else
     end
     %Step 1: make matrix
@@ -248,7 +250,10 @@ for i = 1:length(dtseries_file) %number of subjects
     %end
     dotsloc = strfind(output_cifti_scalar_name,'.');
     sub_basename = output_cifti_scalar_name(1:(dotsloc(end-1)-1));
+    dotsloc_wscan = strfind(output_cifti_scalar_name_wscan,'.');
+    sub_basename_wscan = output_cifti_scalar_name_wscan(1:(dotsloc_wscan(end-1)-1));    
     recolored_name = [sub_basename '_recolored.dscalar.nii'];
+    recolored_name_wscan = [sub_basename '_scanthresh3' '_recolored.dscalar.nii'];
     
     if run_infomap_too ==1
         if use_all_ABCD_tasks == 1
@@ -286,8 +291,23 @@ for i = 1:length(dtseries_file) %number of subjects
             end
             final_outputs_found =1;
         else
+            try
+                if exist(output_cifti_scalar_name_wscan,'file') == 2
+                    disp(['Template_matching scalar w scan found for this subject: ' output_cifti_scalar_name_wscan])
+                    if exist(recolored_name_wscan,'file') == 0
+                        disp('Cleaned template matching file not found. cleaning...')
+                      recolored_name_wscan= clean_dscalars_by_size(output_cifti_scalar_name_wscan,[],[],[],[],30,[],0,1);
+                    else
+                        disp(['No cleaning necessary: Cleaned networks file found: ' recolored_name_wscan])
+                    end
+                end
+                final_outputs_found =1;
+            catch
+                disp('Final scalar with scan network output not found. continuing...')
+                final_outputs_found =0;
+            end
             final_outputs_found =0;
-        end     
+        end
     end
     
     if final_outputs_found ==1
@@ -447,9 +467,28 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
         %Step 2: get network assingments via template matching.
-        [ eta_net_assign{i}, output_cifti_scalar_name] = template_matching_RH(subjectdconn, data_type, template_path, transform_data, output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results, allow_overlap,overlap_method,surface_only,already_surface_only);
+        [ eta_net_assign{i}, output_cifti_scalar_name,corr_mat_full] = template_matching_RH(subjectdconn, data_type, template_path, transform_data, output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results, allow_overlap,overlap_method,surface_only,already_surface_only);
         
+        if isempty(corr_mat_full)~=1
+            disp('NOTE: template matching was run previously on this subject, therefore the .mat file containing the weights was loaded, however note that if your data would have been was Zscored during template matching, is was skipped.')
+            corr_mat_full = subjectdconn;
+        else
+        end
+        %% plot the matrix (sorted by the TM solution).  and Get the network-network correlation.
+        [~,a] = fileparts(output_cifti_scalar_name);[~,cleaned_name_root]=fileparts(a);
+        %[net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(dconn_file, assignments_vector_file,output_name,parcel_file)
+        [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(corr_mat_full,output_cifti_scalar_name,[cleaned_name_root '_TMfconn'],'makeme');
         
+        pics_folder = [cifti_output_folder '/pics_template_matching'];
+        disp(['mkdir -p ' pics_folder])
+        system(['mkdir -p ' pics_folder]);
+        
+        %usage
+        %plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply_Zscore_dconn,image_name,plot2dconns,dconn_cifti_path2,use_nets1,net_assigns2_file,caxis_scale,Pos_neg_colormap,exclude_zero_networks,save_processed_matrix,save_diff_dconn,use_showM,shoM_diff_range_option,output_dir,use_only_cortical_connections)
+        plotdconn(corr_mat_full,output_cifti_scalar_name,0,0,0,cleaned_name_root,0,'',1,'',[-0.5 1],0,0,0,0,1,[-0.2 0.2],pics_folder,0);
+        
+        clear clear corr_mat_full
+        %% Let's clean up
         if clean_up_intermed_files ==1 % RH added in case filespace becomes an limited.
             % Step 2.5: Remove dconn to save space.
             cmd = ['rm -f ' subjectdconn];
@@ -461,7 +500,6 @@ for i = 1:length(dtseries_file) %number of subjects
                 system(cmd);
                 
                 cmd = ['rm -f ' motion_path filesep motion_name_only '.mat'];
-                
                 disp([cmd ' . Removing motion mask that was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
             else
@@ -538,8 +576,7 @@ for i = 1:length(dtseries_file) %number of subjects
                     end
                 else
                     disp('Move was sucessfull.')
-                end
-                
+                end 
             end
         else % 'all frames was probably selected selected'
             if surface_only ==1
@@ -553,7 +590,6 @@ for i = 1:length(dtseries_file) %number of subjects
                 system(cmd);
             end
         end
-        %sub-NDARINV3MTP07E9_ses-baselineYear1Arm1_merged_tasks_motionsurf_only.mat_0.2_cifti_censor_FD_vector_All_Good_Frames.txt
     end %finish running template matching.
     
     %% Make pretty pictures of your results
@@ -620,7 +656,7 @@ for i = 1:length(dtseries_file) %number of subjects
     % per cm.
     
     %pics_code_path = '/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
-    pics_code_path = settings.path{15}; % path to figure_maker bash script.
+    figuremaker_code_path = settings.path{15}; % path to figure_maker bash script.
     pics_folder = [cifti_output_folder '/pics_template_matching'];
     disp(['mkdir -p ' pics_folder])
     system(['mkdir -p ' pics_folder]);
@@ -631,7 +667,9 @@ for i = 1:length(dtseries_file) %number of subjects
     end
     
     %make template matching pic
-    cmd = [pics_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf FALSE 0 20 THRESHOLD_TEST_SHOW_OUTSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+    %update fixed an issue where the subcortical template pointed to a
+    %version of the code that is intended for a label file. -RH 02/26/2024
+    cmd = [figuremaker_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
     disp(cmd);
     system(cmd);
     
@@ -639,7 +677,7 @@ for i = 1:length(dtseries_file) %number of subjects
     if run_infomap_too ==1
         pics_folder = [cifti_output_folder '/pics_infomap'];
         system(['mkdir -p ' pics_folder])
-        cmd = [pics_code_path ' ' expected_info_dscalar_name ' ' output_cifti_name_info '_recolored_infomap ' pics_folder ' FALSE 1 18 power_surf FALSE 0 20 THRESHOLD_TEST_SHOW_OUTSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+        cmd = [figuremaker_code_path ' ' expected_info_dscalar_name ' ' output_cifti_name_info '_recolored_infomap ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
         disp(cmd);
         system(cmd);
     end

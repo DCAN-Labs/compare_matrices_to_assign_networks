@@ -94,8 +94,8 @@ switch server_name
         path{11}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii';
         path{12}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';      
         path{13}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
-        path{14}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
-        path{15}='/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        path{14}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
         path{16}='/home/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -116,8 +116,8 @@ switch server_name
         path{11}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
         path{12}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
         path{13}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
-        path{14}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
-        path{15}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        path{14}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
         path{16}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         %path_wb_c='/panfs/roc/groups/4/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -139,8 +139,8 @@ switch server_name
         path{11}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii'; 
         path{12}='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';              
         path{13}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
-        path{14}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
-        path{15}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        path{14}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
         path{16}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         %path_wb_c='/panfs/roc/groups/4/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -162,8 +162,8 @@ switch server_name
         path{11}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii';
         path{12}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';      
         path{13}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
-        path{14}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+        path{14}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
         path{16}='/home/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path

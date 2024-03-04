@@ -3,6 +3,20 @@ function [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_n
 %This function gets the variance of the dconn, after is's been sorted by
 %each network, then gets the variance per network.
 
+%R.Hermosillo 04/05/2021
+%R.Hermosillo updated 02/25/2024 - updated to include make me option for parcel file.
+
+%inputs are:
+%dconn_files=path to a dense connectivity matrix cifti file (.dconni.nii).  This can also be a numeric matrix.
+
+%assignments_vector_file=path to a vector file that is the same length as the dconn file (.dscalar.nii).  This can also be a .csv. This can also be a numeric variable.
+
+%parcel_file=path to a parcel file that contains the network assignments.  If one has
+%not been created yet, and corresponds with a 14 network template matching
+%solution, then you can write 'makeme' and the parcel will be automatically
+%generated.
+
+
 this_code = which('simple_cifti_average');
 [code_dir,~] = fileparts(this_code);
 support_folder=[code_dir '/support_files']; %find support files in the code directory.
@@ -26,6 +40,9 @@ if strcmp(dconn_file(end-3:end),'.nii') ==1
     cii = ciftiopen(dconn_file,wb_command);
     dconn = cii.cdata;
     clear cii;
+elseif isnumeric(dconn_file)
+    dconn = dconn_file;
+    clear dconn_file;
 else
     load(dconn_file,'avg_cifti');
     dconn = avg_cifti;
@@ -34,8 +51,11 @@ end
 
 %cii = ciftiopen('/panfs/roc/groups/3/rando149/shared/projects/ADHD_MedChal/template_matching_all_minutes/sub-1016_ses-both_merged_tasks_template_matched_Zscored_recolored.dscalar.nii',wb_command);
 %assings = cii.cdata;
-if strcmp(assignments_vector_file(end-3:end),'.nii') ==1
-    
+if isnumeric(assignments_vector_file)==1
+    assigns_only_assigned = assignments_vector_file;
+elseif strcmp(assignments_vector_file(end-3:end),'.nii') ==1
+    assignscii=ciftiopen(assignments_vector_file,wb_command);
+    assigns_only_assigned = assignscii.cdata;
 elseif strcmp(assignments_vector_file(end-3:end),'.csv') ==1
     assigns_only_assigned_struct = importdata(assignments_vector_file);
     assigns_only_assigned =assigns_only_assigned_struct.data;
@@ -111,7 +131,12 @@ else
             close all
         end
     end
-    load(parcel_file, 'parcel')
+    if strcmp(parcel_file,'makeme') ==1
+        parcel = build_high_density_parcel_file(assigns,output_name);
+    else
+        load(parcel_file, 'parcel')
+    end
+
     if isfield(parcel,'power_val')
         [~, alpha_sort]=sort([parcel.power_val],'ascend');
     else

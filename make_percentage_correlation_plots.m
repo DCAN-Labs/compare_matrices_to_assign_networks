@@ -1,9 +1,5 @@
 function [all_rho, all_pval, all_nonmatched_num, all_nonmatched_percent] = make_percentage_correlation_plots(group1_conc_file,group2_conc_file,output_path,outputfilename_summary_name)
 
-%group1_conc = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/group_pics/probability_pics/overlap_grp1.conc');
-%group2_conc = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/group_pics/probability_pics/overlap_grp2.conc');
-
-
 %add paths
 this_code = which('make_percentage_correlation_plots');
 [code_dir,~] = fileparts(this_code);
@@ -23,25 +19,22 @@ wb_command=settings.path_wb_c; %path to wb_command
 group1_conc = importdata(group1_conc_file);
 group2_conc = importdata(group2_conc_file);
 
-%[~,outputfilename_summary_name] = fileparts(group1_conc_file);
 for i=1:size(group1_conc)
     [~,B_temp,~] = fileparts(group1_conc{i});
     [~, outputfilename,~] = fileparts(B_temp);
-    %load data
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/ABCD_percentage_maps/ABCD_10min_GRP1_singlenet_percentage_n2988_DMN_network_percentage.dscalar.nii',wb_command);
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/ABCD_percentage_maps/ABCD_10min_GRP1_singlenet_probability_n2988_DMN_network.dscalar.nii',wb_command);
-    
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/ABCD_percentage_maps/ABCD_GRP1_overlap_percentage_DMN_network_percentage.dscalar.nii',wb_command);
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/group_pics/probability_pics/ABCD_GRP1_overlap_probability_DMN_network.dscalar.nii',wb_command);
+    % changing network names
+    network_match = regexp(outputfilename, '_(\w+)_network', 'tokens', 'once');
+    if ~isempty(network_match)
+        network_name = network_match{1};
+        graph_network_cellname = strsplit(network_name,'_');
+        graph_network_title = graph_network_cellname{end};
+    else
+        network_name = 'Unknown Network';
+    end
+
     cii = ciftiopen(group1_conc{i},wb_command);
     dscalar_GRP1 = cii.cdata;
-    
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/ABCD_percentage_maps/ABCD_10min_GRP2_singlenet_percentage_n3084_DMN_network_percentage.dscalar.nii',wb_command);
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/ABCD_percentage_maps/ABCD_10min_GRP2_singlenet_probability_n3084_DMN_network.dscalar.nii',wb_command);
-    
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices/ABCD_percentage_maps/ABCD_GRP2_overlap_percentage_DMN_network_percentage.dscalar.nii',wb_command);
-    %cii = ciftiopen('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/group_pics/probability_pics/ABCD_GRP2_overlap_probability_DMN_network.dscalar.nii',wb_command);
-    
+        
     cii = ciftiopen(group2_conc{i},wb_command);
     dscalar_GRP2 = cii.cdata;
     
@@ -78,28 +71,24 @@ for i=1:size(group1_conc)
     opts.fontType   = 'Times';
     opts.fontSize   = 20;
     
-    % scaling
-    %fig.Units               = 'centimeters';
-    %fig.Position(3)         = opts.width;
-    %fig.Position(4)         = opts.height;
     
+    figure();scatter(x, y, 10,c,'filled'); hold on
+    plot([0:1],[0:1],'Color','k');
     
-    figure();scatter(x, y, 10,c,'filled');
-    
-    %clims([ 1 20])
     set(gcf,'color','white')
     set(gca,'FontSize',20)
-    %set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
     caxis([ 1 20])
-    %xlim([0 1]);ylim([0 1]);
     cb = colorbar();
     colormap jet
-    %caxis([ 1 20]);
-    %cb.Ruler.Exponent = 3;
     
-    fig.PaperPositionMode   = 'auto';
-    title('Correlation without Zeros')
+    % fig.PaperPositionMode   = 'auto';
+    title(graph_network_title);
     [rho,pval] = corr(x,y);
+    performance = (y-x);
+    performance_wzero = (dscalar_GRP1-dscalar_GRP2);
+  
+    mean_abs_error_wzero = mean(abs(performance_wzero)); 
+    mean_abs_error = mean(abs(performance)); 
     
     log_Zerogrp1 = (dscalar_GRP1 ==0);
     log_Zerogrp2 = (dscalar_GRP2 ==0);
@@ -117,17 +106,18 @@ for i=1:size(group1_conc)
     all_pval(i) = pval;
     all_rho_wzero(i) = rho_wzero;
     all_pval_wzero(i) = pval_wzero;
-    
+    all_performance{i} = performance;
+    all_performance_wzero{i} = performance_wzero;
+    all_mean_abs_error(i) = mean_abs_error;
+    all_mean_abs_error_wzero(i) = mean_abs_error_wzero;
+   
     all_nonmatched_num(i) = sum(non_match_zero);
     all_nonmatched_percent(i) = (sum(non_match_zero))/size(both_nonzero,1);
-    % nonZgrp1 = find(DMN_GRP1);
-    % nonZgrp1 = nnz(DMN_GRP1);
-    % nonZgrp1 = find(DMN_GRP1);
-    % nonZgrp1 = DMN_GRP1(find(DMN_GRP1));
-    % nonZgrp1 = DMN_GRP2(find(DMN_GRP2));
+    cii.cdata = performance_wzero;
+    ciftisave(cii,[output_path filesep outputfilename '_performance.dscalar.nii'],wb_command);
 end
 disp('Saving .mat file with summary stats saving...')
-save([output_path filesep outputfilename_summary_name '_correlation_.mat'],'all_rho','all_pval','all_nonmatched_num','all_nonmatched_percent','all_rho_wzero','all_pval_wzero')
+save([output_path filesep outputfilename '_correlation_.mat'],'all_rho','all_pval','all_nonmatched_num','all_nonmatched_percent','all_rho_wzero','all_pval_wzero','all_performance','all_performance_wzero','all_mean_abs_error','all_mean_abs_error_wzero')
 disp('Done running code for all files in conc.')
 
 end

@@ -40,14 +40,23 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 %DS_factor = 50;
 
 disp('Printing input variables:')
-dconn_cifti_path
+if isnumeric(dconn_cifti_path)
+    disp('dconn is numeric. not printing dconn...')
+else
+    dconn_cifti_path
+end
 net_assigns
 downsample_dconn
 DS_factor
 apply_Zscore_dconn
 image_name
 plot2dconns
-dconn_cifti_path2
+if isnumeric(dconn_cifti_path2)
+    disp('dconn is numeric. not printing dconn...')
+else
+    dconn_cifti_path2
+end
+
 use_nets1
 net_assigns2_file
 caxis_scale

@@ -35,7 +35,7 @@ function [all_subjects_minutes,all_mean_FD,allrestlist] = check_twins_motion(all
 %splits = 2;
 save_split_motion_vectors = 1;
 get_FDnumbers =1;
-find_subjects_with_most_data=1;
+find_subjects_with_most_data=0;
 %minimum_frames_threshold = 750; % if find_subjects_with_most_data is ==1, then subset subjects with at least this many frames.
 minimum_frames_threshold = 1500; % if find_subjects_with_most_data is ==1, then subset subjects with at least this many frames (@TR=0.8, 1500=20 minutes).
 
