@@ -147,9 +147,19 @@ for i = 1:length(all_motion_conc)
         all_subjects_minutes(i,1) = good_frames_in_minutes;
     else
         load(all_motion_conc{i})
-        good_frames_in_minutes=good_frames(i,1)*motion_data{1,FD_column}.epi_TR/60;
+        if isfield(motion_data{1,FD_column},'epi_TR') ==1
+            good_frames_in_minutes=good_frames(i,1)*motion_data{1,FD_column}.epi_TR/60;
+        else
+            good_frames_in_minutes=good_frames(i,1)*TR/60;
+        end
         possible_frames =  length(motion_data{FD_column}.frame_removal);
-        possible_minutes = possible_frames*motion_data{1,FD_column}.epi_TR/60;
+        
+        if isfield(motion_data{1,FD_column},'epi_TR') ==1
+            possible_minutes = possible_frames*motion_data{1,FD_column}.epi_TR/60;
+        else
+            possible_minutes = possible_frames*TR/60;
+            
+        end
         disp([num2str(good_frames_in_minutes) ' minutes available out of ' num2str(possible_minutes) ' possible minutes'])
         all_subjects_minutes(i,1) = good_frames_in_minutes;
         
@@ -179,7 +189,7 @@ if exist('FD_conc_file', 'var') == 1 && ~isempty(FD_conc_file) == 1
         
     end
 end
-
+allrestlist ={};
 %Find subjects with the most data
 if exist('find_subjects_with_most_data', 'var') == 1 && find_subjects_with_most_data == 1
     [frames, best_subs] = sort(good_frames);
@@ -321,13 +331,13 @@ if exist('find_subjects_with_most_data', 'var') == 1 && find_subjects_with_most_
     end
     allrestlist = {};
     if exist('split_motion', 'var') == 1 && split_motion == 1
-    save([output_dir filesep  output_name 'best_subs_split' num2str(splits) '_FD' num2str(motion_data{1,FD_column}.FD_threshold) '_masks.mat'],'allrestlist','all_best_masks','all_subjects_minutes','all_mean_FD','allrestlist','all_motion_conc_file')
+    save([output_dir filesep  output_name 'best_subs_split' num2str(splits) '_FD' num2str(motion_data{1,FD_column}.FD_threshold) '_masks.mat'],'allrestlist','all_best_masks','all_subjects_minutes','all_mean_FD','allrestlist','all_motion_conc_file','all_motion_conc')
     else
-     save([output_dir filesep  output_name '_masks_summary.mat'],'minimum_frames_threshold','lots_o_data_subs','allrestlist', 'all_poss_frames', 'all_possible_minutes', 'all_subjects_minutes','all_mean_FD','allrestlist','all_motion_conc_file')       
+     save([output_dir filesep  output_name '_masks_summary.mat'],'minimum_frames_threshold','lots_o_data_subs','allrestlist', 'all_poss_frames', 'all_possible_minutes', 'all_subjects_minutes','all_mean_FD','allrestlist','all_motion_conc_file','all_motion_conc')       
     end
 else
     
-    save([output_dir filesep  output_name '_summary.mat'],'good_frames', 'all_subjects_minutes', 'all_mean_FD', 'all_poss_frames', 'all_possible_minutes', 'all_motion_conc_file')
+    save([output_dir filesep  output_name '_summary.mat'],'good_frames', 'all_subjects_minutes', 'all_mean_FD', 'all_poss_frames', 'all_possible_minutes', 'all_motion_conc_file','all_motion_conc')
 end
 
 disp('Done')

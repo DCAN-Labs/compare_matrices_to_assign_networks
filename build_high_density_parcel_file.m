@@ -1,4 +1,4 @@
-function parcel = build_high_density_parcel_file(assignments_dscalar_or_vector,output_name)
+function [parcel, parcel_file_name]= build_high_density_parcel_file(assignments_dscalar_or_vector,output_name)
 
 % R.Hermosillo 12/13/2022
 % This function build a parcel file for your individual-specific network
@@ -76,6 +76,7 @@ parcel = new_parcel;
 %save('/home/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel')
 disp('Saving parcel...')
 disp([output_name '_parcel.mat'])
+parcel_file_name=[output_name '_parcel.mat'];
 save([output_name '_parcel.mat'],'parcel');
 
 disp('Done saving parcel file.')

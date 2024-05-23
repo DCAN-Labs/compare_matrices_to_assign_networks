@@ -6,6 +6,11 @@ code_dir = pwd;
 try
     disp(['code dir is : ' code_dir]);
     server_name=code_dir(1:10);
+    
+    pathparts=strsplit(server_name,'/');
+     if strcmp(pathparts{2},'tmp') ==1
+         server_name='/tmp';
+     end
 catch
     disp(['code dir is : ' code_dir]);
     try
@@ -168,7 +173,30 @@ switch server_name
         
         path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
-       
+  
+    case '/scratch.g' %/scratch.global
+        path{1}='/home/faird/shared/code/external/utilities/gifti-1.6';
+        path{2}='/home/faird/shared/code/internal/utilities/Matlab_CIFTI';
+        path{3}='/home/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
+        path{4}='/home/faird/shared/code/internal/utilities/hcp_comm_det_damien/Gordan_subcortical_template_ptseries.conc_AVG.pconn.nii';
+        %templates:
+        path{5}='/home/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.pscalar.nii';
+        path{6}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned.dscalar.nii';
+        path{7}='/panfs/jay/groups/6/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dconn.nii';
+        path{8}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii'; 
+        path{9}='/home/faird/shared/code/internal/utilities/hcp_comm_det_damien/Merged_HCP_best80_dtseries.conc_AVG.dconn.nii';        
+        path{10}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dtseries.nii';
+        path{11}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dtseries.nii';
+        path{12}='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';      
+        path{13}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';      
+        path{14}='/home/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/panfs/jay/groups/6/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';      
+        path{15}='/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{16}='/home/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
+        
+        path_wb_c='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_template_nets='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
+   
+        
     case 'PCWIN64'
         path{1}='P:\code\external\utilities\gifti-1.6';
         path{2}='P:\code\external\utilities\Matlab_CIFTI';   

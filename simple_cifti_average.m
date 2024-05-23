@@ -355,7 +355,7 @@ end
 %current_cponn.cdata = avg_cifti;
 %ciftisave(current_cponn,avg_cifti_output_name,wb_command);
 if ismatfile ==1
-    save([output_name '.mat'],'avg_cifti','-v7.3')
+    save([output_name '.mat'],'avg_cifti','-v7.3','parcel')
 else
     current_gii_obj.cdata = avg_cifti;
     ciftisave(current_gii_obj,output_name,wb_command)

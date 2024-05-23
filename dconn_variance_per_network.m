@@ -36,13 +36,14 @@ addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
 
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
-if strcmp(dconn_file(end-3:end),'.nii') ==1
+
+if isnumeric(dconn_file) ==1 
+    dconn = dconn_file;
+    clear dconn_file;
+elseif strcmp(dconn_file(end-3:end),'.nii') ==1
     cii = ciftiopen(dconn_file,wb_command);
     dconn = cii.cdata;
     clear cii;
-elseif isnumeric(dconn_file)
-    dconn = dconn_file;
-    clear dconn_file;
 else
     load(dconn_file,'avg_cifti');
     dconn = avg_cifti;
@@ -63,8 +64,8 @@ else
     load(assignments_vector_file,'assigns_only_assigned');
 end
 
-if exist([output_name 'normed.mat'],'file') == 1
-    disp(['Network .mat file found. It will not be remade: ' output_name 'normed.mat'])
+if exist([output_name '_TM_mean_per_network.mat'],'file') == 2
+    disp(['Network .mat file found. It will not be remade: ' output_name '_TM_mean_per_network.mat'])
 else
     
     
@@ -147,7 +148,8 @@ else
     net_variance_mat_alpha_sorted = net_variance_mat(alpha_sort,alpha_sort);
     net_mean_mat_alpha_sorted = net_mean_mat(alpha_sort,alpha_sort);
     %save([output_name '.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins')
-    save([output_name 'normed.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins','countsnorm', 'net_variance_mat_alpha_sorted', 'net_mean_mat_alpha_sorted')
+    disp('Saving connectivity data:...' )
+    save([output_name '_TM_mean_per_network.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins','countsnorm', 'net_variance_mat_alpha_sorted', 'net_mean_mat_alpha_sorted');
 end
 
 end

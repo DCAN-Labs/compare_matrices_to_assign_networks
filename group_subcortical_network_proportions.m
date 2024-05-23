@@ -6,7 +6,7 @@ addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/U
 
 %reference_dscalar = '/mnt/rose/shared/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
-reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii';
+reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii'
 
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.dscalar.nii';
 %reference_dscalar = 'rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
@@ -18,6 +18,8 @@ reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/A
 %subject_list = importdata('/mnt/rose/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
 %ABCD Group1
 %subject_list = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/ABCD_group1_cleaned_TM_dscalars_trimmed.conc');
+subject_list = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/surfacearea/ABCD_templ_matched_scalars_group1_10_min_MSI_dscalars_trimmed.conc')
+
 subject_list = importdata(dscalar_conc);
 run_locally =0;
 
@@ -62,11 +64,12 @@ end
 
 for sub = 1: size(subject_list,1)
     disp(sub);
-    try
-    [~, structure_percentD] = network_alluvial(reference_dscalar,subject_list{sub},wb_command);
-    catch
+    %try
+    %network_alluvial(DscalarC,DscalarD,plot_subcortex,output_name,wb_command)
+    [~, structure_percentD] = network_alluvial(reference_dscalar,subject_list{sub},1,outname,wb_command);
+    %catch
         structure_percentD =nan(21,14); % if there's an erro with the dscalar, fill with nans.
-    end
+    %end
     all_nets_mat(sub,:,:) = structure_percentD;
     structure_percentD_trans = structure_percentD';
     structure_percentD_vec = structure_percentD_trans(:);

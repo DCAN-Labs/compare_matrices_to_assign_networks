@@ -289,13 +289,13 @@ if use_showM ==1
         parcel_output_name = [output_dir filesep image_name '_cortex_only'];
         if exist('parcel','var')~=1
             which build_high_density_parcel_file
-            parcel = build_high_density_parcel_file(assigns,parcel_output_name);
+            [parcel, parcel_file_name]= build_high_density_parcel_file(assigns,parcel_output_name);
         end
     elseif use_only_cortical_connections ==0
         parcel_output_name = [output_dir filesep image_name];
         if exist('parcel','var')~=1
             which build_high_density_parcel_file
-            parcel = build_high_density_parcel_file(assigns,parcel_output_name);
+            [parcel, parcel_file_name]=  build_high_density_parcel_file(assigns,parcel_output_name);
         end
     else
         error('use_only_cortical_connections variable must be a numeric or logical 1 or 0.')
@@ -341,6 +341,8 @@ if use_showM ==1
         
     end
     
+    disp('Saving network connectivity dconn1...')
+    dconn_variance_per_network(newdconn, assigns,[output_dir filesep  image_name],parcel_file_name);
     
 else
     if downsample_dconn == 1
@@ -364,7 +366,8 @@ else
         end
         
         imagesc(sorted_dconn1); hold on;
-        insert_net_lines(networks,sort1,1)
+
+      insert_net_lines(networks,sort1,1)
     end
 end
 set(gca,'FontSize',9)
@@ -394,13 +397,13 @@ if plot2dconns ==1
             parcel_output_name = [output_dir filesep image_name '_cortex_only'];
             if exist('parcel','var')~=1
                 which build_high_density_parcel_file
-                parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
+                [parcel, parcel_file_name2] = build_high_density_parcel_file(assigns2,parcel_output_name);
             end
         else
             parcel_output_name = [output_dir filesep image_name];
             if exist('parcel','var')~=1
                 which build_high_density_parcel_file
-                parcel = build_high_density_parcel_file(assigns2,parcel_output_name);
+                [parcel, parcel_file_name2] = build_high_density_parcel_file(assigns2,parcel_output_name);
             end
         end
         
@@ -444,6 +447,8 @@ if plot2dconns ==1
             
         end
         close all
+            disp('Saving network connectivity dconn2...')
+            dconn_variance_per_network(newdconn2, assigns,[output_dir filesep  image_name '2'],parcel_file_name);
         
     else
         
@@ -548,7 +553,7 @@ if plot2dconns ==1
         else
             colormap jet
         end
-        
+            disp('Saving difference in network connectivity ...')
         %colorbar;
         disp('saving image diff image post minus pre...')
         if use_only_cortical_connections ==1
@@ -556,7 +561,8 @@ if plot2dconns ==1
         else
             print([output_dir filesep  image_name '_diff_including_subcortex.png'], '-dpng', '-r300')
         end
-        
+              dconn_variance_per_network(diff_matrix, assigns,[output_dir filesep  image_name 'diff'],parcel_file_name);
+      
     else
         imagesc(diff_matrix); hold on;
         

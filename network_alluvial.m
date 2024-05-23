@@ -10,7 +10,7 @@ sort_matrix =0;
 subcort_plot_type = 'donut';
 save_subcortical_percentages =1;
 run_locally =0;
-skip_plotting =0;
+skip_plotting =1;
 %left_labels = {'AUD', 'CO','DAN','DMN','FP','MTL','PMN','PON','SAL', 'SMD','SML' , 'Tpole', 'VAN','VIS'};
 all_labels = {'DMN','Vis','FP','DAN','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON'};
 add_label_percentages =1;
@@ -134,7 +134,8 @@ num_greys_in_nets_b = sum(alluvial_matrix,1);
 
 if skip_plotting ==0
     if sort_matrix ==0 %
-        h= alluvialflow_change_colors(alluvial_matrix, left_labels, right_labels, string('Network Change'),0,[],[], isanet_in_current_setC, isanet_in_current_setD,output_name); % unsorted
+        %h = alluvialflow_change_colors(data, left_labels, right_labels, chart_title,sort_mat, Eidx, Fidx,isanet_in_current_setC, isanet_in_current_setD,output_name)
+        h= alluvialflow_change_colors(alluvial_matrix, left_labels, right_labels, 'Network_Change',0,[],[], isanet_in_current_setC, isanet_in_current_setD,output_name); % unsorted
     else
         %disp(' sort matrix option is selected. NOTE: network colors need fixing.')
         %[E,Eidx] = sort(num_greys_in_all_nets_a,'descend');

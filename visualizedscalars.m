@@ -76,17 +76,18 @@ end
 %load colormap
 load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
 
-
-conc = strsplit(dscalarswithassignments, '.');
-conc = char(conc(end));
-if strcmp('conc',conc) == 1
-    dscalarswithassignments = importdata(dscalarswithassignments);
-elseif strcmp('csv',conc) == 1
-    dscalarswithassignments = importdata(dscalarswithassignments);
+if iscell(dscalarswithassignments) ==1
 else
-    dscalarswithassignments = {dscalarswithassignments};
+    conc = strsplit(dscalarswithassignments, '.');
+    conc = char(conc(end));
+    if strcmp('conc',conc) == 1
+        dscalarswithassignments = importdata(dscalarswithassignments);
+    elseif strcmp('csv',conc) == 1
+        dscalarswithassignments = importdata(dscalarswithassignments);
+    else
+        dscalarswithassignments = {dscalarswithassignments};
+    end
 end
-
 num_orig_files = length(dscalarswithassignments);
 network_assignment_filetype = strsplit(dscalarswithassignments{1}, '.');
 cifti_type = char(network_assignment_filetype(end-1));
@@ -126,6 +127,7 @@ else
     disp(['Files found: ' num2str(found_files_total)])
     disp(['Files missing: ' num2str(missing_files_total)])
     prompt = 'Continue with only found files? [Y/N]: ';
+    
     str = input(prompt, 's');
     if strcmp(str,'y')==1 || strcmp(str,'Y')==1 || strcmp(str,'yes')==1 || strcmp(str,'YES')==1 || strcmp(str,'Yes')==1 || isempty(str)
         disp('Using only found files.')
@@ -307,6 +309,7 @@ if overlap == 1
             integration_zone_number_of_nets = integration_zone_number_of_nets';
             save([outputname '.mat'],'whole_brain_number_of_nets','integration_zone_number_of_nets');
             ciftisave(temp_file,[outputname '_avg_number_of_networks.dscalar.nii'],wb_command);
+            return_name=[outputname '_avg_number_of_networks.dscalar.nii'];
         end
     else %calculate mode
         if calc_mode ==1
@@ -314,6 +317,7 @@ if overlap == 1
             mode_scalar = mode_scalar';
             temp_file.cdata=mode_scalar;
             ciftisave(temp_file,[outputname '_population_mode.dscalar.nii'],wb_command);
+            return_name=[outputname '_avg_number_of_networks.dscalar.nii'];            
         else
         end
     end
@@ -434,3 +438,4 @@ if plot_results ==1
     end
 end
 disp('Done making network dscalars.')
+

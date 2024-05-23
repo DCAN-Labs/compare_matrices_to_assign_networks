@@ -202,15 +202,15 @@ for i = 1:length(dtseries_file) %number of subjects
     
     switch data_type
         case 'parcellated'
-            output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.pscalar.nii' ];
+            output_cifti_scalar_name  = [cifti_output_folder filesep output_cifti_name '.pscalar.nii' ];
         case 'dense'
             
-            output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '.dscalar.nii' ];
+            output_cifti_scalar_name  = [cifti_output_folder filesep output_cifti_name '.dscalar.nii' ];
     end
     
     if strcmp(transform_data,'Convert_to_Zscores') == 1
-        output_cifti_scalar_name  = [cifti_output_folder '/' output_cifti_name '_Zscored.dscalar.nii' ];
-         output_cifti_scalar_name_wscan  = [cifti_output_folder '/' output_cifti_name '_Zscored_scanthresh3_recolored.dscalar.nii' ];
+        output_cifti_scalar_name  = [cifti_output_folder filesep output_cifti_name '_Zscored.dscalar.nii' ];
+         output_cifti_scalar_name_wscan  = [cifti_output_folder filesep output_cifti_name '_Zscored_scanthresh3_recolored.dscalar.nii' ];
        
     else
     end
@@ -353,7 +353,6 @@ for i = 1:length(dtseries_file) %number of subjects
                             
                 elseif num_greys == 59412
                     disp(['The number of greyordinates is ' num2str(num_greys) '. It is highly likely that subcortical have already been removed.  No subsectioning necessary'])
-                    
                 else
                     disp(['The number of greyordinates is ' num2str(num_greys) '. This is neither the expected 91282, nor 59412.  Unclear how to section your data. Exiting...'])
                     return
@@ -375,10 +374,16 @@ for i = 1:length(dtseries_file) %number of subjects
         %% BUILD DCONN
         %subjectdconn = cifti_conn_matrix(subject_dt_series,series,motion, FD_threshold, TR, minutes_limit, smoothing_kernal,L_surface,R_surface,bit8, remove_outliers, additional_mask);
         disp(['calling cifti_conn_matrixfor_wrapper_continous as follows: cifti_conn_matrix_for_wrapper_continous(' wb_command ',' subject_dt_series ',' series ',' motion ',' num2str(FD_threshold) ',' num2str(TR) ',' num2str(minutes_limit) ',' num2str(smoothing_kernal) ',' left_surface_file ',' right_surface_file ',' num2str(bit8) ',' num2str(remove_outliers) ',' additional_mask ',' num2str(make_dconn_conc) ',' [working_directory filesep] ',' subject_dt_series ',' num2str(use_continous_minutes) ',' num2str(memory_limit_value)])
-        subjectdconn = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [working_directory filesep], subject_dt_series, use_continous_minutes, memory_limit_value);
+        [subjectdconn,final_motion_censor_file_path] = cifti_conn_matrix_for_wrapper_continous(wb_command, subject_dt_series, series, motion, FD_threshold, TR, minutes_limit,smoothing_kernal, left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask, make_dconn_conc, [working_directory filesep], subject_dt_series, use_continous_minutes, memory_limit_value);
         %temp_name = cifti_conn_matrix(dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         %temp_name = cifti_conn_matrix   (dt_or_ptseries_conc_file,series,motion_file, FD_threshold, TR, minutes_limit, smoothing_kernal,left_surface_file, right_surface_file, bit8, remove_outliers, additional_mask)
         [path_to_dconn, dconn_name] = fileparts(subjectdconn);
+        
+        if strcmp(dconn_name,'NA')==1
+            error('Cannot continue because the dconn was not created. You subject likely has fewer than 30 seconds of data based on your motion threshold.')
+        else
+            disp(['subject dconn was created: ' subjectdconn ' Continuing...'])
+        end
         
         %% RUN COMMUNITY DECTECTION
         if run_infomap_too ==1
@@ -469,17 +474,32 @@ for i = 1:length(dtseries_file) %number of subjects
         %Step 2: get network assingments via template matching.
         [ eta_net_assign{i}, output_cifti_scalar_name,corr_mat_full] = template_matching_RH(subjectdconn, data_type, template_path, transform_data, output_cifti_name, cifti_output_folder ,wb_command,make_cifti_from_results, allow_overlap,overlap_method,surface_only,already_surface_only);
         
-        if isempty(corr_mat_full)~=1
-            disp('NOTE: template matching was run previously on this subject, therefore the .mat file containing the weights was loaded, however note that if your data would have been was Zscored during template matching, is was skipped.')
-            corr_mat_full = subjectdconn;
+        if isempty(corr_mat_full)==1 %load the dconn so that it can be plotted with assignments.
+            if strcmp(transform_data,'Convert_to_Zscores') ==1
+                disp('Converting dconn to Z scores to plot data...')
+                if surface_only ==1
+                    Zdconn = Zscore_dconn_surface_only(char(subjectdconn),'inferred',wb_command); %changed 20211216
+                    subject_cii=ciftiopen([char(Zdconn)], wb_command); %dconn path
+                    corr_mat_full = single(subject_cii.cdata); clear subject_cii
+                else
+                    %Zdconn =
+                    Zdconn = Zscore_dconn(char(subjectdconn),'inferred',wb_command); %changed 20211216
+                    subject_cii=ciftiopen([char(Zdconn)], wb_command); %dconn path
+                    corr_mat_full = single(subject_cii.cdata); clear subject_cii
+                end
+                
+            else
+                disp('NOTE: template matching was run previously on this subject, therefore the .mat file containing the weights was loaded, however note that if your data would have been was Zscored during template matching, is was skipped.')
+                corr_mat_full = subjectdconn;
+            end
         else
         end
         %% plot the matrix (sorted by the TM solution).  and Get the network-network correlation.
         [~,a] = fileparts(output_cifti_scalar_name);[~,cleaned_name_root]=fileparts(a);
         %[net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(dconn_file, assignments_vector_file,output_name,parcel_file)
-        [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(corr_mat_full,output_cifti_scalar_name,[cleaned_name_root '_TMfconn'],'makeme');
+        [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(corr_mat_full,output_cifti_scalar_name,[cifti_output_folder filesep cleaned_name_root '_TMfconn'],'makeme');
         
-        pics_folder = [cifti_output_folder '/pics_template_matching'];
+        pics_folder = [cifti_output_folder filesep 'pics_template_matching'];
         disp(['mkdir -p ' pics_folder])
         system(['mkdir -p ' pics_folder]);
         
@@ -533,19 +553,19 @@ for i = 1:length(dtseries_file) %number of subjects
         end
         
         % Save motion mask
-        motion_folder = [cifti_output_folder '_motion_masks/'];
+        motion_folder = [cifti_output_folder '_motion_masks' filesep];
         disp(['mkdir -p ' motion_folder])
         system(['mkdir -p ' motion_folder]);
         if isnumeric(minutes_limit) ==1
             if surface_only ==1
-                cmd = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
+                cmd = ['mv -v ' working_directory filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
                 disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
                 [cmdstatus,cmdout]=system(cmd);
                 if cmdstatus~=0
                     disp(cmdout)
                     disp('Problem moving motion file. "All frames" was mask was likely generated. (i.e. subject did not meet the "minimum number of minutes" criteria.')
                     disp('Trying to move all_frames mask...')
-                    cmd2 = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                    cmd2 = ['mv -v ' working_directory filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
                     disp([cmd2 ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
                     [cmdstatus2,cmdout2]=system(cmd2);
                     if cmdstatus2~=0
@@ -558,14 +578,14 @@ for i = 1:length(dtseries_file) %number of subjects
                     disp('Move was sucessfull.')
                 end
             else
-                cmd = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
+                cmd = ['mv -v ' working_directory filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt ' cifti_output_folder '_motion_masks/' ];
                 disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
                 [cmdstatus,cmdout]=system(cmd);
                 if cmdstatus~=0
                     disp(cmdout)
                     disp('Problem moving motion file. "All frames" was mask was likely generated. (i.e. subject did not meet the "minimum number of minutes" criteria.')
                     disp('Trying to move all_frames mask...')
-                    cmd2 = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                    cmd2 = ['mv -v ' working_directory filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
                     disp([cmd2 ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
                     [cmdstatus2,cmdout2]=system(cmd2);
                     if cmdstatus2~=0
@@ -580,12 +600,12 @@ for i = 1:length(dtseries_file) %number of subjects
             end
         else % 'all frames was probably selected selected'
             if surface_only ==1
-                cmd = ['mv -v ' motion_path filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                cmd = ['mv -v ' working_directory filesep motion_name_only 'surf_only.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
                 disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
                 
             else
-                cmd = ['mv -v ' motion_path filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
+                cmd = ['mv -v ' working_directory filesep motion_name_only '.mat_' num2str(FD_threshold) '_cifti_censor_FD_vector_All_Good_Frames.txt ' cifti_output_folder '_motion_masks/' ];
                 disp([cmd ' . Saving motion mask that was created as part of the twins_mapping_wrapper.']);
                 system(cmd);
             end
@@ -669,7 +689,11 @@ for i = 1:length(dtseries_file) %number of subjects
     %make template matching pic
     %update fixed an issue where the subcortical template pointed to a
     %version of the code that is intended for a label file. -RH 02/26/2024
-    cmd = [figuremaker_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+    if size(net_variance_mat,1) ==15
+        cmd = [figuremaker_code_path ' ' recolored_name_wscan ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+    else
+        cmd = [figuremaker_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+    end
     disp(cmd);
     system(cmd);
     

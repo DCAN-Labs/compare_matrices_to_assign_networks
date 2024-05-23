@@ -165,6 +165,7 @@ for sub = 1:length(dconn_filename)
         
         if exist([cifti_output_folder '/' output_cifti_name '.mat']) == 2
             disp('.mat file already reated.  loading...');
+            disp([cifti_output_folder '/' output_cifti_name '.mat'])
             load([cifti_output_folder '/' output_cifti_name '.mat']);
             if exist('eta_subject_index','var') ==1
                 new_subject_labels = eta_subject_index;
