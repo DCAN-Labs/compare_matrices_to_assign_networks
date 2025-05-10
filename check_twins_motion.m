@@ -114,6 +114,8 @@ for i = 1:length(all_motion_conc)
                 disp('Subject does not have the outlier dection mask in this .mat file. combined_removal mask not found. using power2014 FD mask instead.')
                 FD02_vector =  motion_data{FD_column}.frame_removal; % use 21 for FD= 0.2, 31 for 0.3
             end
+        else
+                FD02_vector =  motion_data{FD_column}.frame_removal; % use 21 for FD= 0.2, 31 for 0.3            
         end
         good_frames(i) = sum(abs(FD02_vector-1));
         if exist('get_mean_FD', 'var') == 1 && ~isempty(get_mean_FD) == 1

@@ -1,4 +1,4 @@
-function corr_netcombo_activation(probabilistic_network_conc,activation_dscalar,wb_command,maximum_combination_of_nets,outputfolder,use_negative_nets, abs_activation, corr_type, create_max_combo_cifti, output_name ,run_locally)
+function corr_netcombo_activation(probabilistic_network_conc,activation_dscalar,wb_command,maximum_combination_of_nets,outputfolder,use_negative_nets, abs_activation, only_use_postive_activation, corr_type, create_max_combo_cifti, output_name ,find_network_proportions, run_locally)
 
 % R. Hermosillo
 % v1.0 - 07/28/2021
@@ -16,8 +16,9 @@ function corr_netcombo_activation(probabilistic_network_conc,activation_dscalar,
 % this conc MUST be in the same order as the Network number ("net_list" variable below). (i.e. DMN
 % first, Vis second, etc.).  If not, the combinations of "network 1" and
 % "network 7" will actually correspond with the addative sum of different
-% networks.
- 
+% networks.  This can also be a .mat file of the network weights (again in
+% the same order).
+
 %activation_dscalar = Char. a dscalar file of activation (This should be the
 % same (i.e. 91282 greyordinates in length as the probabilistic dscalars).
 
@@ -39,8 +40,8 @@ function corr_netcombo_activation(probabilistic_network_conc,activation_dscalar,
 % output_name = The name of you output file.  THis will be appended with
 % the selected parameters.
 
-% run_locally = Set to 0 for running on MSI.  Set to 1 for Robert's computer to debug.  
-% 
+% run_locally = Set to 0 for running on MSI.  Set to 1 for Robert's computer to debug.
+%
 
 %Additional packages are required to handle ciftis:
 %MSCcodebase-master: https://github.com/MidnightScanClub/MSCcodebase
@@ -62,7 +63,10 @@ if isnumeric(abs_activation) ==1
 else
     abs_activation = str2num(abs_activation);
 end
-
+if isnumeric(only_use_postive_activation) ==1
+else
+    only_use_postive_activation = str2num(only_use_postive_activation);
+end
 if isnumeric(create_max_combo_cifti) ==1
 else
     create_max_combo_cifti=str2num(create_max_combo_cifti);
@@ -82,7 +86,7 @@ if run_locally ==1
     addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\utilities')
     addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\gifti')
     addpath('C:\Users\hermosir\Documents\repos\MSCcodebase-master\Utilities\read_write_cifti\fileio')
-else    
+else
     this_code = which('template_matching_RH');
     [code_dir,~] = fileparts(this_code);
     support_folder=[code_dir '/support_files']; %find support files in the code directory.
@@ -102,14 +106,16 @@ else
 end
 
 %% Step 2: Load activation data
-% 
-net_list = [1 2 3 5 7 8 9 10 11 12 13 14 15 16]; % hardcoded network assingments.
-all_labels = {'DMN','Vis','FP','','DAN','','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON'};
-
-
-activation_dscalar_file = ciftiopen(activation_dscalar,wb_command);
-activation_dscalar_cifti = activation_dscalar_file.cdata;
-
+%
+net_list = [1 2 3 5 7 8 9 10 11 12 13 14 15 16 18]; % hardcoded network assingments.
+all_labels = {'DMN','Vis','FP','','DAN','','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON','SCAN'};
+num_steps =100;
+if isnumeric(activation_dscalar) ==1
+    activation_dscalar_cifti = activation_dscalar;
+else
+    activation_dscalar_file = ciftiopen(activation_dscalar,wb_command);
+    activation_dscalar_cifti = activation_dscalar_file.cdata;
+end
 if abs_activation ==1
     activation_dscalar_cifti = abs(activation_dscalar_cifti);
     abs_act = 'ON'; % for saved file name
@@ -117,9 +123,22 @@ else
     abs_act = 'OFF';
 end
 
+if only_use_postive_activation ==1
+    activation_dscalar_cifti(activation_dscalar_cifti < 0) = 0;
+    only_pos = 'ON'; % for saved file name
+else
+    only_pos = 'OFF';
+end
+
 %reference_cifti = reference_cifti_all(1:59412,1); %just use surface labels
-net_file_list = importdata(probabilistic_network_conc);
-num_nets = size(net_list,1);
+if strcmp(probabilistic_network_conc(end-4:end),'.conc') ==1
+    net_file_list = importdata(probabilistic_network_conc);
+    num_nets = size(net_list,1);
+elseif strcmp(probabilistic_network_conc(end-3:end),'.mat') ==1
+    load(probabilistic_network_conc,'eta_to_template_vox');
+else
+    error('reference files must either be a conc file of dscalars or a .mat file.')
+end
 
 %% Step 3: Build list of combinations of networks
 D=[]; k=1;
@@ -139,9 +158,9 @@ disp(['Based on the maximum combinations you have selected: ' num2str(maximum_co
 %build negative combinations
 if use_negative_nets ==1
     for N = 1:maximum_combination_of_nets
-    binary_combinations_all{1,N} = dec2bin(0:2^N-1)-'0'; % get all binary combinations of max values.
-    zeroindxs = binary_combinations_all{1,N} ==0;
-    binary_combinations_all{1,N}(zeroindxs) = -1; % set 0 values to neagtive 1.  So networks will be multiplied by 1 or negative 1.
+        binary_combinations_all{1,N} = dec2bin(0:2^N-1)-'0'; % get all binary combinations of max values.
+        zeroindxs = binary_combinations_all{1,N} ==0;
+        binary_combinations_all{1,N}(zeroindxs) = -1; % set 0 values to neagtive 1.  So networks will be multiplied by 1 or negative 1.
     end
     negnets= 'ON';
 else
@@ -151,17 +170,24 @@ end
 %% Step 4: Load each probability cifti then build network probabiliity matrix
 n = 1;m=1;
 %for i = 1:size(net_file_list,1)
-for i = 1:max(net_list)
-    if i ==4 || i==6 % HARDCODE Warning: In template matching, these numbered networks don't exist.
-        net_prob(:,n) = nan(size(net_prob,1),1); %probably 91282 
-    else
-        ciifile = ciftiopen(net_file_list{m},wb_command);
-        net_prob(:,n) = ciifile.cdata;
-        m=m+1;
+if strcmp(probabilistic_network_conc(end-4:end),'.conc') ==1
+    for i = 1:max(net_list)
+        if i ==4 || i==6 || i==17 % HARDCODE Warning: In template matching, these numbered networks don't exist.
+            net_prob(:,n) = nan(size(net_prob,1),1); %probably 91282
+        else
+            ciifile = ciftiopen(net_file_list{m},wb_command);
+            net_prob(:,n) = ciifile.cdata;
+            m=m+1;
+        end
+        n=n+1;
     end
-    n=n+1;
+elseif strcmp(probabilistic_network_conc(end-3:end),'.mat') ==1
+    net_prob=eta_to_template_vox;
+    net_prob(:,4) = nan(size(net_prob,1),1); %probably 91282
+    net_prob(:,6) = nan(size(net_prob,1),1); %probably 91282
+    net_prob(:,17) = nan(size(net_prob,1),1); %probably 91282
+    
 end
-
 %% Step 5: Start correlation of activation with each combination of network.
 
 tic
@@ -169,6 +195,17 @@ if use_negative_nets ==1
     summation_tau_vec = zeros(size(D,1),size(binary_combinations_all{1,end},1)); % preallocate for speed.
 else
     summation_tau_vec = zeros(size(D,1),1); % preallocate for speed.
+end
+
+if find_network_proportions ==1
+    E=cell(size(D,1),size(D,2));
+    b=single([0:0.01:1]);
+    for ee=1:size(E,1)
+        non_zero_combo= find(D(ee,:)>0);
+        for eee=1:size(non_zero_combo,2)
+            E{ee,eee}=b;
+        end
+    end
 end
 
 for i = 1:size(D,1) % use 3472 for maximum 5 nets.
@@ -187,7 +224,7 @@ for i = 1:size(D,1) % use 3472 for maximum 5 nets.
             netssum = sum(nets_combo_flipping,2);
             switch corr_type
                 case 'Kendall'
-            [summation_tau_vec(i,N),~] = corr(activation_dscalar_cifti,netssum,'Type','Kendall');
+                    [summation_tau_vec(i,N),~] = corr(activation_dscalar_cifti,netssum,'Type','Kendall');
                 case 'Pearson'
                     [summation_tau_vec(i,N),~] = corr(activation_dscalar_cifti,netssum);
                 otherwise
@@ -272,54 +309,54 @@ if create_max_combo_cifti ==1
     max_combo_output_name = [outputfolder filesep output_name '_corrtype' corr_type '_maxnets' num2str(maximum_combination_of_nets) '_absactivation' abs_act 'negnets' negnets '_max_probnet_combination_' combo_char '.dscalar.nii'];
     ciftisave(ciifile,max_combo_output_name,wb_command);
 end
- if plot_data ==1
-figure()
-if use_negative_nets ==0
-    set(gcf,'color','w');
-    %imagesc(D(1:3472,1:5)');
-    imagesc(D(:,1:maximum_combination_of_nets)');
-    colormap(mycmap);
-    xlabel('Combination')
-    ylabel('Number of networks in combination')
-    hold on
-    yyaxis right
-    p = plot(summation_tau_vec,'LineWidth',2,'Color','k','LineStyle','-');
-    ylabel('Correlation')
-    hold on
-    plot(max_tauindx,maxtau,'wo','MarkerSize',7,'MarkerFaceColor','w')
-    set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
-    title(output_name)
-    
-    % Make sorted polot
-    figure;
-    set(gcf,'color','w');
-    [corr_sorted, corr_sorted_idx] = sort(summation_tau_vec,'descend');
-    D_sorted= D(corr_sorted_idx,:);
-    imagesc(D_sorted(:,1:maximum_combination_of_nets)');
-    colormap(mycmap);
-    xlabel('Combination')
-    ylabel('Number of networks in combination')
-    hold on
-    yyaxis right
-    p = plot(corr_sorted,'LineWidth',2,'Color','k','LineStyle','-');
-    ylabel('Correlation')
-    hold on
-    plot(max_tauindx,maxtau,'wo','MarkerSize',7,'MarkerFaceColor','w')
-    set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
-    title(output_name)
-    
+if plot_data ==1
+    figure()
+    if use_negative_nets ==0
+        set(gcf,'color','w');
+        %imagesc(D(1:3472,1:5)');
+        imagesc(D(:,1:maximum_combination_of_nets)');
+        colormap(mycmap);
+        xlabel('Combination')
+        ylabel('Number of networks in combination')
+        hold on
+        yyaxis right
+        p = plot(summation_tau_vec,'LineWidth',2,'Color','k','LineStyle','-');
+        ylabel('Correlation')
+        hold on
+        plot(max_tauindx,maxtau,'wo','MarkerSize',7,'MarkerFaceColor','w')
+        set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
+        title(output_name)
+        
+        % Make sorted polot
+        figure;
+        set(gcf,'color','w');
+        [corr_sorted, corr_sorted_idx] = sort(summation_tau_vec,'descend');
+        D_sorted= D(corr_sorted_idx,:);
+        imagesc(D_sorted(:,1:maximum_combination_of_nets)');
+        colormap(mycmap);
+        xlabel('Combination')
+        ylabel('Number of networks in combination')
+        hold on
+        yyaxis right
+        p = plot(corr_sorted,'LineWidth',2,'Color','k','LineStyle','-');
+        ylabel('Correlation')
+        hold on
+        plot(max_tauindx,maxtau,'wo','MarkerSize',7,'MarkerFaceColor','w')
+        set(gca,'LooseInset',max(get(gca,'TightInset'), 0.02))
+        title(output_name)
+        
+    else
+        disp('Plotting data for negative nets not yet implemented.')
+    end
+    %disp(['Saving image: ' opts.saveFolder outputfilename])
+    %print([opts.saveFolder outputfilename], '-dpng', '-r600')
 else
-    disp('Plotting data for negative nets not yet implemented.')
 end
-%disp(['Saving image: ' opts.saveFolder outputfilename])
-%print([opts.saveFolder outputfilename], '-dpng', '-r600')
- else
- end
- 
+
 % Now that you've found the optimum combonation of networks, see which
-% thresholds maximize the correlation between them. 
- disp('Attempting to find optimized threshold for correlation between dscalars...')
- [~,~,maximum_value] = optimize_dscalar_thresholds(run_locally,activation_dscalar, max_combo_output_name, abs_activation,0,200,'correlate',1);
- disp(['After testing all possible combinations of thresholds, the maximum correlation between dscalars is: ' num2double(maximum_value)])
- 
+% thresholds maximize the correlation between them.
+disp('Attempting to find optimized threshold for correlation between dscalars...')
+[~,~,maximum_value] = optimize_dscalar_thresholds(run_locally,activation_dscalar, max_combo_output_name, abs_activation,0,200,'correlate',1);
+disp(['After testing all possible combinations of thresholds, the maximum correlation between dscalars is: ' num2double(maximum_value)])
+
 disp('Done running correlation script.')

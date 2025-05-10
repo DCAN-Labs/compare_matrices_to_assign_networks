@@ -67,7 +67,7 @@ end
 %output_template_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
 %output_subject_path = 'C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_avg_network_patches';
 %output_file_name = 'sub-33005b';
-min_patch_size = 80; % previously 30, but since bold voxels are 2x2x2, only 4 voxels=32.  80 means that voxels must be at least 10 grayodrinates
+min_patch_size = 30; % previously 30, but since bold voxels are 2x2x2, only 4 voxels=32.  80 means that voxels must be at least 10 grayodrinates
 min_num_of_grays = 10; % with above, if a cluster has less than 10 grayordiantes, don't count it as a unique patch to match (for either the template or the subject).
 maximum_combination_of_nets = 4;
 save_matched_dscalars =1;
@@ -126,7 +126,7 @@ end
 %load power colors
 %load('C:\Users\hermosir\Documents\repos\support_folder\Jet_wzerowhite_colormap.mat','mymap')
 
-net_list = [1 2 3 5 7 8 9 10 11 12 13 14 15 16]; % hardcoded network assingments.
+net_list = [1 2 3 5 7 8 9 10 11 12 13 14 15 16 18]; % hardcoded network assingments.
 %all_labels = {'DMN','Vis','FP','','DAN','','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON'};
 
 %% Step 1: Load template data and create cluster_files

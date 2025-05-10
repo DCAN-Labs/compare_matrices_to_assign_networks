@@ -7,7 +7,8 @@ function makeCiftiTemplates_RH(dt_or_ptseries_conc_file,TR,all_motion_conc_file,
 FD_threshold = 0.2; FD_column = 21;
 %FD_threshold = 0.3; %for infant
 check_motion_first =1;
-minutes_to_use =10;
+%minutes_to_use =10;
+minutes_to_use =50;
 
 if surface_only ==1
     Zscore_regions = 0;
@@ -69,8 +70,13 @@ for i = 1:length(subs)
 end
 disp([num2str(subsfound) ' of ' num2str(length(subs)) ' timeseries files found.  All series files exist continuing ...'])
 
+
 if strcmp('conc',conc) == 1
     B = importdata(all_motion_conc_file);
+    
+elseif strcmp('mat',all_motion_conc_file(end:end-3)) == 1
+    load(all_motion_conc_file);
+   B = allmasks_outliers_removed_FD02;
 else
     B = {all_motion_conc_file};
 end
@@ -87,12 +93,14 @@ for i = 1:length(B)
     if exist(B{i},'file') == 0
         NOTE = ['motion file ' num2str(i) ' does not exist']
         disp(num2str(B{i}))
+            good_subs(i) = 0;    
         %return
     else
+
         subsfound_motion=subsfound_motion+1;
     end
 end
-disp([num2str(subsfound_motion) ' of ' num2str(length(B)) ' motion files found. All motion files exist continuing ...'])
+disp([num2str(subsfound_motion) ' of ' num2str(length(B)) ' motion files found. Motion files exist continuing ...'])
 
 file_dir = dt_or_ptseries_conc_file;
 file_split = strsplit(file_dir,'/');
@@ -123,18 +131,21 @@ if check_motion_first ==1
     % check_twins_motion(all_motion_conc_file, TR_or_TR_conc, output_dir, output_name, FD_column,FD_conc_file,get_mean_FD,use_outlierdetection_mask_if_possible,split_motion,splits)
 [~,output_name] = fileparts(all_motion_conc_file);
    %[all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, FD_column,[],0,1);
-    [all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, project_dir, output_name ,FD_column,[],0,1,0,0);
+
+   [all_subjects_minutes,all_mean_FD] = check_twins_motion(all_motion_conc_file, TR, project_dir, output_name ,FD_column,[],0,1,0,0);
 
          good_subs_idx = find(minutes_to_use<=all_subjects_minutes); %use these subjects
          bad_subs_idx = find(minutes_to_use>all_subjects_minutes); %dont' use these subjects
          really_bad_subs_idx= find(0.5>=all_subjects_minutes); %these subjects have very little data.
+
+
 end
 
 %Going Forward, only use timeseries and motion from subjects that pass
 %minimum number of minutes requirement.
 if use_only_subjects_that_pass_motion_criteria ==1
-subs = subs(good_subs_idx);
-B = B(good_subs_idx);
+    subs = subs(good_subs_idx);
+    B = B(good_subs_idx);
 else
 end
 
@@ -173,6 +184,7 @@ else
         if power_motion == 1
             %use power method
             load(B{i})
+            [~,orig_motion_filename]=fileparts(B{i});
             allFD = zeros(1,length(motion_data));
             for motion_colum = 1:length(motion_data)
                 allFD(motion_colum) = motion_data{motion_colum}.FD_threshold;
@@ -219,7 +231,7 @@ else
                     ones_idx = good_frames_idx(rand_good_frames);
                     FDvec_cut(ones_idx) = 1; % the new vector that should match good frames with the minutes limit
                     
-                    fileID = fopen([char(project_dir) filesep char(orig_motion_filename) '_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_limit) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt'],'w');
+                    fileID = fopen([char(project_dir) filesep char(orig_motion_filename) '_' num2str(FD_threshold) '_cifti_censor_FD_vector_' num2str(minutes_to_use) '_minutes_of_data_at_' num2str(FD_threshold) '_threshold.txt'],'w');
                     fprintf(fileID,'%1.0f\n',FDvec_cut);
                     fclose(fileID);
                     
@@ -420,9 +432,9 @@ for j=1:length(network_names)
 end
 %save all maps
 if Zscore_regions == 1
-    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'B','seed_matrix','subs','Zscore_regions','power_motion','remove_outliers','surface_only','use_only_subjects_that_pass_motion_criteria','combined_outliermask_provided','include_scan_net','bad_subs_idx','good_subs_idx','cleansubs');
+    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networksZscored.mat'],'B','seed_matrix','subs','Zscore_regions','power_motion','remove_outliers','surface_only','use_only_subjects_that_pass_motion_criteria','combined_outliermask_provided','include_scan_net','bad_subs_idx','good_subs_idx','cleansubs','FD_threshold','minutes_to_use');
 else
-    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networks.mat'],'B','seed_matrix','subs','Zscore_regions','power_motion','remove_outliers','surface_only','use_only_subjects_that_pass_motion_criteria','combined_outliermask_provided','include_scan_net','bad_subs_idx','good_subs_idx','cleansubs');
+    save([project_dir filesep 'seedmaps_' file_root_no_ext '_all_networks.mat'],'B','seed_matrix','subs','Zscore_regions','power_motion','remove_outliers','surface_only','use_only_subjects_that_pass_motion_criteria','combined_outliermask_provided','include_scan_net','bad_subs_idx','good_subs_idx','cleansubs','FD_threshold','minutes_to_use');
 end
 
 disp('Done making network templates based on the subjects you provided.');

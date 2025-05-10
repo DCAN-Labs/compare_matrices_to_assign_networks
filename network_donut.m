@@ -98,7 +98,8 @@ netRGBs = [
     0 102 153
     102 255 102
     60 60 251
-    200 200 200]/255;
+    200 200 200
+    142 0 102]/255;
 
 netRGBcs = netRGBs(isanet_in_current_setC,:);
 netRGBds = netRGBs(isanet_in_current_setD,:);

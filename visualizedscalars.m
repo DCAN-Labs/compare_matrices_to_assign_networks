@@ -1,16 +1,16 @@
 function [large_scalar_array,whole_brain_number_of_nets,integration_zone_number_of_nets] = visualizedscalars(dscalarswithassignments,outputname,output_map_type, plot_results,surface_only,if_mode_which_network_number)
 
 %This code loads in a conc of dcalars to visualize them for all subjects.
-% It also can calculates the probability of a network assingment from the
+% It also can calculates the probability of a network assignment from the
 % list of subjects that you've provided.
 
 % inputs are:
-% dscalarswithassignments= path(s) to dscalat with assignmnets. (i.e. a .conc file of all your subject's dscalars (1 path per row))
+% dscalarswithassignments= path(s) to dscalar with assigments. (i.e. a .conc file of all your subject's dscalars (1 path per row))
 % outputname= the output save name for the cifti and .mat file a full path is recommended. Do not include the file extension.
 % output_map_type=  case 'calc_percentage', 'number_of_networks','calc_probability', 'calc_mode'
 % plot_results. Set to 1 to plot results.
 % surface_only. Set to 1 if your cifti has no subcortical data;
-% if_mode_which_network_number.  Provide a numer (e.g. 1= Default mode) to build a mode map of only the default mode network;
+% if_mode_which_network_number.  Provide a number (e.g. 1= Default mode) to build a mode map of only the default mode network;
 
 %Visualization Paremeters:
 %Downsample_scalar = if true, the dscalar with be down sampled (sampled
@@ -254,7 +254,7 @@ if overlap == 1
     if calc_percentage == 1 || calc_probability == 1
         for i=1:length(network_names) % i is network names
             disp(i)
-            if  i~=4 && i~=6
+            if  i~=4 && i~=6 && i~=17
                 allthisnets=squeeze(scalar_array(:,:,i));
                 %                 for j=1:size(scalar_array,1) % j is  voxel
                 %                     if rem(j,5000)==0

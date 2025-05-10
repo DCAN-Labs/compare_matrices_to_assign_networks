@@ -162,7 +162,8 @@ for k_left = 1:size(data, 1) % for each row
         0 102 153
         102 255 102
         60 60 251
-        200 200 200]/255;
+        200 200 200
+        142 0 103]/255;
 %     else
 %         netRGBs = [
 %         255 0 0;
@@ -270,12 +271,12 @@ end % for each row
 % Place left labels
 text(zeros(1, size(data, 1)) - 0.01, ...
     left_category_points + left_category_sizes./2, ...
-    left_labels, 'FontSize', 9, 'FontWeight','bold', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Rotation', 90);
+    left_labels, 'FontSize', 7, 'FontWeight','bold', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Rotation', 90);
 
 % Place right labels
 text(ones(1, size(data, 2)) + 0.01, ...
     right_category_points + right_category_sizes./2, ...
-    right_labels, 'FontSize', 9, 'FontWeight','bold', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Rotation', 90);
+    right_labels, 'FontSize', 7, 'FontWeight','bold', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Rotation', 90);
 
 title(chart_title, 'Interpreter', 'none');
 h.Position = [100 100 200 700]; %make a 100 x 600 figure

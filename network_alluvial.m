@@ -2,7 +2,7 @@ function [structure_percentC, structure_percentD] = network_alluvial(DscalarC,Ds
 
 %OPTIONS
 close all
-check_surface =1;
+only_use_surface =1;
 check_subcortical =1;
 sort_matrix =0;
 %plot_subcort =1;
@@ -10,14 +10,14 @@ sort_matrix =0;
 subcort_plot_type = 'donut';
 save_subcortical_percentages =1;
 run_locally =0;
-skip_plotting =1;
+skip_plotting =0;
 %left_labels = {'AUD', 'CO','DAN','DMN','FP','MTL','PMN','PON','SAL', 'SMD','SML' , 'Tpole', 'VAN','VIS'};
-all_labels = {'DMN','Vis','FP','DAN','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON'};
+all_labels = {'DMN','Vis','FP','DAN','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON','SCAN'};
 add_label_percentages =1;
 
 %right_labels = {'AUD', 'CO','DAN','DMN','FP','MTL','PMN','PON','SAL', 'SMD','SML' , 'Tpole', 'VAN','VIS'};
 %right_labels = {'DMN','Vis','FP','DAN','VAN','Sal','CO','SMd','SML','AUD', 'Tpole', 'MTL','PMN','PON'};
-possible_net_nums = [1 2 3  5  7 8 9 10 11 12 13 14 15 16];
+possible_net_nums = [1 2 3  5  7 8 9 10 11 12 13 14 15 16 18];
 donut_label_font_size =10;
 
 if run_locally ==1
@@ -104,7 +104,7 @@ if check_subcortical ==1
     end
 end
 %test_missing_nets=1;
-if check_surface ==1
+if only_use_surface ==1
     %D(find(D==10 | D==8 )) =5; % set all 10s to 1.
     D=D_surf;C=C_surf;
 end

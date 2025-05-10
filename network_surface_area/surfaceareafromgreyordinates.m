@@ -1,6 +1,24 @@
-function [all_areas_vec, network_surfarea, network_volume ] = surfaceareafromgreyordinates(Lmidthicknessfile_path,Rmidthicknessfile_path,output_only_greySA,dscalarwithassignments_path,outputname,output_folder,cleanupintermediatefiles,data_is_surface_only)
+function [all_areas_vec, network_surfarea, network_volume ] = surfaceareafromgreyordinates(Lmidthicknessfile_path,Rmidthicknessfile_path,output_only_greySA,dscalarwithassignments_path,outputname,output_folder,cleanupintermediatefiles,data_is_surface_only,restrict_to_ROI,ROI_vector)
 
 %This wrapper create a surface area dscalar
+
+% You'll need the subject's own midthickness files  and dscalar (dscalar.nii)of the network assignments.
+% Lmidthicknessfile = a left mid-thickness file of the brain (.surf.gii) or (conc file of Lmidthckness files).
+% Rmidthicknessfile = a right mid-thickness file of the brain (.surf.gii) or (conc file of Lmidthckness files).
+% output_only_greySA = set to 1 to get the surface areas.  Set to 0 to debug.
+% dscalarwithassignnments = vector of assignments for neural network numbers (1-18)   (dscalar.nii) or (conc file of dscalars)
+% outputname = name of resulting file
+% outputfolder = path to your output folder
+% cleanupintermediatefiles = This script does a lot of file conversions, set to 1 to clean up. and 0 to inspect the intermediate files. 
+% data_is_surface_only set to 1 if your data is surface only (i.e. 59412 grayordinates).  Set to 0 if you have a regular dscalar (i.e. 91282 grayordinates) 
+% restrict_to_ROI = set to 1 if you want to restrict the surface area calculation to a specific ROI. set to 0 if you want to preform the surface area calculation across the whole brain.
+% ROI_vector = optional. path to the an .mat file with a variable 'label_indices' vector where 1s and 0s where 1 is a grayordinate to keep and 0 is a grayordinate to ignore when doing the surface area calculation.  if you want to preform the surface area calculation across the whole brain, provide an empty string (e.g. '').
+
+%example call using a conc file and and restricted ROI:
+%surfaceareafromgreyordinates('/path/to/my_Lmidthickness.conc','/path/to/my_Rmidthickness.conc',1,'/path/to/my_dscalars.conc','my5subjectsoutputname','/path/to/myoutputfolder',1,0,1,'/path/to/myfrontal_cortex_indices.mat');
+%example call for a single subject:
+%surfaceareafromgreyordinates('/path/to/my_Lmidthickness.surf.gii','/path/to/my_Rmidthickness.surf.gii',1,'/path/to/my_network.dscalar.nii','myoutputname','/path/to/myoutputfolder',1,0,0,'');
+
 
 %% Add necessary paths
 this_code = which('surfaceareafromgreyordinates');
@@ -23,7 +41,7 @@ addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/U
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
-
+wb_command='/home/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
 %Lmidthicknessfile,Rmidthicknessfile,dscalarwithassignments
 
 conc = strsplit(dscalarwithassignments_path, '.');
@@ -91,7 +109,14 @@ end
 % end
 disp('All series files exist continuing ...')
 
-
+if isempty(ROI_vector)
+else
+    if ischar(ROI_vector) ==1
+        load(ROI_vector);
+        ROI_vector=label_indices;
+    end
+    
+end
 %Make a blank dscalar with 8000 as all the values using the 1st cifti.
 newcii = ciftiopen(dscalarwithassignments{1},wb_command);
 network_assignments = newcii.cdata;
@@ -161,7 +186,8 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
     
     all_areas = ciftiopen([outputname 'surfaceareas.dscalar.nii'], wb_command);
     all_areas_vec = all_areas.cdata;
-    
+        all_areas_vec_orig = all_areas.cdata;
+
     if output_only_greySA   ==1
         network_assignment_filetype = strsplit(dscalarwithassignments{i}, '.');
         cifti_type = char(network_assignment_filetype(end-1));
@@ -204,15 +230,27 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
         else % run single network assingment
             
             for j = 1:num_networks
-                net_indices = find(network_assignments == j);
-                net_indices_log = network_assignments == j;
+                if restrict_to_ROI ==0
+                    net_indices = find(network_assignments == j);
+                    net_indices_log = network_assignments == j;
+                    net_and_left = net_indices_log & indices_left_log; %logical sum of hemisphere and network
+                    net_and_right = net_indices_log & indices_right_log; %logical sum of hemisphere and network
+                    
+                else
+                    net_indices = find(network_assignments((ROI_vector)) == j);
+                    net_indices_log = network_assignments((ROI_vector)) == j;
+                    net_and_left = net_indices_log & indices_left_log(ROI_vector); %logical sum of hemisphere and network
+                    net_and_right = net_indices_log & indices_right_log(ROI_vector); %logical sum of hemisphere and network
+                    
+                end
                 
-                net_and_left = net_indices_log & indices_left_log; %logical sum of hemisphere and network
                 net_indices_left = find(net_and_left==1);
-                net_and_right = net_indices_log & indices_right_log; %logical sum of hemisphere and network
-                net_indices_right = find(net_and_right==1);  
-                
+                net_indices_right = find(net_and_right==1);
+                if restrict_to_ROI ==1
+                    all_areas_vec =all_areas_vec_orig(ROI_vector);
+                end
                 grey_SA = all_areas_vec(net_indices);
+                
                 sub_indices = find(grey_SA > 1000);
                 surf_indices = find(grey_SA < 1000); %if surface only data is incorrectly indicated, then this function should still work, because the surface area of the addional grayordinates is zero.
                 if data_is_surface_only ==1
@@ -225,7 +263,11 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
                 Lhemi_net_SA = all_areas_vec(net_indices_left);
                 Rhemi_net_SA = all_areas_vec(net_indices_right);
                 
+                %if restrict_to_ROI ==1
+                %network_surfarea_restricted(i,j) = sum(total_net_SA(ROI_vector));
+                %end
                 network_surfarea(i,j) = sum(total_net_SA);
+                
                 network_L_hemi_surfarea(i,j) = sum(Lhemi_net_SA);
                 network_R_hemi_surfarea(i,j) = sum(Rhemi_net_SA);
             end
@@ -248,9 +290,20 @@ if cleanupintermediatefiles ==1
 else
 end
 
+
+for i= 1:size(network_surfarea,1)
+network_proportion(i,:) = network_surfarea(i,:)/(sum(network_surfarea(i,:)));
+end
+
+
 if output_only_greySA  ==1
     disp('saving volumes and surface areas');
-    save( [output_folder filesep outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Lmidthicknessfile','Rmidthicknessfile')
+    if restrict_to_ROI ==1
+        save( [output_folder filesep outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Lmidthicknessfile','Rmidthicknessfile','network_proportion','restrict_to_ROI','ROI_vector')
+        
+    else
+        save( [output_folder filesep outputname '.mat'], 'network_volume','network_surfarea','network_L_hemi_surfarea','network_R_hemi_surfarea','dscalarwithassignments','Lmidthicknessfile','Rmidthicknessfile','network_proportion')
+    end
 else
 end
 

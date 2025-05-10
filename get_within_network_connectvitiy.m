@@ -195,10 +195,5 @@ net255=net_colors*255;
 
 
 
-%example
-data = rand(20,24);
-month = repmat({'jan' 'feb' 'mar' 'apr' 'may' 'jun' 'jul' 'aug' 'sep' 'oct' 'nov' 'dec'},1,2);
-simobs = [repmat({'sim'},1,12),repmat({'obs'},1,12)];
-
 end
 

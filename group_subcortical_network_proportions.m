@@ -6,7 +6,8 @@ addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/U
 
 %reference_dscalar = '/mnt/rose/shared/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
-reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group1_AVG_TM_Zscored_recolored.dscalar.nii'
+%reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group2_AVG_TM_Zscored_recolored.dscalar.nii';
+reference_dscalar = '/home/faird/shared/projects/HCP-Dv2_net_template_matching/group_averages/HCP-D_TM_networks_2.0_10minute_ages20-21.dscalar.nii';
 
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.dscalar.nii';
 %reference_dscalar = 'rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
@@ -16,11 +17,16 @@ reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/A
 %subject_list = importdata('/mnt/rose/shared/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_BOTH_rushpaths_dscalars.conc');
 %NiGG Twins
 %subject_list = importdata('/mnt/rose/shared/projects/NIGGTWINS/WTO/Experiments/Template_matching/template_matching_dscalars/template_matching_cleaned_dscalar.conc');
-%ABCD Group1
-%subject_list = importdata('/home/exacloud/lustre1/fnl_lab/projects/ABCD_net_template_matching/ABCD_group1_cleaned_TM_dscalars_trimmed.conc');
-subject_list = importdata('/home/rando149/shared/projects/ABCD_net_template_matching/surfacearea/ABCD_templ_matched_scalars_group1_10_min_MSI_dscalars_trimmed.conc')
+conc = strsplit(dscalar_conc, '.');
+conc = char(conc(end));
+if strcmp('conc',conc) == 1
+    subject_list = importdata(dscalar_conc);
+    
+else
+    subject_list = {dscalar_conc};
+end
 
-subject_list = importdata(dscalar_conc);
+
 run_locally =0;
 
 if run_locally ==1
@@ -55,20 +61,23 @@ end
 
 
 if surface_only ==0
-    all_nets_mat = zeros(size(subject_list,1), 21, 14);
-    all_nets_vec = zeros(size(subject_list,1), 21*14);
+    all_nets_mat = zeros(size(subject_list,1), 21, 15); % 15 networks includes the SCAN network
+    all_nets_vec = zeros(size(subject_list,1), 21*15);
 else
-    all_nets_mat = zeros(size(subject_list,1), 2, 14); %cortex only (i.e. only get proportions for left and right.)
-    all_nets_vec = zeros(size(subject_list,1), 2*14);
+    all_nets_mat = zeros(size(subject_list,1), 2, 15); %cortex only (i.e. only get proportions for left and right.)
+    all_nets_vec = zeros(size(subject_list,1), 2*15);
 end
-
+tic
 for sub = 1: size(subject_list,1)
     disp(sub);
     %try
+        toc
     %network_alluvial(DscalarC,DscalarD,plot_subcortex,output_name,wb_command)
     [~, structure_percentD] = network_alluvial(reference_dscalar,subject_list{sub},1,outname,wb_command);
     %catch
-        structure_percentD =nan(21,14); % if there's an erro with the dscalar, fill with nans.
+         %structure_percentD =nan(21,14); % if there's an erro with the dscalar, fill with nans.
+    %     structure_percentD =nan(21,15); % if there's an erro with the dscalar, fill with nans. adding 1 for the scan network.
+    
     %end
     all_nets_mat(sub,:,:) = structure_percentD;
     structure_percentD_trans = structure_percentD';

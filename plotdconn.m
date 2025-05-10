@@ -5,6 +5,7 @@ function plotdconn(dconn_cifti_path,net_assigns,downsample_dconn,DS_factor,apply
 %This code make a picture of the dconn matrix, sorted by networks, the
 %dconn is down sampled (DS_factor)to reduce the number of pixels in the image.
 
+
 %inputs are:
 % 1)path to a dconn
 % 2)path to a dscalar with asssignments (ordinal).
@@ -201,8 +202,13 @@ if isnumeric(dconn_cifti_path) ==1
     clear dconn_cifti_path
 else
     disp(dconn_cifti_path)
-    dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);
-    dconn = single(dconn_cifti.cdata);
+    if strcmp(dconn_cifti_path(end-3:end),'.mat')
+        load(dconn_cifti_path,'avg_cifti');
+        dconn = avg_cifti; clear avg_cifti;
+    else
+        dconn_cifti=ciftiopen(dconn_cifti_path,wb_command);
+        dconn = single(dconn_cifti.cdata);
+    end
 end
 %subsample dconn
 
@@ -342,7 +348,7 @@ if use_showM ==1
     end
     
     disp('Saving network connectivity dconn1...')
-    dconn_variance_per_network(newdconn, assigns,[output_dir filesep  image_name],parcel_file_name);
+    dconn_variance_per_network(newdconn, assigns,[output_dir filesep  image_name '1'],parcel_file_name);
     
 else
     if downsample_dconn == 1

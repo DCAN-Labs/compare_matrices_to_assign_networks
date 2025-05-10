@@ -9,7 +9,9 @@ function [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_n
 %inputs are:
 %dconn_files=path to a dense connectivity matrix cifti file (.dconni.nii).  This can also be a numeric matrix.
 
-%assignments_vector_file=path to a vector file that is the same length as the dconn file (.dscalar.nii).  This can also be a .csv. This can also be a numeric variable.
+%assignments_vector_file=(string) path to a vector file that is the same length as the dconn file (.dscalar.nii).  This can also be a .csv. This can also be a numeric variable.
+
+%outputname=(string) Some output file name. 
 
 %parcel_file=path to a parcel file that contains the network assignments.  If one has
 %not been created yet, and corresponds with a 14 network template matching
@@ -66,12 +68,13 @@ end
 
 if exist([output_name '_TM_mean_per_network.mat'],'file') == 2
     disp(['Network .mat file found. It will not be remade: ' output_name '_TM_mean_per_network.mat'])
+    load([output_name '_TM_mean_per_network.mat'], 'net_variance_mat', 'net_mean_mat','counts','mybins','countsnorm', 'net_variance_mat_alpha_sorted', 'net_mean_mat_alpha_sorted');
 else
     
     
-    assigns = assigns_only_assigned;
-    
-    
+    %assigns = assigns_only_assigned;
+     assigns = assigns_only_assigned(assigns_only_assigned>0);
+   
     %assigns = assignments_vector;
     [sorted_networks,I] = sort(assigns); % get sorted indices;
     networks = unique(assigns); % get network assingments from template.

@@ -5,7 +5,7 @@ function [new_subject_labels, cleaned_outname, corr_mat_full] = template_matchin
 %Make_Cifti_template_RH.m).  
 
 %inputs are:
-%subjectlist = subject (e.g. dconn.nii)
+%dconn_filename is the path to your dconn
 %data_type = "parcellated" or "dense" connectivity matrix
 %template_path = path to .mat file that has th network templates.
 %transform_data =  if you want to convert you data before comparing to your template, use can use 1 of 2 transformations: 'Convert_FisherZ_to_r' or 'Convert_r_to_Pearons' or 'Convert_to_Zscores' or use no tranformation.
@@ -259,6 +259,8 @@ for sub = 1:length(dconn_filename)
             %%% compute eta similarity value b/w each vertex and template %%%
             if exist('eta_to_template_vox','var') ~=1
                 eta_to_template_vox = single(zeros(size(corr_mat_full,1),length(network_names)));
+                disp(['your template is size : ' num2str(size(cifti_template_mat_full,1)) ' by '  num2str(size(cifti_template_mat_full,2)) ]);
+                disp(['your correlation matrix is size : ' num2str(size(corr_mat_full,1)) ' by '  num2str(size(corr_mat_full,2)) ]);
                 for i=1:size(corr_mat_full,1)
                     if rem(i,5000)==0
                         disp([' Calculating voxel ' num2str(i)]);toc;
