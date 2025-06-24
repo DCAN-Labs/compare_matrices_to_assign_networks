@@ -1,4 +1,4 @@
-function [final_patch_path] = patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile, output_subject_path,output_file_name,distance_matrix_to_use)
+function [final_patch_path] = patch_match(subject_input_cifti_file,template_input_cifti_file,output_template_path,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile, output_subject_path,output_file_name,distance_matrix_to_use,maximum_combination_of_nets)
 
 %This function work trying to match up a subjects individualized clusters
 %with the clusters observed in the group.
@@ -12,20 +12,27 @@ function [final_patch_path] = patch_match(subject_input_cifti_file,template_inpu
 %                               the cluster to.  ABCD has around 200 patches depending on how the
 %                               clusters are defined using the parameteres specified below.  Use 'default
 %                               to use the ABCD_consesus map.
-% "output_template_path" =      path to where you want to write the template patches file. 
+% "output_template_path" =      path to where you want to write the template patches file.
 % "path_to_Lmidthicknessfile" = path to the LEFT midthickness file that you will use to find the clusters
 % "path_to_Rmidthicknessfile" = path to the RIGHT midthickness file that you will use to find the clusters
-% "output_subject_path" =       path to output the subject's files. Several 
+% "output_subject_path" =       path to output the subject's files. Several
 %                               intermediate files are written (e.g.
 %                               patches are identified per network, and
 %                               the final files).
 % "output_file_name" =          Some output file name to use (E.g. "SUBJECT1234")
-% "distance_matrix_to_use" =    Path to a  geodesic+euclidean distance 
+% "distance_matrix_to_use" =    Path to a  geodesic+euclidean distance
 %                               matrix.  If you haven't created one before you can use the code found
-%                               here: /home/faird/shared/code/internal/utilities/distance-matrix or 
+%                               here: /home/faird/shared/code/internal/utilities/distance-matrix or
 %                                at https://gitlab.com/Fair_lab/distance-matrix.git
-% 
-% 
+%
+%"maximum_combination_of_nets" = (Whole number). The maximum combination of patches use to
+%identify a single patch.  For example.  If the FP is fragmented into 4
+%pieces, in the subject but is usually only 1 patch in the template.  Label
+%all of them with the sample number.  (I.e is the overlap better using 1 patch or 7 patches? (using jaccard)).
+%I recommend using 6 at most. Increasing this will expoentially increase
+%compute time, as the number of combinations of patches increases
+%expoentitally.
+
 % An Example call to this functin would be as follows:
 % patch_match('/path/to/my/TM_networks.dscalar.nii','default','/path/to/my/output_folder/,'/path/to/my/L_midthickness_file.surf.gii','/path/to/my/R_midthickness_file.surf.gii','the_best_subject_ever','/path/to/my/huge/distance_matrix_file.mat');
 
@@ -38,10 +45,10 @@ function [final_patch_path] = patch_match(subject_input_cifti_file,template_inpu
 
 %In the first step cluster files are created for each network.  Then the
 %jaccard similiarty is calculated for each patch again sthe the patches in
-%the template.  AFter that, combinations of patches are also tested against
+%the template.  After that, combinations of patches are also tested against
 %the template patches.  Most grayordinates are assigned at this step.
 
-%In the second step For small islands Distance to unassigned group-patches of the same
+%In the second step for small islands Distance to unassigned group-patches of the same
 %network.  This allows for patches that are very close to the template (but
 %maybe missed in step 1) to be assigned.  The code works by calculating the
 %distance between each grayordinate to the unassigned template patches.
@@ -69,7 +76,7 @@ end
 %output_file_name = 'sub-33005b';
 min_patch_size = 30; % previously 30, but since bold voxels are 2x2x2, only 4 voxels=32.  80 means that voxels must be at least 10 grayodrinates
 min_num_of_grays = 10; % with above, if a cluster has less than 10 grayordiantes, don't count it as a unique patch to match (for either the template or the subject).
-maximum_combination_of_nets = 4;
+%maximum_combination_of_nets = 2; % use 2 for testing and 6 for running. 
 save_matched_dscalars =1;
 min_dist=30;
 keep_cortical_subcortical_seperation =1; %Set to 1 to set cortico-subcortical distance at 255mm (max).  If 0, distance matrix will use the eucliden distance from cortical to subcortical grayordiantes.
@@ -121,6 +128,13 @@ else
     else
         wb_command=settings.path_wb_c; %path to wb_command
     end
+end
+addpath('/panfs/jay/groups/6/faird/shared/code/internal/utilities/distance-matrix/')
+
+
+if isnumeric(maximum_combination_of_nets) ==1
+else
+    maximum_combination_of_nets = str2num(maximum_combination_of_nets);
 end
 
 %load power colors
@@ -205,18 +219,20 @@ else
             end
         end
     end
-
-template_patch_label_vector =sum(adjusted_patch_matrix,2);
-template_cifti_obj.cdata=template_patch_label_vector;
-ciftisave(template_cifti_obj,[output_template_path filesep 'template_net_all_unique_patches.dscalar.nii'],wb_command);
-
-num_greys_left = nnz(template_patch_label_vector);
-num_greys_removed = size(adjusted_patch_matrix,1)-nnz(template_patch_label_vector);
-disp(['Number of grayordinates removed: ' num2str(num_greys_removed)]);
-disp(['Number of grayordinates left: ' num2str(num_greys_left)]);
-disp(['Number of patches at this threshold: ' num2str(max(full_patches_list))]);
-
-
+    
+    template_patch_label_vector =sum(adjusted_patch_matrix,2);
+    template_cifti_obj.cdata=template_patch_label_vector;
+    disp('Saving template...')
+    
+    num_greys_left = nnz(template_patch_label_vector);
+    num_greys_removed = size(adjusted_patch_matrix,1)-nnz(template_patch_label_vector);
+    disp(['Number of grayordinates removed: ' num2str(num_greys_removed)]);
+    disp(['Number of grayordinates left: ' num2str(num_greys_left)]);
+    disp(['Number of patches at this threshold: ' num2str(max(full_patches_list))]);
+    
+    ciftisave(template_cifti_obj,[output_template_path filesep 'template_net_all_unique_patches.dscalar.nii'],wb_command);
+    save([output_template_path filesep 'template_net_all_unique_patches.mat'],'patch_matrix','full_patches_list','template_list_of_adjusted_patches_by_networks','template_list_of_patches_by_networks','template_num_patches','template_patch_label_vector','template_input_cifti_file','output_template_path');
+    
 end
 
 
@@ -301,7 +317,7 @@ disp(['Number of patches at this threshold: ' num2str(max(subject_full_patches_l
 %%step 4 Create logicals for each cluster separated by network.
 
 for n =1: size(subject_list_of_adjusted_patches_by_networks,1)
-    if n == 4 || n ==6
+    if n == 4 || n == 6 || n == 17
     else
         subject_adj_cluster_nums_for_this_net = subject_list_of_adjusted_patches_by_networks{n,1};
         template_adj_cluster_nums_for_this_net = template_list_of_adjusted_patches_by_networks{n,1};
@@ -323,155 +339,162 @@ end
 
 %% step 5 Jaccard time.
 jaccard_mat_all_nets=cell(size(subject_all_clust_log_vectors,2),1);
-for n= 1:size(subject_all_clust_log_vectors,2)
-    disp(['Matching patches for network ' num2str(n)])
-    
-    sub_num_clusters_in_this_net = size(subject_all_clust_log_vectors{n},2);
-    template_num_clusters_in_this_net = size(template_all_clust_log_vectors{n},2);
-    subject_this_nets_cluster_logicals = subject_all_clust_log_vectors{n}; %select this network
-    template_this_nets_cluster_logicals = template_all_clust_log_vectors{n}; %select this network
-    
-    disp(['Matching patches for network ' num2str(n)])
-    disp(['Number of network ' num2str(n) ' patches for template= '  num2str(template_num_clusters_in_this_net) ]);
-    disp(['Number of network ' num2str(n) ' patches for subject = '  num2str(sub_num_clusters_in_this_net) ]);
-    
-    
-    for p = 1:template_num_clusters_in_this_net
-        patch2matchto = template_this_nets_cluster_logicals(:,p);
-        disp(['Calculating match (Jaccard) for patch '  num2str(p) ' for network: ' num2str(n) ' ...' ]);
-        D{n,1}=[]; k=1;
-        
-        this_patch_vec = 1:sub_num_clusters_in_this_net;
-        for i = 1:maximum_combination_of_nets
-            C = nchoosek(this_patch_vec,k); % return all possible combinations of select k nets from all networks.
-            % put the vector of C into a matrix of zeros so that it can be concatenated onto the full list.
-            Czeromat = zeros(size(C,1),size(this_patch_vec,2),1);
-            Czeromat(:,1:size(C,2)) = C;
-            D{n,1} = [D{n,1}; Czeromat];
-            k=k+1;
-        end
-        if p==1
-            jaccard_mat=zeros(size(D{n,1},1),size(template_this_nets_cluster_logicals,2));
-        end
-        for q = 1:size(D{n,1},1)
-            net_indices_combo = nonzeros(D{n,1}(q,:));
-            E=logical(sum(subject_this_nets_cluster_logicals(:,net_indices_combo),2));
-            jaccard_mat(q,p)=jaccard(E,patch2matchto);
-        end
-    end
-    jaccard_mat_all_nets{n}=jaccard_mat;
-    
-end
-
-%Step 6 Set patch numbers with largest jaccard.
-
-for n = 1: size(jaccard_mat_all_nets,1)
-    if n == 4 || n ==6
-    else
-        jaccard_this_net = jaccard_mat_all_nets{n,1};
-        
-        %Before finding out which combos have the largest jaccard, check
-        %that the the maximum values for jaccard are not all zero (which
-        %indicates no overlap of any subject patches with the given template patch).
-        %If any of the columnes in the jaccard matrix are all zero, then
-        %matlab's max function will label the first element of the matrix
-        %the maximum.  Here, we set them to Nan.
-        
-        for j=1:size(jaccard_this_net,2)
-            jaccard_checksum = sum(jaccard_this_net,1);
-            for k =1: size(jaccard_checksum,2)
-                if jaccard_checksum(k) ==0
-                    jaccard_mat_all_nets{n,1}(:,k)=nan;
-                end
-            end
-        end
-        
-        %make copies of these for later. Because they will be modified to
-        %remove patches from the pool. (Akin to sample without replacement)
-        jaccard_mod = jaccard_mat_all_nets;
-        possible_patch_values_template = 1:size(jaccard_mod{n,1},2);
-        num_sub_clust= max(D{n,1}(:,1));
-        assignment_mat{n,1} = zeros(num_sub_clust,1);
-        
-        for i = 1:size(jaccard_mod{n,1},2)
-            maximum = max(max(jaccard_mod{n,1}));
-            if maximum ==0
-                disp('max is zero')
-                break
-            else
-                [x,y]=find(jaccard_mod{n,1}==maximum);
-                if size(x,1)>1
-                    x=x(1);
-                    y=y(1);
-                end
-                jaccard_mod{n,1}(x,:)=nan;
-                jaccard_mod{n,1}(:,y)=nan;
-                patches_to_exclude = nonzeros(D{n,1}(x,:));
-                
-                %assingn nets
-                assignment_mat{n,1}(patches_to_exclude) = y;
-                
-                D_mod{n,1} = ismember(D{n,1}(:,:),patches_to_exclude); %find combos that have already been assigned.
-                
-                %exclude additional jaccard values if the network has already been
-                %assigned.
-                additional_combos_to_exclude = any(D_mod{n,1},2);
-                jaccard_mod{n,1}(additional_combos_to_exclude,:)=nan;
-                
-                possible_patch_values_template(possible_patch_values_template==y) =[];
-            end
-        end
-        %[max_values{n},patch_indices_this_net] =  max(jaccard_mat_all_nets{n,1},[],1,'includenan');
-        %patch_indices_this_net(all(isnan(jaccard_mat_all_nets{n,1}),1))= NaN;
-        
-        %         for i=1:size(patch_indices_this_net,2)
-        %             if isnan(patch_indices_this_net(i)) ==1
-        %                 best_combos{n}(i,:) = NaN;
-        %             else
-        %                 best_combos{n}(i,:) = D{n,1}(patch_indices_this_net(i),:);
-        %                 %best_combos{n}(i,:) = (D{n,1}(patch_indices_this_net,i));
-        %
-        %             end
-        %         end
-    end
-end
-
-for n=1:size(assignment_mat,1)
-    unlabeled_patches(n,1) = size(assignment_mat{n,1},1)-nnz(assignment_mat{n,1});
-    labeled_patches(n,1)= nnz(assignment_mat{n,1});
-end
-
-
-subject_patch_matched_matrix=zeros(size(subject_patch_matrix,1),size(subject_patch_matrix,2));
-
-
-for i= 1:size(assignment_mat,1)
-    for j=1:size(assignment_mat{i,1},1)
-        orig_patch_dix=subject_patch_matrix(:,i)==j; % get the logical indices of each patch.
-        subject_patch_matched_matrix(orig_patch_dix,i)=assignment_mat{i,1}(j);
-    end
-end
-
-if save_matched_dscalars==1
-    %k=1;
-    for net_num =net_list
-        disp('Saving patch-matched dscalars for each network for subject...')
-        %subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '.dscalar.nii'];
-        patch_matched_subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '_maxcombo' num2str(maximum_combination_of_nets) '_patch_matched.dscalar.nii'];
-        %subject_patch_matched_list{k,1} = patch_matched_subject_outputname_cifti_file;
-        
-        %if exist(patch_matched_subject_outputname_cifti_file,'file') ~=0
-        %    disp('Subject patch dscalars has already been made for this network.')
-        %else
-        this_net_double = double(subject_patch_matched_matrix(:,net_num));
-        subject_cifti_obj.cdata=this_net_double;
-        ciftisave(subject_cifti_obj,patch_matched_subject_outputname_cifti_file,wb_command);
-        %system(cmd);
-        %end
-        %k=k+1;
-    end
+if exist([output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post1.mat'],'file')==2
+    disp('Jaccard data found.  Loading... ')
+    load([output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post1.mat'],'assignment_mat','subject_unassigned_patches','subject_adjusted_missing_nets_indices_by_net','subject_adjusted_missing_nets_indices_by_net','template_unmatched_clusters_poststep1','unlabeled_patches','labeled_patches','subject_patch_matched_matrix','subject_patch_matched_matrix');
 else
-end
+    for n= 1:size(subject_all_clust_log_vectors,2)
+        disp(['Matching patches for network ' num2str(n)])
+        
+        sub_num_clusters_in_this_net = size(subject_all_clust_log_vectors{n},2);
+        template_num_clusters_in_this_net = size(template_all_clust_log_vectors{n},2);
+        subject_this_nets_cluster_logicals = subject_all_clust_log_vectors{n}; %select this network
+        template_this_nets_cluster_logicals = template_all_clust_log_vectors{n}; %select this network
+        
+        disp(['Matching patches for network ' num2str(n)])
+        disp(['Number of network ' num2str(n) ' patches for template= '  num2str(template_num_clusters_in_this_net) ]);
+        disp(['Number of network ' num2str(n) ' patches for subject = '  num2str(sub_num_clusters_in_this_net) ]);
+        
+        
+        for p = 1:template_num_clusters_in_this_net
+            patch2matchto = template_this_nets_cluster_logicals(:,p);
+            disp(['Calculating match (Jaccard) for patch '  num2str(p) ' for network: ' num2str(n) ' ...' ]);
+            D{n,1}=[]; k=1;
+            
+            this_patch_vec = 1:sub_num_clusters_in_this_net;
+            for i = 1:maximum_combination_of_nets
+                C = nchoosek(this_patch_vec,k); % return all possible combinations of select k nets from all networks.
+                % put the vector of C into a matrix of zeros so that it can be concatenated onto the full list.
+                Czeromat = zeros(size(C,1),size(this_patch_vec,2),1);
+                Czeromat(:,1:size(C,2)) = C;
+                D{n,1} = [D{n,1}; Czeromat];
+                k=k+1;
+            end
+            if p==1
+                jaccard_mat=zeros(size(D{n,1},1),size(template_this_nets_cluster_logicals,2));
+            end
+            for q = 1:size(D{n,1},1)
+                net_indices_combo = nonzeros(D{n,1}(q,:));
+                E=logical(sum(subject_this_nets_cluster_logicals(:,net_indices_combo),2));
+                jaccard_mat(q,p)=jaccard(E,patch2matchto);
+            end
+        end
+        jaccard_mat_all_nets{n}=jaccard_mat;
+        
+    end
+    
+    %Step 6 Set patch numbers with largest jaccard.
+    
+    for n = 1: size(jaccard_mat_all_nets,1)
+        if n == 4 || n ==6 || n==17
+        else
+            jaccard_this_net = jaccard_mat_all_nets{n,1};
+            
+            %Before finding out which combos have the largest jaccard, check
+            %that the the maximum values for jaccard are not all zero (which
+            %indicates no overlap of any subject patches with the given template patch).
+            %If any of the columnes in the jaccard matrix are all zero, then
+            %matlab's max function will label the first element of the matrix
+            %the maximum.  Here, we set them to Nan.
+            
+            for j=1:size(jaccard_this_net,2)
+                jaccard_checksum = sum(jaccard_this_net,1);
+                for k =1: size(jaccard_checksum,2)
+                    if jaccard_checksum(k) ==0
+                        jaccard_mat_all_nets{n,1}(:,k)=nan;
+                    end
+                end
+            end
+            
+            %make copies of these for later. Because they will be modified to
+            %remove patches from the pool. (Akin to sample without replacement)
+            jaccard_mod = jaccard_mat_all_nets;
+            possible_patch_values_template = 1:size(jaccard_mod{n,1},2);
+            num_sub_clust= max(D{n,1}(:,1));
+            assignment_mat{n,1} = zeros(num_sub_clust,1);
+            
+            for i = 1:size(jaccard_mod{n,1},2)
+                maximum = max(max(jaccard_mod{n,1}));
+                if maximum ==0
+                    disp('max is zero')
+                    break
+                else
+                    [x,y]=find(jaccard_mod{n,1}==maximum);
+                    if size(x,1)>1
+                        x=x(1);
+                        y=y(1);
+                    end
+                    jaccard_mod{n,1}(x,:)=nan;
+                    jaccard_mod{n,1}(:,y)=nan;
+                    patches_to_exclude = nonzeros(D{n,1}(x,:));
+                    
+                    %assingn nets
+                    assignment_mat{n,1}(patches_to_exclude) = y;
+                    
+                    D_mod{n,1} = ismember(D{n,1}(:,:),patches_to_exclude); %find combos that have already been assigned.
+                    
+                    %exclude additional jaccard values if the network has already been
+                    %assigned.
+                    additional_combos_to_exclude = any(D_mod{n,1},2);
+                    jaccard_mod{n,1}(additional_combos_to_exclude,:)=nan;
+                    
+                    possible_patch_values_template(possible_patch_values_template==y) =[];
+                end
+            end
+            %[max_values{n},patch_indices_this_net] =  max(jaccard_mat_all_nets{n,1},[],1,'includenan');
+            %patch_indices_this_net(all(isnan(jaccard_mat_all_nets{n,1}),1))= NaN;
+            
+            %         for i=1:size(patch_indices_this_net,2)
+            %             if isnan(patch_indices_this_net(i)) ==1
+            %                 best_combos{n}(i,:) = NaN;
+            %             else
+            %                 best_combos{n}(i,:) = D{n,1}(patch_indices_this_net(i),:);
+            %                 %best_combos{n}(i,:) = (D{n,1}(patch_indices_this_net,i));
+            %
+            %             end
+            %         end
+        end
+    end
+    
+    for n=1:size(assignment_mat,1)
+        unlabeled_patches(n,1) = size(assignment_mat{n,1},1)-nnz(assignment_mat{n,1});
+        labeled_patches(n,1)= nnz(assignment_mat{n,1});
+    end
+    
+    
+    subject_patch_matched_matrix=zeros(size(subject_patch_matrix,1),size(subject_patch_matrix,2));
+    
+    
+    for i= 1:size(assignment_mat,1)
+        for j=1:size(assignment_mat{i,1},1)
+            orig_patch_dix=subject_patch_matrix(:,i)==j; % get the logical indices of each patch.
+            subject_patch_matched_matrix(orig_patch_dix,i)=assignment_mat{i,1}(j);
+        end
+    end
+    
+    if save_matched_dscalars==1
+        %k=1;
+        for net_num =net_list
+            disp('Saving patch-matched dscalars for each network for subject...')
+            %subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '.dscalar.nii'];
+            patch_matched_subject_outputname_cifti_file = [output_subject_path filesep output_file_name 'subject_net_' num2str(net_num) '_maxcombo' num2str(maximum_combination_of_nets) '_patch_matched.dscalar.nii'];
+            %subject_patch_matched_list{k,1} = patch_matched_subject_outputname_cifti_file;
+            
+            %if exist(patch_matched_subject_outputname_cifti_file,'file') ~=0
+            %    disp('Subject patch dscalars has already been made for this network.')
+            %else
+            this_net_double = double(subject_patch_matched_matrix(:,net_num));
+            subject_cifti_obj.cdata=this_net_double;
+            ciftisave(subject_cifti_obj,patch_matched_subject_outputname_cifti_file,wb_command);
+            %system(cmd);
+            %end
+            %k=k+1;
+        end
+    else
+    end
+    %save this for later since this step took a while.
+    save([output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post1.mat'],'assignment_mat','unlabeled_patches','labeled_patches','subject_patch_matched_matrix','subject_patch_matched_matrix')
+end % load data
 
 total_unlabelled_patches = sum(unlabeled_patches);
 total_labelled_patches = sum(labeled_patches);
@@ -499,7 +522,9 @@ for i=1:size(template_unmatched_clusters_poststep1,1)
         end
     end
 end
-
+subject_unassigned_patches = cell(size(assignment_mat,1),1);
+% try to preallocate the cell size of subject_adjusted_missing_nets_indices_by_net.  This will prevent the matrix from becoming too small if the final metwork has no missing  patches.  UNfortunately, we can only preallocate in 1 dimension without know how maximum number of unassigned patches.
+subject_adjusted_missing_nets_indices_by_net= cell(size(assignment_mat,1),1);
 i=1;k=1;
 for i=1:size(assignment_mat,1)
     %if isempty(assignment_mat{i,1}) ~=1
@@ -516,19 +541,29 @@ if exist([output_subject_path filesep output_file_name '_templatepatchto' output
     load([output_subject_path filesep output_file_name '_templatepatchto' output_file_name 'patch_distance_mat_by_net.mat'],'templatepatchtosubjectpatch_distance_mat_by_net')
 else
     
-    if exist('distances','var') ==1
+    if exist('EUGEODistancematrix','var') ==1
         disp('Distance matrix already loaded.')
     else
         tic
-        disp('loading distance matrix...')
-        if keep_cortical_subcortical_seperation ==1
+        if strcmp(distance_matrix_to_use,'makeme')
+            disp('You have elected to create the distance matrix.  This may take some time.')
+            % inputs for distmat_creation_distribute_RH(ciftifile, surfcoordsfileL, surfcoordsfileR, output_folder,output_name,path_to_template_dconn,set_interhemispheric_high, set_cortical_to_subcortical_high)
+            
+            %MAKE DISTANCE MATRIX
+            [dist_mat_filename, EUGEODistancematrix] = distmat_creation_distribute_RH(subject_input_cifti_file,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile,output_subject_path,[output_file_name '_distmat'],'/home/faird/shared/projects/AnitaOHSUVAcollab/dconns_max_minutes/sub-TAAR844_ses-combined_task-restV3B_bold_desc-filtered_timeseries_spatially_interpolated_SMOOTHED_2.55.dtseries.nii_36_minutes_of_data_at_FD_0.2.dconn.nii',1,1,0);
+            
+
+        else
+            disp('loading distance matrix...')
+            if keep_cortical_subcortical_seperation ==1
             disp('Note: Distance matrix has eucliean distances between the cortex and subcortex set to 255mm (max uint8).')
             %load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
-            load(distance_matrix_to_use,'distances');
+            load(distance_matrix_to_use,'EUGEODistancematrix');
         else
             disp('Note: Distance matrix uses eucliean distances between the cortex and subcortex.')
             %load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
-            load(distance_matrix_to_use,'distances');
+            load(distance_matrix_to_use,'EUGEODistancematrix');
+        end
         end
         toc
     end
@@ -549,7 +584,7 @@ else
                         subject_lonely_patch_indices = subject_adjusted_missing_nets_indices_by_net{i,k};
                         if isempty(subject_lonely_patch_indices) ==1
                         else
-                            templatepatchtosubjectpatch_distance_mat{j,k}=distances(template_lonely_patch_indices,subject_lonely_patch_indices);
+                            templatepatchtosubjectpatch_distance_mat{j,k}=EUGEODistancematrix(template_lonely_patch_indices,subject_lonely_patch_indices);
                         end
                     end
                 end
@@ -598,7 +633,7 @@ template_unmatched_clusters_poststep1_mod = template_unmatched_clusters_poststep
 assignment_mat_post2 =assignment_mat; %save for later;
 
 for n = 1: size(min_distance_of_every_grey_per_patch_allnets,1)
-    if n == 4 || n ==6
+    if n == 4 || n ==6 || n==17
     else
         min_distance_of_every_grey_per_patch = min_distance_of_every_grey_per_patch_allnets{n,1};
         possible_patch_values_template2 = 1:size(template_unmatched_clusters_poststep1_mod{n,1},1);
@@ -721,18 +756,18 @@ end
 %get the distances.
 
 tic
-if exist('distances','var') ==1
+if exist('EUGEODistancematrix','var') ==1
     disp('Distance matrix already loaded.')
 else
     disp('loading distance matrix...')
     if keep_cortical_subcortical_seperation ==1
         disp('Note: Distance matrix has eucliean distances between the cortex and subcortex set to 255mm (max uint8).')
         %load([support_folder filesep 'EUGEODistancematrix_XYZ_255interhem_unit8.mat'],'distances');
-        load(distance_matrix_to_use,'distances');
+        load(distance_matrix_to_use,'EUGEODistancematrix');
     else
         disp('Note: Distance matrix uses eucliean distances between the cortex and subcortex.')
         %load([support_folder filesep 'EUGEODistancematrix_XYZ_unit8.mat'],'distances');
-        load(distance_matrix_to_use,'distances');
+        load(distance_matrix_to_use,'EUGEODistancematrix');
     end
     toc
     
@@ -758,7 +793,7 @@ for i=1:size(subject_unmatched_patch_indices_post2,1)
                 if isempty(subject_matched_patch_indices) ==1
                     subjectunmatched2matched_distance_mat{k,j}=[];
                 else
-                    subjectunmatched2matched_distance_mat{k,j}=distances(subject_lonely_patch_indices,subject_matched_patch_indices);
+                    subjectunmatched2matched_distance_mat{k,j}=EUGEODistancematrix(subject_lonely_patch_indices,subject_matched_patch_indices);
                 end
             end
         end
@@ -810,7 +845,7 @@ end
 assignment_mat_post3=assignment_mat_post2; % save for later.
 subject_patch_matched_matrix_post3= subject_patch_matched_matrix_post2;
 for n = 1: size(subject2subject_min_distance_of_every_grey_per_patch_allnets,1)
-    if n == 4 || n ==6
+    if n == 4 || n ==6 || n==17
     else
         min_distance_of_every_grey_per_patch_nans = subject2subject_min_distance_of_every_grey_per_patch_allnets{n,1};
         for i = 1:size(min_distance_of_every_grey_per_patch_nans,1)
@@ -926,7 +961,7 @@ template_unique_adjusted_patches = nonzeros(unique(template_patch_label_vector))
 unmatchable_num = sum(unmatchable_log);
 unmatched_indices = template_unique_adjusted_patches(unmatchable_log);
 disp(['The number of patches that could not be matched is ' num2str(unmatchable_num) '/' num2str(max(template_unique_adjusted_patches)) ]);
-disp(['The subject did not have the following networks: ' num2str(unmatched_indices')])
+disp(['The subject did not have the following patches: ' num2str(unmatched_indices')])
 subject_cifti_obj.cdata=subject_patch_label_vector;
 final_patch_path=[output_subject_path filesep output_file_name '_maxcombo' num2str(maximum_combination_of_nets) 'subject_net_all_unique_patches_post3.dscalar.nii'];
 ciftisave(subject_cifti_obj,final_patch_path,wb_command);
@@ -949,8 +984,14 @@ for net_num =net_list
     system(cmd4);
     system(cmd5);
 end
-    
-disp('done')
+
+if exist('dist_mat_filename','var') ==1 % You can probably remove this since the variable is created during this session and loaded into work space.
+    disp(['removing distance matrix file: ' dist_mat_filename]);
+    cmdrmdist_mat_filename = sprintf('rm -v "%s"', dist_mat_filename);
+    system(cmdrmdist_mat_filename);
+end
+
+disp('Done. Patch Match completed.')
 
 
 end

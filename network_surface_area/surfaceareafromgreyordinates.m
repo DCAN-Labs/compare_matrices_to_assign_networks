@@ -284,7 +284,7 @@ for i = 1:size(dscalarwithassignments) % loop through every subject
     
 end
 
-if cleanupintermediatefiles ==1
+if cleanupintermediatefiles ==1 && data_is_surface_only ~=1
     cmd = ['rm ' output_folder filesep outputname '8000s_91282.dscalar.nii ' output_folder filesep '8000s_volume.nii'];
     system(cmd)
 else

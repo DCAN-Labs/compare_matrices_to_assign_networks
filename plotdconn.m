@@ -593,7 +593,7 @@ if plot2dconns ==1
     end
     
 else
-    disp('saving image...')
+    disp(['saving image...' output_dir filesep image_name '.png']);
     print([output_dir filesep image_name '.png'], '-dpng', '-r600')
 end
 

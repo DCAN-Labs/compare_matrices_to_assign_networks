@@ -14,7 +14,8 @@ outputname_for_cifti_file = 'PCS0003_elecmapp_';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\test_placements_updated_sulc_depth\Paddles_placement_v5_single_color';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\test_placements_updated_sulc_depth_wfmriprep_v02052024\temp2';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\test_placements_updated_sulc_depth_wfmriprep';
-output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS0003';
+%output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS0003';
+output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS003_xcpd_surfaces_05292025_postop';
 
 %output_dir = 'C:\Users\hermosir\Desktop\Darrow_pain\RECODE\';
 
@@ -25,7 +26,9 @@ output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_dept
 %path_sulc_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\sulc_depth_test\MNI_wm\tmadison\sub-PCS0001_ses-01to02_space-fsLR_den-32k_sulc_inv.dscalar.nii';
 %path_sulc_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\sulc_depth_test\fmriprep_v02052024\sub-PCS0001_ses-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
-path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/fmriprep/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+%path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/fmriprep/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %xcp
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\sub-PCS0001_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz');
@@ -43,11 +46,14 @@ path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/fmriprep/output/P
 
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS0003_T1w_fmriprep_pial_xyz_raw_coordinates.mat','allxyz');
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS0003_T1w_fmriprep_pial_xyz_raw_coordinates.mat','allxyz');
-load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_fMRIPrep_pial_xyz_raw_coordinates.mat');
+%load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_fMRIPrep_pial_xyz_raw_coordinates.mat');
+load('/home/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_MNIspace_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
 %Lstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_den-32k_hemi-L_desc-msmsulc_pial.surf.stl';
 %Rstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_den-32k_hemi-R_desc-msmsulc_pial.surf.stl';
-Lstl='/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_den-32k_hemi-L_desc-msmsulc_pial.surf.stl';
-Rstl='/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_den-32k_hemi-R_desc-msmsulc_pial.surf.stl';
+%Lstl='/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_den-32k_hemi-L_desc-msmsulc_pial.surf.stl';
+%Rstl='/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_den-32k_hemi-R_desc-msmsulc_pial.surf.stl';
+Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
+Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-R_space-fsLR_den-32k_pial.stl';
 
 %paddlestl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\LAMITRODE_44_blocky.stl';
 paddlestl='/home/znahas/shared/projects/PCSLAMITRODE_44_blocky.stl';
@@ -94,18 +100,26 @@ plot_model_on_brain=0;
 % Rmed=[55282]; %paddle4
 
 %PCS-0003
-Llat=[16520];% Llat=[16989]; %paddle1
-Lmed=[25959];% Lmed=[26643]; %paddle2
-Rlat=[56505];% Rlat=[39613]; %paddle3
-Rmed=[55237];% Rmed=[56010]; %paddle4
+Llat=[27124];% Llat=[16520]; %paddle1
+Lmed=[25922]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+Rlat=[46744]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+Rmed=[55443]; %Rmed=[55237];% Rmed=[55237]; %paddle4
+
+%PCS-0003 postop
+Llat=[27030];% Llat=[16520]; %paddle1
+Lmed=[25957]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+Rlat=[56500]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+Rmed=[54947]; %Rmed=[55237];% Rmed=[55237]; %paddle4
 
 %ctscan_rotations = [-20 -40 80 -45];
 %PCS-0001
-rotations = [100 130 90 55];
+rotations = [125 110 270 80];
+%use  60o for 25923 for PCS003
+sulc_depth_threshold = 2; %0.1; %typically use 0.35 %larger numbers are more superficial. Recommend to set to 0.15 or greater
+
 
 r=14; % paddle lenth is 28mm, so we set the radius of the sphere to be half be half that length.
 planar_radius=14; %or 14
-sulc_depth_threshold = 2.8; %typically use 0.35 %larger numbers are more superficial. Recommend to set to 0.15 or greater
 usedistweights =0; %generate plane using by eighting points closer to the desired grayordinate
 weightby_sulc_depth_similarity=0; %with above, weight the tangential plane based on the similarity of the sulcal depth of the desired point.
 force_normal_positive=1; %This will ensure that your normal vector points upward.
@@ -135,8 +149,8 @@ electrode_array_orient(4,1) = rotations(4); %230
 
 %r=7.5; % paddle lenth is 28mm, so we set the radius of the sphere to be half be half that length.
 
-plot_l_mesh =1;
-plot_r_mesh =1;
+plot_l_mesh =0;
+plot_r_mesh =0;
 
 if save_all_electrodes_one_color ==1
     all_electrodes_value = 1000;
@@ -146,9 +160,9 @@ else
 end
 electrode_sphere_size = 2.3585; %comes from the length of the diagonla of the contact electrode.
 %the following values (caz, cel) come from the view function.  Set hese
-%here so that you don't have to spin the view around every time.
-caz =-158.4424;
-cel =31.8495;
+%here so that you don't have to spin the view around every time. e.g. [caz,cel] = view
+caz =-226; %-137.1935; % -158.4424;
+cel =10; %21.8488; %31.8495;
 
 if usedistweights ==1
     plandistweight='true'
@@ -213,7 +227,7 @@ xyz = allxyz(:,2:4);
 
 
 
-
+%% make stl plots
 figure()
 
 if plot_l_mesh ==1
@@ -305,7 +319,7 @@ scatter3(xyz_surface_only(sulcal_indx,1),xyz_surface_only(sulcal_indx,2),xyz_sur
 set(gca,'Color','k')
 set(gcf,'Color','k')
 
-%% plot sphere
+%% plot sphere on stl plots
 
 for elec = 1:num_stim_paddels
     %r=20;
@@ -337,6 +351,7 @@ for elec = 1:num_stim_paddels
     all_distance_vec{1,elec} = distance_vec;
 end
 
+%% MAKE PADDLE Placement figure
 placefig = figure();
 %subplot(1,3,2)
 grey_surfacepoints = ones(size(xyz_surface_only,1),3)*0.3;
@@ -441,10 +456,10 @@ xlabel('x');
 ylabel('y');
 zlabel('z');
 %axis equal
-xlim([-70,70]);
+xlim([-50,50]);
 ylim([-10 120]);
-zlim([0 80]);
-view( -177.2077,15.6000);
+zlim([-30 50]);
+view( -137,21.6000);
 set(gca,'Color',[.1 .1 .1]);
 
 %% try a cube plot
@@ -679,6 +694,27 @@ for n=1:size(paddles_list,2)
         Y8_rotated_origin = mean(Y8); all_electrode_origins{elec}(8,2) = Y8_rotated_origin;
         Z8_rotated_origin = mean(Z8); all_electrode_origins{elec}(8,3) = Z8_rotated_origin;
         
+            electrode_coordinates{elec,1} = [X1,Y1,Z1];
+            electrode_coordinates{elec,2} = [X2,Y2,Z2];
+            electrode_coordinates{elec,3} = [X3,Y3,Z3];
+            electrode_coordinates{elec,4} = [X4,Y4,Z4];
+            electrode_coordinates{elec,5} = [X5,Y5,Z5];
+            electrode_coordinates{elec,6} = [X6,Y6,Z6];
+            electrode_coordinates{elec,7} = [X7,Y7,Z7];
+            electrode_coordinates{elec,8} = [X8,Y8,Z8];
+            paddle_coordinates{n,1}=electrode_coordinates;
+            
+            array_origins{elec,1} = [X1_rotated_origin,Y1_rotated_origin,Z1_rotated_origin];
+            array_origins{elec,2} = [X2_rotated_origin,Y2_rotated_origin,Z2_rotated_origin];
+            array_origins{elec,3} = [X3_rotated_origin,Y3_rotated_origin,Z3_rotated_origin];
+            array_origins{elec,4} = [X4_rotated_origin,Y4_rotated_origin,Z4_rotated_origin];
+            array_origins{elec,5} = [X5_rotated_origin,Y5_rotated_origin,Z5_rotated_origin];
+            array_origins{elec,6} = [X6_rotated_origin,Y6_rotated_origin,Z6_rotated_origin];
+            array_origins{elec,7} = [X7_rotated_origin,Y7_rotated_origin,Z7_rotated_origin];
+            array_origins{elec,8} = [X8_rotated_origin,Y8_rotated_origin,Z8_rotated_origin];
+            
+            all_origins{n,1}=array_origins;
+            
         if n~=1 %check to make sure that you don't plot multiple array on top of each other.
             disp('Note: not replotting 3D paddle data over first paddle type (if you are looking for the mirrored 3d plot).')
         else
@@ -693,15 +729,6 @@ for n=1:size(paddles_list,2)
             fill3(X8,Y8,Z8,[0.9 0.9 0.9],'FaceAlpha',0.5)
             %A =plotcube(X,Y,Z);
             
-            electrode_coordinates{elec,1} = [X1,Y1,Z1];
-            electrode_coordinates{elec,2} = [X2,Y2,Z2];
-            electrode_coordinates{elec,3} = [X3,Y3,Z3];
-            electrode_coordinates{elec,4} = [X4,Y4,Z4];
-            electrode_coordinates{elec,5} = [X5,Y5,Z5];
-            electrode_coordinates{elec,6} = [X6,Y6,Z6];
-            electrode_coordinates{elec,7} = [X7,Y7,Z7];
-            electrode_coordinates{elec,8} = [X8,Y8,Z8];
-            
             %show paddle origin
             scatter3(X1_rotated_origin,Y1_rotated_origin,Z1_rotated_origin,4,'w','filled')
             scatter3(X2_rotated_origin,Y2_rotated_origin,Z2_rotated_origin,4,'w','filled')
@@ -711,15 +738,6 @@ for n=1:size(paddles_list,2)
             scatter3(X6_rotated_origin,Y6_rotated_origin,Z6_rotated_origin,4,'w','filled')
             scatter3(X7_rotated_origin,Y7_rotated_origin,Z7_rotated_origin,4,'w','filled')
             scatter3(X8_rotated_origin,Y8_rotated_origin,Z8_rotated_origin,4,'w','filled')
-            
-            array_origins{elec,1} = [X1_rotated_origin,Y1_rotated_origin,Z1_rotated_origin];
-            array_origins{elec,2} = [X2_rotated_origin,Y2_rotated_origin,Z2_rotated_origin];
-            array_origins{elec,3} = [X3_rotated_origin,Y3_rotated_origin,Z3_rotated_origin];
-            array_origins{elec,4} = [X4_rotated_origin,Y4_rotated_origin,Z4_rotated_origin];
-            array_origins{elec,5} = [X5_rotated_origin,Y5_rotated_origin,Z5_rotated_origin];
-            array_origins{elec,6} = [X6_rotated_origin,Y6_rotated_origin,Z6_rotated_origin];
-            array_origins{elec,7} = [X7_rotated_origin,Y7_rotated_origin,Z7_rotated_origin];
-            array_origins{elec,8} = [X8_rotated_origin,Y8_rotated_origin,Z8_rotated_origin];
             
             %create spheres at electrodes
             [sphere1X,sphere1Y,sphere1Z] = sphere(15);
@@ -800,10 +818,19 @@ for n=1:size(paddles_list,2)
             electrode_nets{elec,1}{k,1} = sulcal_TM_networks(areinsphere);
             electrode_nets_mode{elec,1}(k,1) = mode(electrode_nets{elec,1}{k,1});
             electrode_nets_RGBcolors{elec,1}{k,1} = net_colors_surf(areinsphere,:);
-            this_net_mode_RGBcolors{elec,1}(k,1) = mode(net_colors_surf(areinsphere));
+            %this_net_mode_RGBcolors{elec,1}(k,1) = mode(net_colors_surf(areinsphere,:));%don't calculate the mode this way as it can get the RGB values from different rows.
+            
+            %Instead get the first element from the list of the mode:
+            mode_colors = electrode_nets_RGBcolors{elec,1}{k,1}(find(electrode_nets{elec,1}{k,1}==electrode_nets_mode{elec,1}(k,1)),:);
+            if isempty(mode_colors) ==1
+                this_net_mode_RGBcolors{elec,1}{k,:} = mode_colors; % write an empty matrix rather than trying to referen ce the first element.
+            else
+                this_net_mode_RGBcolors{elec,1}{k,:} = mode_colors (1,:);
+            end
         end
         
     end
+    
     %print('-dpng','-r300',placefig,[output_dir filesep outputname_for_cifti_file '_array' num2str(elec) '_gray' num2str(test_vertex(elec,1)) '_rotat' num2str(electrode_array_orient(elec,1)) '_deg.png']);
     
     % plot(leed1prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
@@ -815,7 +842,9 @@ for n=1:size(paddles_list,2)
     % plot(leed7prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
     % plot(leed8prime,'FaceColor',[0.9 0.9 0.9],'FaceAlpha',0.8); hold on;
     
-    arrayfig  = figure();
+    
+   %% make 2D paddle pictures
+   arrayfig  = figure();
     for elec = 1:num_stim_paddels
         
         if mod(elec,2)==0 % iseven
@@ -922,11 +951,12 @@ for n=1:size(paddles_list,2)
                 export_dscalar(this_electrodes_greymappings) = all_electrodes_value;
             else % use the network assignments.
                 export_dscalar(this_electrodes_greymappings) = gyral_networks(this_electrodes_sulc_indxs);
+                %export_dscalar(this_electrodes_greymappings) = TM_networks_full(this_electrodes_greymappings);    
             end
             
         end
         if save_paddle_dscalars ==1
-            saving_Cii = ciftiopen(settings.path{8},wb_command); % path to dscalar with 91282 grayordinates.
+            saving_Cii = ciftiopen(network_dscalar,wb_command); % path to dscalar with 91282 grayordinates.
             saving_Cii.cdata = export_dscalar;
             ciftisave(saving_Cii,[output_dir filesep outputname_for_cifti_file '_mc-' multinet '_sulc-' num2str(sulc_depth_threshold) '_plan_rad-' num2str(planar_radius) '_plandw' num2str(plandistweight) '_paddle-' lamatrode '_array' num2str(elec) '_gray' num2str(test_vertex(elec,1)) '_rotat' num2str(electrode_array_orient(elec,1)) '_deg.dscalar.nii'],wb_command);
             print('-dpng','-r300',arrayfig,[output_dir filesep outputname_for_cifti_file '_mc-' multinet '_sulc-' num2str(sulc_depth_threshold) '_plan_rad-' num2str(planar_radius) '_plandw' num2str(plandistweight) '_paddle-' lamatrode '_array' num2str(elec) '_gray' num2str(test_vertex(elec,1)) '_rotat' num2str(electrode_array_orient(elec,1)) '_deg_nets.png']);
@@ -935,9 +965,11 @@ for n=1:size(paddles_list,2)
     end
 end
 
-%Let's save all of the parameters!
+%Let's save all of the parameters! %update changed "electrode coordinates" to
+%"paddle coordinates" and "electrode origins" to "all_origins" to ensure that they had both the mirrored and
+%un-mirrored versions.
 save([output_dir filesep outputname_for_cifti_file '_mc-' multinet '_sulc-' num2str(sulc_depth_threshold) '_plan_rad-' num2str(planar_radius) '_plandw' num2str(plandistweight) '_paddle-' lamatrode '_array' num2str(elec) '_gray' num2str(test_vertex(elec,1)) '_rotat' num2str(electrode_array_orient(elec,1)) '_deg.mat'],'n_2_all','V_2_all','p_2_all',...
-    'Llat','Lmed','Rlat','Rmed','rotations','sulc_depth_threshold','electrode_coordinates','array_origins',...
+    'Llat','Lmed','Rlat','Rmed','rotations','sulc_depth_threshold','paddle_coordinates','electrode_coordinates','all_origins',...
     'r','planar_radius','sulc_depth_threshold','usedistweights','weightby_sulc_depth_similarity',...
     'force_normal_positive','move_bullseye_to_gray','save_paddle_dscalars','num_electrode_contacts',...
     'electrode_sphere_edge_color','electrode_sphere_face_color','electrode_sphere_facealpha','run_locally','save_all_electrodes_one_color',...
