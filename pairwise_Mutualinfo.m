@@ -22,7 +22,7 @@
 %infomap_dscalarwithassignments = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/bothhalvesdsclars.conc');
 %infomap_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/MSC_to_DCAN/analyses/infomap_scott/infomap_dscalars.conc');
 
-%templ_match_dscalarwithassignments = '/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_templ.conc';
+%templ_match_dscalarwithassignments = '/projects/standard/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_templ.conc';
 
 %cross-method comparison for infomap and template matching
 %templ_match_dscalarwithassignments = importdata('/home/exacloud/lustre1/fnl_lab/projects/MSC_to_DCAN/analyses/cross-method/MSC_to_DCAN_all_frames_templ_match_half1_infomap_half1.conc');
@@ -66,8 +66,8 @@ omnibus =1; %for overlapping networks, set to true if you want to concatenate al
 network_names = {   'DMN'    'Vis'    'FP'      'DAN'       'VAN'   'Sal'    'CO'    'SMd'    'SMl'    'Aud'    'Tpole'    'MTL'    'PMN'    'PON'};
 
 %% Add necessary paths
-addpath ('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks')
-addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'))
+addpath ('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks')
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/plotting-tools'))
 
 this_code = which('pairwise_Mutualinfo');
 [code_dir,~] = fileparts(this_code);

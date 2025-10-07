@@ -9,13 +9,15 @@ function [array_origins, electrode_coordinates, n_2,V_2,p_2] = plot_surface_mesh
 % network_dscalar='C:\Users\hermosir\Documents\test_ciftis\MSC_to_DCAN\MSC01_half1_to_ADHD315Z_Zscored_recolored.dscalar.nii';
 close all
 %outputname_for_cifti_file = 'PCS0001_elecmapp_';
-outputname_for_cifti_file = 'PCS0003_elecmapp_';
+%outputname_for_cifti_file = 'PCS0003_elecmapp_';
+outputname_for_cifti_file = 'PCS0004_elecmapp_';
 
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\test_placements_updated_sulc_depth\Paddles_placement_v5_single_color';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\test_placements_updated_sulc_depth_wfmriprep_v02052024\temp2';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\test_placements_updated_sulc_depth_wfmriprep';
 %output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS0003';
-output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS003_xcpd_surfaces_05292025_postop';
+%output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS003_xcpd_surfaces_05292025_postop';
+output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS004';
 
 %output_dir = 'C:\Users\hermosir\Desktop\Darrow_pain\RECODE\';
 
@@ -27,8 +29,9 @@ output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_dept
 %path_sulc_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\sulc_depth_test\fmriprep_v02052024\sub-PCS0001_ses-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/fmriprep/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
-path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
-path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+%path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+%path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS04/sub-PCS04/ses-1/anat/sub-PCS04_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %xcp
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\sub-PCS0001_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz');
@@ -47,13 +50,21 @@ path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS0003_T1w_fmriprep_pial_xyz_raw_coordinates.mat','allxyz');
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS0003_T1w_fmriprep_pial_xyz_raw_coordinates.mat','allxyz');
 %load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_fMRIPrep_pial_xyz_raw_coordinates.mat');
-load('/home/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_MNIspace_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+%load('/home/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_MNIspace_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+%load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS0004_T1w_MNIspace_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS0004_T1w_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+
 %Lstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_den-32k_hemi-L_desc-msmsulc_pial.surf.stl';
 %Rstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_den-32k_hemi-R_desc-msmsulc_pial.surf.stl';
 %Lstl='/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_den-32k_hemi-L_desc-msmsulc_pial.surf.stl';
 %Rstl='/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_den-32k_hemi-R_desc-msmsulc_pial.surf.stl';
-Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
-Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-R_space-fsLR_den-32k_pial.stl';
+%Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
+%Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-R_space-fsLR_den-32k_pial.stl';
+%Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS04_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
+%Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS04_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
+Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/lh.pial.32k.msm.surf.stl';
+Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/rh.pial.32k.msm.surf.stl';
+
 
 %paddlestl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\LAMITRODE_44_blocky.stl';
 paddlestl='/home/znahas/shared/projects/PCSLAMITRODE_44_blocky.stl';
@@ -64,7 +75,9 @@ paddlestl='/home/znahas/shared/projects/PCSLAMITRODE_44_blocky.stl';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0002\TM_1.0_networks\sub-PCS0002_ses-01_spatially_interpolated_SMOOTHED_2.55_Zscored_recolored.dscalar.nii';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\precision_networks\TM_networks\sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\precision_networks\TM_networks\sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
-network_dscalar='/panfs/jay/groups/14/znahas/shared/projects/PCS/precision_networks/template2.0/sub-PCS0003_ses-01/sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
+%network_dscalar='/panfs/jay/groups/14/znahas/shared/projects/PCS/precision_networks/template2.0/sub-PCS0003_ses-01/sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
+network_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/fmriprep-24.1.1-xcpd-0.10.7/PCS04/PCM/ExpData-fullm/figures/Percent_Holdout-100/ciftis/Mode_of_Shuffled_dscalars_Percent_holdout_population_mode.dscalar.nii';
+
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\Infomap_from_evan_gordon\PCS0001_networks_simple_recolored.dtseries.nii';
 testset=1;
 
@@ -100,22 +113,28 @@ plot_model_on_brain=0;
 % Rmed=[55282]; %paddle4
 
 %PCS-0003
-Llat=[27124];% Llat=[16520]; %paddle1
-Lmed=[25922]; %Lmed=[25682];% Lmed=[25959]; %paddle2
-Rlat=[46744]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
-Rmed=[55443]; %Rmed=[55237];% Rmed=[55237]; %paddle4
-
+% Llat=[27124];% Llat=[16520]; %paddle1
+% Lmed=[25922]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+% Rlat=[46744]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+% Rmed=[55443]; %Rmed=[55237];% Rmed=[55237]; %paddle4
+ 
 %PCS-0003 postop
-Llat=[27030];% Llat=[16520]; %paddle1
-Lmed=[25957]; %Lmed=[25682];% Lmed=[25959]; %paddle2
-Rlat=[56500]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
-Rmed=[54947]; %Rmed=[55237];% Rmed=[55237]; %paddle4
+% Llat=[27030];% Llat=[16520]; %paddle1
+% Lmed=[25957]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+% Rlat=[56500]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+% Rmed=[54947]; %Rmed=[55237];% Rmed=[55237]; %paddle4
+
+%PCS-0004 Pre-op planning
+Llat=[26999];% Llat=[16520]; %paddle1
+Lmed=[26159]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+Rlat=[56886]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+Rmed=[55154]; %Rmed=[55237];% Rmed=[55237]; %paddle4
 
 %ctscan_rotations = [-20 -40 80 -45];
 %PCS-0001
-rotations = [125 110 270 80];
+rotations = [-10 45 120 0];
 %use  60o for 25923 for PCS003
-sulc_depth_threshold = 2; %0.1; %typically use 0.35 %larger numbers are more superficial. Recommend to set to 0.15 or greater
+sulc_depth_threshold = 2.5; %0.1; %typically use 0.35 %larger numbers are more superficial. Recommend to set to 0.15 or greater
 
 
 r=14; % paddle lenth is 28mm, so we set the radius of the sphere to be half be half that length.
@@ -195,8 +214,8 @@ else
     end
     warning('on')
     wb_command=settings.path_wb_c; %path to wb_command
-    load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat')
-    addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
+    load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat')
+    addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
 end
 
 netRGBs = [

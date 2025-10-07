@@ -22,7 +22,7 @@ function [final_patch_path] = patch_match(subject_input_cifti_file,template_inpu
 % "output_file_name" =          Some output file name to use (E.g. "SUBJECT1234")
 % "distance_matrix_to_use" =    Path to a  geodesic+euclidean distance
 %                               matrix.  If you haven't created one before you can use the code found
-%                               here: /home/faird/shared/code/internal/utilities/distance-matrix or
+%                               here: /projects/standard/faird/shared/code/internal/utilities/distance-matrix or
 %                                at https://gitlab.com/Fair_lab/distance-matrix.git
 %
 %"maximum_combination_of_nets" = (Whole number). The maximum combination of patches use to
@@ -67,7 +67,7 @@ tic
 %template_input_cifti_file='C:\Users\hermosir\Documents\repos\support_folder\ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
 switch template_input_cifti_file
     case 'default'
-        template_input_cifti_file='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
+        template_input_cifti_file='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/ABCD_GRP1_91282_Greyordinates_consensus_recolored.dscalar.nii';
     otherwise
         disp(['Using template file: ' template_input_cifti_file]);
 end
@@ -129,7 +129,7 @@ else
         wb_command=settings.path_wb_c; %path to wb_command
     end
 end
-addpath('/panfs/jay/groups/6/faird/shared/code/internal/utilities/distance-matrix/')
+addpath('/projects/standard/faird/shared/code/internal/utilities/distance-matrix/')
 
 
 if isnumeric(maximum_combination_of_nets) ==1
@@ -550,7 +550,7 @@ else
             % inputs for distmat_creation_distribute_RH(ciftifile, surfcoordsfileL, surfcoordsfileR, output_folder,output_name,path_to_template_dconn,set_interhemispheric_high, set_cortical_to_subcortical_high)
             
             %MAKE DISTANCE MATRIX
-            [dist_mat_filename, EUGEODistancematrix] = distmat_creation_distribute_RH(subject_input_cifti_file,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile,output_subject_path,[output_file_name '_distmat'],'/home/faird/shared/projects/AnitaOHSUVAcollab/dconns_max_minutes/sub-TAAR844_ses-combined_task-restV3B_bold_desc-filtered_timeseries_spatially_interpolated_SMOOTHED_2.55.dtseries.nii_36_minutes_of_data_at_FD_0.2.dconn.nii',1,1,0);
+            [dist_mat_filename, EUGEODistancematrix] = distmat_creation_distribute_RH(subject_input_cifti_file,path_to_Lmidthicknessfile,path_to_Rmidthicknessfile,output_subject_path,[output_file_name '_distmat'],'/projects/standard/faird/shared/projects/AnitaOHSUVAcollab/dconns_max_minutes/sub-TAAR844_ses-combined_task-restV3B_bold_desc-filtered_timeseries_spatially_interpolated_SMOOTHED_2.55.dtseries.nii_36_minutes_of_data_at_FD_0.2.dconn.nii',1,1,0);
             
 
         else

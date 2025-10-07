@@ -74,7 +74,7 @@ switch output_map_type
         disp('output map type not supported. check your inputs.')
 end
 %load colormap
-load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
+load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
 
 if iscell(dscalarswithassignments) ==1
 else
@@ -244,9 +244,9 @@ end
 
 %open a file to write for saving
 if surface_only ==1
-    temp_file=ciftiopen('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii',wb_command);
 else
-    temp_file=ciftiopen('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii',wb_command);
+    temp_file=ciftiopen('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates.dscalar.nii',wb_command);
 end
 length(network_names)
 size(scalar_array,1)

@@ -37,8 +37,8 @@ for i=1:np
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
-addpath(genpath('/home/faird/shared/code/internal/utilities/Nan_checker'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/plotting-tools'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/Nan_checker'));
 
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
@@ -143,8 +143,15 @@ if ismatfile == 1
                 disp('looking for matrix data...')
                 load(ciftis{i},'sorted_dconn2');
                 current_cifti = sorted_dconn2;
-            catch
-                error('unclear what vairable name contains matrix...');
+            % catch
+            %     disp('could not find sorted dconn2, looking for diff_matrix variable.');
+            %     try
+            %         disp('looking for matrix data...')
+            %         load(ciftis{i},'diff_matrix');
+            %         current_cifti = diff_matrix;
+                catch
+                    error('unclear what vairable name contains matrix...')
+                % end
             end
         end
     end
@@ -324,7 +331,7 @@ if strcmp('pconn',cifti_exten) == 1 || strcmp('dconn',cifti_exten) == 1
             %             [sorted_networks, netsortindx ] = sort(nets_assigns);
             %
             %             imagesc(avg_cifti(netsortindx,netsortindx))
-            load('/panfs/jay/groups/6/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel');
+            load('/projects/standard/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel');
             
         end
         if gordon_modules ==1
@@ -336,11 +343,11 @@ if strcmp('pconn',cifti_exten) == 1 || strcmp('dconn',cifti_exten) == 1
         end
         if average_of_diff_of_cifti_pairs ==1
             h1= showM(avg_cifti,'parcel',parcel,'clims',matrix_color_limits_vector,'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',15,'one_side_labels',1,'fig_tall',18);
-            load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+            load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
             colormap(pos_neg_cmap);
         else
             h1= showM(avg_cifti,'parcel',parcel,'clims',matrix_color_limits_vector,'line_color',[0 0 0],'line_width',0.5,'fs_axis',8,'fig_wide',15,'one_side_labels',1,'fig_tall',18);
-            load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+            load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
             colormap(pos_neg_cmap);
             
             %colormap jet

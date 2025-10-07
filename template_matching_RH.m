@@ -53,8 +53,8 @@ else
     end
     %rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
     %rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-    addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
-    addpath(genpath('/home/faird/shared/code/internal/utilities/Zscore_dconn'));
+    addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/plotting-tools'));
+    addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/Zscore_dconn'));
     warning('on')
 end
 

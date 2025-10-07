@@ -10,23 +10,23 @@ v=num2str(randi([1 10000000]));
 %m = 64;
 num_nets = 16;
 %load('C:\Users\hermosir\Documents\repos\support_folder\PowerColorMap_wzero.mat');
-load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
-load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
+load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
+load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap.mat')
 %load('C:\Users\hermosir\Documents\repos\support_folder\PowerColorMap.mat');
 load('/home/rando149/shared/projects/Polyvertexscore/parcel_probability_map.mat');
 %load the parcel file to get the RGB colors;
-load('/home/faird/shared/code/internal/utilities/distance-matrix/Conte69_flatmap_and_vol_91282_xyz_coord.mat','allxyz')
+load('/projects/standard/faird/shared/code/internal/utilities/distance-matrix/Conte69_flatmap_and_vol_91282_xyz_coord.mat','allxyz')
 
 % provide a dscalar to make a random map from
-dscalar_file='/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
+dscalar_file='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
 
-wb_command = '/home/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
-% addpath(genpath('/home/faird/shared/code/external/utilities/gifti/gifti-1.6'));
-% addpath(genpath('/home/faird/shared/code/external/utilities/Matlab_CIFTI'));
-addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
-addpath(genpath('/home/faird/shared/code/internal/utilities/Matlab_CIFTI/'));
-addpath(genpath('/home/miran045/shared/code/internal/utilities/CIFTI/'));
-addpath(genpath('/home/miran045/shared/code/internal/utilities/gifti'));
+wb_command = '/projects/standard/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
+% addpath(genpath('/projects/standard/faird/shared/code/external/utilities/gifti/gifti-1.6'));
+% addpath(genpath('/projects/standard/faird/shared/code/external/utilities/Matlab_CIFTI'));
+addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/Matlab_CIFTI/'));
+addpath(genpath('/projects/standard/miran045/shared/code/internal/utilities/CIFTI/'));
+addpath(genpath('/projects/standard/miran045/shared/code/internal/utilities/gifti'));
 
 
 % for i = 1:size(parcel_file.parcel,2)

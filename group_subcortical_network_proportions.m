@@ -2,12 +2,12 @@ function [all_nets_mat, all_nets_vec] = group_subcortical_network_proportions(ds
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/'))
+addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/'))
 
 %reference_dscalar = '/mnt/rose/shared/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/projects/ADHD_comm_det/ADHD_templmatch/rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';
 %reference_dscalar = '/home/rando149/shared/projects/ABCD_net_template_matching/ABCD_GROUP_AVERAGES/template_matching/ABCD_group2_AVG_TM_Zscored_recolored.dscalar.nii';
-reference_dscalar = '/home/faird/shared/projects/HCP-Dv2_net_template_matching/group_averages/HCP-D_TM_networks_2.0_10minute_ages20-21.dscalar.nii';
+reference_dscalar = '/projects/standard/faird/shared/projects/HCP-Dv2_net_template_matching/group_averages/HCP-D_TM_networks_2.0_10minute_ages20-21.dscalar.nii';
 
 %reference_dscalar = '/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_files/Networks_template_cleaned.dscalar.nii';
 %reference_dscalar = 'rushmore_average/all_trio_and_prisma_TM_cleaned_5minutes_Control_avg.dscalar.nii';

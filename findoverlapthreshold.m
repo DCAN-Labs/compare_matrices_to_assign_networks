@@ -6,7 +6,7 @@ function [MuI_threshhold_all_networks] = findoverlapthreshold(eta_to_template_vo
 % output is the the threshold.
 
 if isdeployed ==0
-addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/plotting-tools'));
 end
 
 

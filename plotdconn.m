@@ -74,12 +74,12 @@ use_only_cortical_connections
 %% add dependencies
 %parameters:
 %wb_command='LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command';
-wb_command='/home/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
-addpath(genpath('/panfs/jay/groups/6/faird/shared/code/external/utilities/gifti-1.6'))
-addpath(genpath('/panfs/jay/groups/6/faird/shared/code/internal/utilities/Matlab_CIFTI'))
-addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools/showM'))
+wb_command='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
+addpath(genpath('/projects/standard/faird/shared/code/external/utilities/gifti-1.6'))
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/Matlab_CIFTI'))
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/plotting-tools/showM'))
 
-%load('/panfs/jay/groups/6/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
+%load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/PowerColorMap_wzero.mat');
 %load('parcel_probability_map.mat','parcel'); [~,index] = sortrows([parcel.power_val].'); parcel = parcel(index); clear index
 if isnumeric(DS_factor)==1
 else
@@ -348,7 +348,7 @@ if use_showM ==1
     end
     
     disp('Saving network connectivity dconn1...')
-    dconn_variance_per_network(newdconn, assigns,[output_dir filesep  image_name '1'],parcel_file_name);
+    [~, ~, ~, ~, within_network_vec1] = dconn_variance_per_network(newdconn, assigns,[output_dir filesep  image_name '1'],parcel_file_name);
     
 else
     if downsample_dconn == 1
@@ -382,7 +382,7 @@ set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
 %f.PaperPositionMode   = 'auto';
 %title('Correlation matrix sorted by network','FontSize',9);
 if Pos_neg_colormap==1
-    load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+    load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
     colormap(pos_neg_cmap);
 else
     colormap jet
@@ -454,7 +454,7 @@ if plot2dconns ==1
         end
         close all
             disp('Saving network connectivity dconn2...')
-            dconn_variance_per_network(newdconn2, assigns,[output_dir filesep  image_name '2'],parcel_file_name);
+          [~, ~, ~, ~, within_network_vec2] = dconn_variance_per_network(newdconn2, assigns,[output_dir filesep  image_name '2'],parcel_file_name);
         
     else
         
@@ -526,7 +526,7 @@ if plot2dconns ==1
     end
     
     if use_showM==1
-        load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+        load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
         colormap(pos_neg_cmap);
         
         if isnumeric(shoM_diff_range_option) ==1
@@ -551,10 +551,10 @@ if plot2dconns ==1
         end
         
         showM(diff_matrix,'parcel', parcel,'clims',diff_clims,'fig_tall',21,'fig_wide',18,'line_color',[0 0 0],'one_side_labels',1);
-        %load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+        %load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
         %colormap(pos_neg_cmap);
         if Pos_neg_colormap==1
-            load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+            load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
             colormap(pos_neg_cmap);
         else
             colormap jet
@@ -569,6 +569,12 @@ if plot2dconns ==1
         end
               dconn_variance_per_network(diff_matrix, assigns,[output_dir filesep  image_name 'diff'],parcel_file_name);
       
+              % calculate the correlation between the within-network
+              % connectivity between the dconns
+              for w = 1:size(within_network_vec2,2)
+                  within_network_connectivity_correlation(w,1) = corr(within_network_vec1{w}',within_network_vec2{w}');
+              end
+              save([output_dir filesep  image_name 'diff_TM_mean_per_network.mat'],'within_network_connectivity_correlation','-append');
     else
         imagesc(diff_matrix); hold on;
         
@@ -582,7 +588,7 @@ if plot2dconns ==1
         set(gca,'LooseInset',max(get(gca,'TightInset'), 0.05))
         title('Matrix Difference','FontSize',9);
         %colormap jet
-        load('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
+        load('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Positive-Negative_ColorMap.mat','pos_neg_cmap');
         colormap(ax3,pos_neg_cmap);
         colorbar;
         caxis([-0.5 0.5])

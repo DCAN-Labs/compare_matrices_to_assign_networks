@@ -8,7 +8,7 @@
 
 #[muI] = mutualinfofromnetworks(dt_or_ptseries_conc_file(1),series(2),motion_file(3), FD_threshold(4), TR(5), minutes_vector(6),include_all_frames(7), smoothing_kernal(8),left_surface_file(9), right_surface_file(10), bit8(11), output_cifti_name(12),community_detection(13), method(14), cifti_enhancement(15),other_half_networks_cii(16),num_interval_reps(17),indepen_time_series(18),remove_outliers(19), additional_mask(20),make_dconn_conc(21), output_directory(22), dtseries_conc(23),use_continous_minutes(24),transform_data(25),surface_only(26),already_surface_only(27),template_path(28),memory_limit_value(29))
 
-X="addpath(genpath('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/')); mutualinfofromnetworks('${1}', '${2}', '${3}', '${4}', '${5}', '${6}' , '${7}', '${8}', '${9}', '${10}', '${11}', '${12}', '${13}', '${14}', '${15}', '${16}', '${17}', '${18}' , '${19}', '${20}', '${21}', '${22}', '${23}', '${24}', '${25}', '${26}', '${27}', '${28}', '${29}')"
+X="addpath(genpath('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/')); mutualinfofromnetworks('${1}', '${2}', '${3}', '${4}', '${5}', '${6}' , '${7}', '${8}', '${9}', '${10}', '${11}', '${12}', '${13}', '${14}', '${15}', '${16}', '${17}', '${18}' , '${19}', '${20}', '${21}', '${22}', '${23}', '${24}', '${25}', '${26}', '${27}', '${28}', '${29}')"
 
 
 ## This code then runs template matching or infomap on subjects and calculate the mututal information to a specifided dscalar.

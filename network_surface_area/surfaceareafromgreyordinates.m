@@ -37,11 +37,11 @@ end
 
 %add path to ft_read_cifti_mod so that you can get the left hemisphere  and
 %right hemisphere mappings.
-addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti')); % remove non-working gifti path included with MSCcodebase
+addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti')); % remove non-working gifti path included with MSCcodebase
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
-wb_command='/home/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
+wb_command='/projects/standard/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command';
 %Lmidthicknessfile,Rmidthicknessfile,dscalarwithassignments
 
 conc = strsplit(dscalarwithassignments_path, '.');

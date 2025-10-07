@@ -10,8 +10,8 @@ function SaveLoadingsAsScalars(loadings_mat_file,template_dscalar_path,network_n
 %    Format: 1 row where each cell in the row should contain the network name.
 % 4) path to workbench command.
 
-addpath(genpath('/home/faird/shared/code/external/utilities/gifti-1.6'))
-addpath(genpath('/home/faird/shared/code/internal/utilities/Matlab_CIFTI'))
+addpath(genpath('/projects/standard/faird/shared/code/external/utilities/gifti-1.6'))
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/Matlab_CIFTI'))
 if exist('wb_command','var') ==1
 else
     wb_command=settings.path_wb_c; %path to wb_command

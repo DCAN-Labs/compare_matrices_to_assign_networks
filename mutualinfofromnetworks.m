@@ -149,7 +149,7 @@ if indepen_time_series == 1
                 %% Step 1: make connectivity matrix
                 %%HARDCODE WARNING
                 %addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien');
-                addpath(('/home/faird/shared/code/internal/utilities/cifti_connectivity/src')); % be careful not to add all subfolders as there are compiled dependencies that are incompatible with an interative matlab session. -RH
+                addpath(('/projects/standard/faird/shared/code/internal/utilities/cifti_connectivity/src')); % be careful not to add all subfolders as there are compiled dependencies that are incompatible with an interative matlab session. -RH
                 
                 %remove_outliers =1; %hardcoded options for making connectivity matrices
                 %additional_mask = 'none';

@@ -27,11 +27,11 @@ if interval_setA == 1
     %B = importdata('/mnt/max/shared/projects/midnight_scan_club/template_matching/Zscored_dscalars/all_frames_half2.conc');
     
     %A = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Ztempl_match_and_infomap_intervals/MSC_templ_match_intervals_dscalars.conc');
-    %A = importdata('/home/faird/shared/projects/MSC_to_DCAN/split_halves/half1/MSC_half1_intervals_continuous.conc');
+    %A = importdata('/projects/standard/faird/shared/projects/MSC_to_DCAN/split_halves/half1/MSC_half1_intervals_continuous.conc');
     %B = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half2.conc');
     A = importdata('/home/rando149/hermosir/subpop_subjects/conc_files/template_matching_reli_surface_only.conc');
-    %B = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
-    %B = importdata('/home/faird/shared/projects/MSC_to_DCAN/split_halves/half2ADHD315/MSC_half2_to_ADHD315Z_Zscored_recolored_dscalars.conc');
+    %B = importdata('/projects/standard/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
+    %B = importdata('/projects/standard/faird/shared/projects/MSC_to_DCAN/split_halves/half2ADHD315/MSC_half2_to_ADHD315Z_Zscored_recolored_dscalars.conc');
     %E = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/template_matching/Zscored_templatematching/template_matching_none_minutes_half1.conc');
     B = importdata('/home/rando149/hermosir/subpop_subjects/conc_files/template_matching_nets_surface_only_halfb.conc');
 else
@@ -44,9 +44,9 @@ if interval_setB == 1
     %D = importdata('/mnt/max/shared/projects/midnight_scan_club/info_map/Results/MSC_Exacloud_lustre_backup/Infomap/Z-scoredconn_communities_half2/all_frames_half2.conc');
     %D = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half2/MSC_half2_allframes_infomap.conc');
     %F = importdata('/home/exacloud/lustre1/fnl_lab/projects/midnight_scan_club/Infomap/Z-scoredconn_communities_half1/MSC_half1_allframes_infomap.conc');
-    C = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/full_intervals/MSChalf1_templ_matching_at_intervals_MSI_paths.conc');
-    %D = importdata('/home/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
-    D = importdata('/home/faird/shared/projects/MSC_to_DCAN/split_halves/half2ADHD315/MSC_half2_to_ADHD315Z_Zscored_recolored_dscalars.conc');
+    C = importdata('/projects/standard/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/full_intervals/MSChalf1_templ_matching_at_intervals_MSI_paths.conc');
+    %D = importdata('/projects/standard/faird/shared/projects/MSC_to_DCAN/analyses/template_matching/all_frames/MSC_to_DCAN_all_frames_template_matching_half2.conc');
+    D = importdata('/projects/standard/faird/shared/projects/MSC_to_DCAN/split_halves/half2ADHD315/MSC_half2_to_ADHD315Z_Zscored_recolored_dscalars.conc');
     
 else
 end

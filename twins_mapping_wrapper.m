@@ -108,9 +108,9 @@ for i=1:np
     addpath(genpath(settings.path{i}));
 end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-rmpath('/home/faird/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/faird/shared/code/internal/utilities/plotting-tools'));
-addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
+rmpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/plotting-tools'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/MergeTimeSeries'));
 warning('on')
 if exist('wb_command','var') ==1
     %do nothing
@@ -219,9 +219,9 @@ for i = 1:length(dtseries_file) %number of subjects
     %addpath('/mnt/max/shared/code/internal/utilities/hcp_comm_det_damien/');
     
     %support_folder='/home/exacloud/lustre1/fnl_lab/code/internal/analyses/compare_matrices'; -old
-    support_folder='/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks';
+    support_folder='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks';
     %addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/hcp_comm_det_damien/'); -old
-    addpath('/home/faird/shared/code/internal/utilities/cifti_connectivity/src');
+    addpath('/projects/standard/faird/shared/code/internal/utilities/cifti_connectivity/src');
     addpath(support_folder);
     
     
@@ -418,7 +418,7 @@ for i = 1:length(dtseries_file) %number of subjects
                 %surface_only = 0;
                    
                 %addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair'))
-                addpath(genpath('/home/faird/shared/code/internal/utilities/community_detection/fair'))               
+                addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/community_detection/fair'))               
                 
                 [cleaned_info_ties_dtseries, raw_info_ties_dtseries] = Run_infomap_at_many_densities(subjectdconn,distance_matrix,template,min_distance,tie_density_vec,min_network_size,min_region_size,donotZscore,surface_only,already_surface_only,wb_command,'infomap',num_reps);
                 
@@ -454,7 +454,7 @@ for i = 1:length(dtseries_file) %number of subjects
                     % Get concensus across densities and clean up little bits.
                     [merged_infomap_dtseries_vector] = clean_dscalars_by_size([cifti_output_folder filesep subID '_merged_tasks_infomap_densities.dtseries.nii'],[],[],[],[],30,[],1,1,0);
                 else
-                    MergeTimeSeries('TimeSeriesFiles',raw_info_ties_dtseries,'OutputFile',[cifti_output_folder filesep subID '_infomap_densities.dtseries.nii'],'wb_command','/home/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command')
+                    MergeTimeSeries('TimeSeriesFiles',raw_info_ties_dtseries,'OutputFile',[cifti_output_folder filesep subID '_infomap_densities.dtseries.nii'],'wb_command','/projects/standard/faird/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command')
                     disp('***CALCULATING CONSENSUS FROM TIE DENISTIES AND CLEANING UP TINY PIECES****')
                     % Get concensus across densities and clean up little bits.
                     [merged_infomap_dtseries_vector] = clean_dscalars_by_size([cifti_output_folder filesep subID '_infomap_densities.dtseries.nii'],[],[],[],[],30,[],1,1,0);
@@ -675,7 +675,7 @@ for i = 1:length(dtseries_file) %number of subjects
     % The setting are hardcoded to make a power_colors png with 6 views. at 118 dots
     % per cm.
     
-    %pics_code_path = '/home/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
+    %pics_code_path = '/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.3.sh';
     figuremaker_code_path = settings.path{15}; % path to figure_maker bash script.
     pics_folder = [cifti_output_folder '/pics_template_matching'];
     disp(['mkdir -p ' pics_folder])

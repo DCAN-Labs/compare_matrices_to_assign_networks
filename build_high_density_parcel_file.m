@@ -31,7 +31,7 @@ end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
-addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/MergeTimeSeries'));
 
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
@@ -73,7 +73,7 @@ for i=1:size(nets,1)+3
     end
 end
 parcel = new_parcel;
-%save('/home/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel')
+%save('/projects/standard/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel')
 disp('Saving parcel...')
 disp([output_name '_parcel.mat'])
 parcel_file_name=[output_name '_parcel.mat'];

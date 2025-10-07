@@ -1,4 +1,4 @@
-function [net_variance_mat, net_mean_mat, counts, mybins] = dconn_variance_per_network(dconn_file, assignments_vector_file,output_name,parcel_file)
+function [net_variance_mat, net_mean_mat, counts, mybins, within_network_vec] = dconn_variance_per_network(dconn_file, assignments_vector_file,output_name,parcel_file)
 
 %This function gets the variance of the dconn, after is's been sorted by
 %each network, then gets the variance per network.
@@ -34,7 +34,7 @@ end
 rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
 rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
 addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
-addpath(genpath('/home/faird/shared/code/internal/utilities/MergeTimeSeries'));
+addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/MergeTimeSeries'));
 
 warning('on')
 wb_command=settings.path_wb_c; %path to wb_command
@@ -116,10 +116,11 @@ else
             small_mat = sorted_dconn1(net_start_idx(i)+1:net_end_idx(i),net_start_idx(j)+1:net_end_idx(j));
             
             if i ==j %to get variance of within network connectivity, use upper triangle of matrix.
+                %disp("Making within network vector")
                 small_matt = small_mat.';
                 m_triulog = triu(true(size((small_matt))),1);
                 net_net_mat_vec = small_matt(m_triulog).';
-                
+                within_network_vec{i} = net_net_mat_vec;
             else
                 net_net_mat_vec = small_mat(:);
             end

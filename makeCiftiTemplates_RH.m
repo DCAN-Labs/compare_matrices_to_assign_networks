@@ -35,12 +35,12 @@ warning('off') %supress addpath warnings to nonfolders.
 for i=2:np
     addpath(genpath(settings.path{i}));
 end
-%addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/fileio/'))
-%addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/gifti')); % add  new working gifti path included with MSCcodebase
+%addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/fileio/'))
+%addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/gifti')); % add  new working gifti path included with MSCcodebase
 addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_scripts')
 %rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
 %addpath(genpath('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_scripts'))
-addpath(genpath('/home/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/')); %Add top level folder to get paircorr_mod.m
+addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/')); %Add top level folder to get paircorr_mod.m
 warning('on')
 
 wb_command=settings.path_wb_c; %path to wb_command
@@ -118,8 +118,8 @@ end
 %consen_file = ciftiopen(settings.path{6}, wb_command); %path to dscalar with template labels.
 %consen = consen_file.cdata;
 if include_scan_net ==1
-%consen = ft_read_cifti_mod('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned_wHCPscan.dscalar.nii');    
-consen = ft_read_cifti_mod('/home/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned_wABCDscan.dscalar.nii');    
+%consen = ft_read_cifti_mod('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned_wHCPscan.dscalar.nii');    
+consen = ft_read_cifti_mod('/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/Networks_template_cleaned_wABCDscan.dscalar.nii');    
 else
 consen = ft_read_cifti_mod(settings.path{6}); %path to dscalar with template labels.
 end
