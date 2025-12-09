@@ -690,9 +690,14 @@ for i = 1:length(dtseries_file) %number of subjects
     %update fixed an issue where the subcortical template pointed to a
     %version of the code that is intended for a label file. -RH 02/26/2024
     if size(net_variance_mat,1) ==15
-        cmd = [figuremaker_code_path ' ' recolored_name_wscan ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+        %cmd = [figuremaker_code_path ' ' recolored_name_wscan ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+    %sg ${filegroup_owner} -c "/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.5.sh ${input_dscalar} ${fileroot_name_short} ${filedir_name} FALSE ${lower_thres} ${upper_thres} videen_style FALSE 0 0 THRESHOLD_TEST_SHOW_OUTSIDE TRUE TRUE png 8 118 FALSE ${wb_command} /projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene /projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene /projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/Conte69_atlas-v2.LR.32k_fs_LR.wb/Conte69.L.very_inflated.32k_fs_LR.surf.gii /projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/Conte69_atlas-v2.LR.32k_fs_LR.wb/Conte69.R.very_inflated.32k_fs_LR.surf.gii"
+        cmd = [figuremaker_code_path ' ' recolored_name_wscan];
+
     else
-        cmd = [figuremaker_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+        %cmd = [figuremaker_code_path ' ' recolored_name ' ' output_cifti_name '_recolored_TM ' pics_folder ' FALSE 1 18 power_surf TRUE 0.1 30 THRESHOLD_TEST_SHOW_INSIDE TRUE  ' make_subcortical_images ' png 8 118 FALSE ' wb_command ' ' settings.path{13} ' ' settings.path{14}];
+        cmd = [figuremaker_code_path ' ' recolored_name];
+ 
     end
     disp(cmd);
     system(cmd);

@@ -316,7 +316,7 @@ else
             avg_cifti = mode(all_ciftis'); % call it all_ciftis just to make things easy.
             avg_cifti = avg_cifti';
         otherwise
-            error('Method is not supported.')
+            error('Method is not supported. Choose: average_cifti or mode_cifti in your input arguments')
             clear current_cifti
             
     end

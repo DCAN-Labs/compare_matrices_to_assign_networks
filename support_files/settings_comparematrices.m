@@ -46,13 +46,15 @@ switch server_name
         path{12}='/code/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/code/support_files/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/code/support_files/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/code/support_files/make_dscalar_pics_v9.3.sh';
+        %path{15}='/code/support_files/make_dscalar_pics_v9.3.sh';
+        path{15}='/code/support_files/quick_network_pic.sh';
+
         path{16}='/code/support_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/opt/workbench/wb_command'; % workbench command path
         path_template_nets='/code/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat'; %unused - supplied by user in template_matching_RH.
         
-    case '/mnt/max/s' %rushmore
+    case '/mnt/max/s' %rushmore %No longer supported
         path{1}='/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/';
         path{2}='/mnt/max/shared/code/external/utilities/Matlab_CIFTI';
         path{3}='/mnt/max/shared/code/external/utilities/Matlab_effect_size_toolbox/';
@@ -72,7 +74,7 @@ switch server_name
         path_template_nets='/mnt/max/shared/code/internal/analyses/compare_matrices/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_fromsurfonly.mat';
         path_wb_c='LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/local/bin/wb_command'; % workbench command path
         
-    case '/home/exac' %lustre filesystem
+    case '/home/exac' %lustre filesystem %No longer supported
         path{1}='/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities';
         path{2}='/home/exacloud/lustre1/fnl_lab/code/external/utilities/Matlab_CIFTI';
         path{3}='/home/exacloud/lustre1/fnl_lab/code/external/utilities/Matlab_effect_size_toolbox/';
@@ -106,7 +108,9 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
+
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -128,7 +132,9 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
+
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -151,7 +157,9 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
+
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -174,7 +182,9 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
+
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -196,7 +206,9 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
+
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
@@ -218,14 +230,16 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh'; % This code is a bit more challening to use.  use quick_pic_network_instead.
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
+
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
         
-    case '/projects' %mesabi
+    case '/projects' %projects
         path{1}='/projects/standard/faird/shared/code/external/utilities/gifti-1.6';
         path{2}='/projects/standard/faird/shared/code/internal/utilities/Matlab_CIFTI';
         path{3}='/projects/standard/faird/shared/code/external/utilities/Matlab_effect_size_toolbox/';
@@ -241,7 +255,8 @@ switch server_name
         path{12}='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/91282_Greyordinates_surf_only.dscalar.nii';
         path{13}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_quad_scaled_v3_legend_fixed_MSI.scene';
         path{14}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_scalar_MSI.scene'; % avoid using the following, since it is intended for a label file instead of dscalar file. '/projects/standard/faird/shared/code/internal/utilities/figure_maker/MSC01_template_scene_subcort_label_MSI.scene';
-        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
+        path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path

@@ -3,14 +3,14 @@ function [parcel, parcel_file_name]= build_high_density_parcel_file(assignments_
 % R.Hermosillo 12/13/2022
 % This function build a parcel file for your individual-specific network
 %file.  A parcel, which contains the RGB, and indicies of each ROI in the networks file, can be handy when using the showM function.
-%  
-% Inputs are are: 
+%
+% Inputs are are:
 % 1) a dscalar of networks of a vector of assignments.
 % 2) an output name.  A string of characters.  '_parcel .mat will be added to the end of the string.'
-% 
+%
 % Outputs are:
 % 1) a .mat file with a struture variable called "parcel" inside.
-% 
+%
 % NOTE: this code, assumes that the order follows a similar convention to
 % the template matching networks. And would need to be modified to use
 % different parcel formats.
@@ -42,9 +42,11 @@ wb_command=settings.path_wb_c; %path to wb_command
 %TM80dense = ciftiopen('/home/rando149/shared/projects/ADHD_MedChal/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR.dscalar.nii',wb_command);
 if isnumeric(assignments_dscalar_or_vector)
     TM80dscalar = assignments_dscalar_or_vector;
-else
+elseif ischar(assignments_dscalar_or_vector)
     TM80dense = ciftiopen(assignments_dscalar_or_vector,wb_command);
     TM80dscalar = TM80dense.cdata;
+else %is cell?
+    load(assignments_dscalar_or_vector,'assignment_mat');
 end
 
 nets = unique(nonzeros(TM80dscalar));
@@ -58,20 +60,41 @@ end
 
 new_parcel = parcel;
 TM80dscalar_reduced = nonzeros(TM80dscalar);
-for i=1:size(nets,1)+3
-    try
-        netrow = find([new_parcel.power_val] ==i); % find the network number that is equal
-        if isempty(netrow)
+if exist('assignment_mat','var') ==0
+    
+    for i=1:size(nets,1)+3
+        try
+            netrow = find([new_parcel.power_val] ==i); % find the network number that is equal
+            if isempty(netrow)
+                disp(['No net:  ' num2str(i)]);
+            else
+                greys = find(TM80dscalar_reduced == i);
+                new_parcel(netrow).ix=greys;
+                new_parcel(netrow).n=size(greys,1);
+            end
+        catch
             disp(['No net:  ' num2str(i)]);
-        else
-            greys = find(TM80dscalar_reduced == i);
-            new_parcel(netrow).ix=greys;
-            new_parcel(netrow).n=size(greys,1);
         end
-    catch
-        disp(['No net:  ' num2str(i)]);
     end
+else
+    for i=1:size(assignment_mat,1)
+        try
+            netrow = find([new_parcel.power_val] ==i); % find the network number that is equal
+            if isempty(netrow)
+                disp(['No net:  ' num2str(i)]);
+            else
+                %greys = find(TM80dscalar_reduced == i);
+                new_parcel(netrow).ix=greys;
+                new_parcel(netrow).n=size(greys,1);
+            end
+        catch
+            disp(['No net:  ' num2str(i)]);
+        end
+    end
+    
+    
 end
+
 parcel = new_parcel;
 %save('/projects/standard/faird/shared/projects/AnitaOHSUVAcollab/code/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR_parcel.mat','parcel')
 disp('Saving parcel...')

@@ -32,14 +32,9 @@ np=size(settings.path,2);
 
 disp('Attempting to add neccesaary paths and functions.')
 warning('off') %supress addpath warnings to nonfolders.
-for i=2:np
+for i=1:np
     addpath(genpath(settings.path{i}));
 end
-%addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/fileio/'))
-%addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/read_write_cifti/gifti')); % add  new working gifti path included with MSCcodebase
-addpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/community_detection/fair/supporting_scripts')
-%rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-%addpath(genpath('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_scripts'))
 addpath(genpath('/projects/standard/faird/shared/code/external/utilities/MSCcodebase-master/Utilities/')); %Add top level folder to get paircorr_mod.m
 warning('on')
 
@@ -83,21 +78,26 @@ end
 
 %Make sure length of motion files matches length of timeseries
 if length(subs)==length(B)
+    disp('Length of motion conc file does matches length of series conc file.  Good job.')    
 else
-    disp('length of motion conc file does not match legnth of series con file')
+    error('Length of motion conc file does not match length of series conc file. Check your inputs.')
 end
 
 % Check that all motion files in conc file exist
 subsfound_motion=0;
 for i = 1:length(B)
-    if exist(B{i},'file') == 0
-        NOTE = ['motion file ' num2str(i) ' does not exist']
-        disp(num2str(B{i}))
-            good_subs(i) = 0;    
-        %return
+    if isnumeric(B{i}) ==1
+       subsfound_motion=subsfound_motion+1;  
     else
-
-        subsfound_motion=subsfound_motion+1;
+        if exist(B{i},'file') == 0
+            NOTE = ['motion file ' num2str(i) ' does not exist']
+            disp(num2str(B{i}))
+            good_subs(i) = 0;
+            %return
+        else
+            
+            subsfound_motion=subsfound_motion+1;
+        end
     end
 end
 disp([num2str(subsfound_motion) ' of ' num2str(length(B)) ' motion files found. Motion files exist continuing ...'])
@@ -242,9 +242,13 @@ else
             tmask = logical(FDvec);
             %tmask = FDvec;
         else
+            if isnumeric(B{i}) ==1
+                tmask = logical(B{i});
+                FDvec = tmask; % EVen though your loading in previously saved motion masks, save the FDvec for later.
+            else
             tmask = logical(load(B{i})); %load .txt file that has a list of all masks.
             %tmask = load(B{i}); %load .txt file that has a list of all masks.
-            
+            end
         end
         
         allmasks_outliers_removed_FD02{i} = FDvec; %save for later
@@ -367,7 +371,7 @@ for j=1:length(network_names)
     %avgSeedmaps{j}=inverseFisherTransform(grpNetAve);
     avgSeedmaps{j}=tanh(grpNetAve);
     
-    if surface_only == 0
+    %if surface_only == 0
         if Zscore_regions == 1
             disp('Converting to Zscores')
             %for i=1:length(seedmapsTR)
@@ -392,8 +396,8 @@ for j=1:length(network_names)
             %save(['seedmaps_withinregionZscores' file_root_no_ext '.mat'],'avgSeedmaps','-v7.3')
         else
         end
-    else
-    end
+    %else
+    %end
     
     
     
@@ -403,7 +407,9 @@ for j=1:length(network_names)
     temp_file=ciftiopen(cleansubs{i},wb_command);
     if surface_only ==1
         %temp_file=ciftiopen('/mnt/max/shared/code/internal/utilities/community_detection/fair/supporting_files/120_LR_minsize400_recolored_manualconsensus4.dtseries.nii',wb_command);
-        temp_file= ciftiopen(settings.path{10},wb_command); % path to a surface_only dtseries.nii
+        %temp_file= ciftiopen(settings.path{10},wb_command); % path to a surface_only dtseries.nii
+        temp_file= ciftiopen(settings.path{11},wb_command); % path to a surface_only dtseries.nii
+        
         reset_temp_file = zeros(size(temp_file.cdata,1),1);
         temp_file.cdata = reset_temp_file;
     else
