@@ -59,7 +59,7 @@ This code uses dense connectivity matrices, a template connectivity matrix, and 
 # Step-by-step Tutorial
 ## Background
 
-A video tutorial for these steps can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/master/TM_additional/TM_Video_Tutorial.mp4).
+A video tutorial for these steps can be found [here](https://gitlab.com/Fair_lab/compare_matrices_to_assign_networks/-/blob/27334fe1c9ea3d968c5a9f4d5cf5b9be3af1c252/TM_README_Images/TM_Video_Tutorial.mp4).
 
 The data are assumed to be processed with the [FreeSurfer processing pipeline](https://github.com/DCAN-Labs/abcd-hcp-pipeline), preferably being in [BIDS format](https://bids-specification.readthedocs.io/). The code assumes that participants have 91282 greyordinates in the cortex and subcortical structures or have cortex-only data with 59412 greyordinates.
 
