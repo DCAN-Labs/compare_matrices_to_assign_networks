@@ -28,9 +28,6 @@ warning('off') %supress addpath warnings to nonfolders.
 for i=1:np
     addpath(genpath(settings.path{i}));
 end
-rmpath('/mnt/max/shared/code/external/utilities/MSCcodebase/Utilities/read_write_cifti') % remove non-working gifti path included with MSCcodebase
-rmpath('/home/exacloud/lustre1/fnl_lab/code/external/utilities/MSCcodebase/Utilities/read_write_cifti'); % remove non-working gifti path included with MSCcodebase
-addpath(genpath('/home/exacloud/lustre1/fnl_lab/code/internal/utilities/plotting-tools'));
 addpath(genpath('/projects/standard/faird/shared/code/internal/utilities/MergeTimeSeries'));
 
 warning('on')
@@ -39,7 +36,7 @@ wb_command=settings.path_wb_c; %path to wb_command
 %% start
 
 %gparcel = parcel;
-%TM80dense = ciftiopen('/home/rando149/shared/projects/ADHD_MedChal/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR.dscalar.nii',wb_command);
+%TM80dense = ciftiopen('/projects/standard/rando149/shared/projects/ADHD_MedChal/TMprobabilistic80.networks_pergrayordinate.32k_fs_LR.dscalar.nii',wb_command);
 if isnumeric(assignments_dscalar_or_vector)
     TM80dscalar = assignments_dscalar_or_vector;
 elseif ischar(assignments_dscalar_or_vector)
@@ -51,11 +48,11 @@ end
 
 nets = unique(nonzeros(TM80dscalar));
 
-%load('/home/rando149/shared/projects/Polyvertexscore/HumanGordon_parcel.mat');
+%load('/projects/standard/rando149/shared/projects/Polyvertexscore/HumanGordon_parcel.mat');
 if ismember(18,nets) ==1 % check to see if the scan is included.  If not load the cannonical network names.
-    load('/home/rando149/shared/projects/Polyvertexscore/parcel_probability_map_wscan.mat','parcel');
+    load('/projects/standard/rando149/shared/projects/Polyvertexscore/parcel_probability_map_wscan.mat','parcel');
 else
-    load('/home/rando149/shared/projects/Polyvertexscore/parcel_probability_map.mat','parcel');
+    load('/projects/standard/rando149/shared/projects/Polyvertexscore/parcel_probability_map.mat','parcel');
 end
 
 new_parcel = parcel;

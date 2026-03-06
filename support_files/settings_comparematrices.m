@@ -112,7 +112,7 @@ switch server_name
         path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
 
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
-        
+       
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
@@ -137,8 +137,8 @@ switch server_name
 
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
-        %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
     case '/panfs/jay' %mesabi
@@ -162,8 +162,8 @@ switch server_name
 
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
-        %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
     case '/tmp' %mesabi
@@ -187,7 +187,9 @@ switch server_name
 
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
         
-        path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        %path_wb_c='/common/software/install/manual/workbench/2.0.1-rocky8/bin/wb_command'; % workbench command path
+        path_wb_c='/projects/standard/faird/shared/code/external/utilities/workbench/2.0.1/workbench/bin_rh_linux64/wb_command';
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
     case '/scratch.g' %/scratch.global
@@ -210,8 +212,8 @@ switch server_name
         path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
 
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
-        
-        path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+       %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        path_wb_c='/common/software/install/manual/workbench/2.0.1-rocky8/bin/wb_command'; % workbench command path
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
     case '/users' %mesabi
@@ -234,8 +236,10 @@ switch server_name
         path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
 
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
-        
-        path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+        %path_wb_c='/common/software/install/manual/workbench/2.0.1-rocky8/bin/wb_command'; % workbench command path
+        path_wb_c='/projects/standard/faird/shared/code/external/utilities/workbench/2.0.1/workbench/bin_rh_linux64/wb_command';
+
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
         
@@ -258,8 +262,10 @@ switch server_name
         %path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/make_dscalar_pics_v9.4.sh';
         path{15}='/projects/standard/faird/shared/code/internal/utilities/figure_maker/quick_network_pic.sh';
         path{16}='/projects/standard/faird/shared/code/internal/utilities/community_detection/fair/supporting_files/EUGEODistancematrix_XYZ_255interhem_unit8.mat';
-        
-        path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+       %path_wb_c='/projects/standard/feczk001/shared/code/external/utilities/workbench/1.4.2/workbench/bin_rh_linux64/wb_command'; % workbench command path
+       %path_wb_c='/common/software/install/manual/workbench/2.0.1-rocky8/bin/wb_command'; % workbench command path
+        path_wb_c='/projects/standard/faird/shared/code/external/utilities/workbench/2.0.1/workbench/bin_rh_linux64/wb_command';
+
         path_template_nets='/projects/standard/faird/shared/code/internal/analytics/compare_matrices_to_assign_networks/support_files/seedmaps_ADHD_smoothed_dtseries315_all_networks_Zscored.mat';
         
         

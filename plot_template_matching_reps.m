@@ -67,7 +67,7 @@ use_cortex_only =1; %will be applied to both datasets.
 num_time_intervals = 8;
 none_minuteslimit = 0;
 num_reps = 10;
-minutes = [1 2 3 4 5 10 15 20];
+minutes = [1 2 3 4 5 10 15 20 25 30];
 
 subject_labelsA ={'sub01','sub02','sub03','sub04','sub05'};
 subject_labelsB ={'MSC01','MSC02','MSC03','MSC04','MSC05','MSC06','MSC07','MSC08','MSC09','MSC10'};

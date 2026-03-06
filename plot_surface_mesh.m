@@ -1,6 +1,6 @@
 function [array_origins, electrode_coordinates, n_2,V_2,p_2] = plot_surface_mesh(vector_mat)
 
-%% Settings
+%% Step 0: Input Data Files
 % outputname_for_cifti_file = 'MSC01_electrode_mappings_BA46';
 % load('C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\MSC01_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz')
 % Lstl='C:\Users\hermosir\Documents\test_ciftis\MSC01_surfaces\T1w_fsaverage\rh.MSC01.L.pial.32k_fs_LR.surf.stl';
@@ -10,14 +10,15 @@ function [array_origins, electrode_coordinates, n_2,V_2,p_2] = plot_surface_mesh
 close all
 %outputname_for_cifti_file = 'PCS0001_elecmapp_';
 %outputname_for_cifti_file = 'PCS0003_elecmapp_';
-outputname_for_cifti_file = 'PCS0004_elecmapp_';
-
+%outputname_for_cifti_file = 'PCS0004_elecmapp_';
+outputname_for_cifti_file = 'PCS0005_elecmapp_';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\test_placements_updated_sulc_depth\Paddles_placement_v5_single_color';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\test_placements_updated_sulc_depth_wfmriprep_v02052024\temp2';
 %output_dir = 'C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\test_placements_updated_sulc_depth_wfmriprep';
 %output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS0003';
 %output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS003_xcpd_surfaces_05292025_postop';
-output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS004';
+%output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS004_10282025';
+output_dir = '/projects/standard/znahas/shared/projects/PCS/test_placements_updated_sulc_depth/sub-PCS005_03032026';
 
 %output_dir = 'C:\Users\hermosir\Desktop\Darrow_pain\RECODE\';
 
@@ -31,8 +32,11 @@ output_dir = '/home/znahas/shared/projects/PCS/test_placements_updated_sulc_dept
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/fmriprep/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
-path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS04/sub-PCS04/ses-1/anat/sub-PCS04_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+%path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-0.10.5/output/PCS04/sub-PCS04/ses-1/anat/sub-PCS04_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
 %path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/xcpd/output/PCS03/sub-PCS03/ses-1/anat/sub-PCS03_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+%path_sulc_dscalar='/home/znahas/shared/projects/PCS/tm_sandbox/fmriprep-25.2.3/output/PCS04/sub-PCS04/ses-1/anat/sub-PCS04_ses-1_run-01_space-fsLR_den-91k_sulc.dscalar.nii';
+path_sulc_dscalar='/projects/standard/znahas/shared/projects/PCS/tm_sandbox/fmriprep-25.2.3/output/PCS0005/sub-PCS0005/ses-1/anat/sub-PCS0005_ses-1_space-fsLR_den-91k_sulc.dscalar.nii';
+
 %xcp
 %load('C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\sub-PCS0001_T1w_fsaverage_LR32k_xzy_raw_coordinates.mat','allxyz');
 %Lstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\surface_coords\xcp_pipeline\resampled_sub-PCS0001_ses-01_hemi-L_pial.surf.stl';
@@ -52,7 +56,9 @@ path_sulc_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/xcpd-
 %load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_fMRIPrep_pial_xyz_raw_coordinates.mat');
 %load('/home/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS0003_T1w_MNIspace_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
 %load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS0004_T1w_MNIspace_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
-load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS0004_T1w_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+%load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS0004_T1w_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+%load('/home/znahas/shared/projects/PCS/native_coordinates_for_surfaces/PCS-0004_ses01_coordinates/sub-PCS0004_T1w_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
+load('/projects/standard/znahas/shared/projects/PCS/native_coordinates_for_surfaces/PCS-0005_ses01_coordinates/sub-PCS0005_T1w_fsLR32k_xcpd_pial_xyz_raw_coordinates.mat');
 
 %Lstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_den-32k_hemi-L_desc-msmsulc_pial.surf.stl';
 %Rstl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\anatomy\sub-PCS03_ses-1_run-01_den-32k_hemi-R_desc-msmsulc_pial.surf.stl';
@@ -62,12 +68,17 @@ load('/home/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordi
 %Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_fsLR_32k_space_surfaces/PCS-0003_ses01_coordinates/sub-PCS03_ses-1_run-01_hemi-R_space-fsLR_den-32k_pial.stl';
 %Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS04_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
 %Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/sub-PCS04_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.stl';
-Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/lh.pial.32k.msm.surf.stl';
-Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/rh.pial.32k.msm.surf.stl';
+%Lstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/lh.pial.32k.msm.surf.stl';
+%Rstl='/panfs/jay/groups/14/znahas/shared/projects/PCS/xcp_native_surfaces/PCS-0004_ses01_coordinates/rh.pial.32k.msm.surf.stl';
+%Lstl='/home/znahas/shared/projects/PCS/native_coordinates_for_surfaces/PCS-0004_ses01_coordinates/sub-PCS04_ses-1_run-01_hemi-L_space-fsLR_den-32k_pial.surf.stl';
+%Rstl='/home/znahas/shared/projects/PCS/native_coordinates_for_surfaces/PCS-0004_ses01_coordinates/sub-PCS04_ses-1_run-01_hemi-R_space-fsLR_den-32k_pial.surf.stl';
+Lstl='/projects/standard/znahas/shared/projects/PCS/native_coordinates_for_surfaces/PCS-0005_ses01_coordinates/sub-PCS0005_ses-1_hemi-L_space-fsLR_den-32k_pial.surf.stl';
+Rstl='/projects/standard/znahas/shared/projects/PCS/native_coordinates_for_surfaces/PCS-0005_ses01_coordinates/sub-PCS0005_ses-1_hemi-R_space-fsLR_den-32k_pial.surf.stl';
+
 
 
 %paddlestl='C:\Users\hermosir\Desktop\TRD_precision_neuromod\LAMITRODE_44_blocky.stl';
-paddlestl='/home/znahas/shared/projects/PCSLAMITRODE_44_blocky.stl';
+paddlestl='/home/znahas/shared/projects/PCS/LAMITRODE_44_blocky.stl';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\TM_networks\ses-01to02_with_ses-01_bad_runs_excluded_smoothed2.55_withoutlier_detection\sub-PCS0001_ses-01to02_task-restMENORDICrmnoisevols_space-fsLR_den-91k_desc-denoisedDilated30mm_bold_SMOOTHED_2.55_bad_runs_excluded_Zscored_recolored.dscalar.nii';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\Infomap\merged_dtseries\ses-01to02_with_ses-01_bad_runs_excluded_smoothed2.55_withoutlier_detectionZscored.dconn.nii_merged_dtseries_infomap_densities_allcolumns_recolored_manual_colors2.dscalar.nii';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\Infomap\merged_dtseries\ses-01to02_with_ses-01_bad_runs_excluded_smoothed2.55_withoutlier_detectionZscored.dconn.nii_merged_dtseries_infomap_densities_allcolumns_recolored_manual_colors.dscalar.nii';
@@ -76,17 +87,10 @@ paddlestl='/home/znahas/shared/projects/PCSLAMITRODE_44_blocky.stl';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\precision_networks\TM_networks\sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\PCS-0003\precision_networks\TM_networks\sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
 %network_dscalar='/panfs/jay/groups/14/znahas/shared/projects/PCS/precision_networks/template2.0/sub-PCS0003_ses-01/sub-PCS0003_ses-01_template2.0_fMRIPrep_Zscored_scanthresh3_recolored.dscalar.nii';
-network_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/fmriprep-24.1.1-xcpd-0.10.7/PCS04/PCM/ExpData-fullm/figures/Percent_Holdout-100/ciftis/Mode_of_Shuffled_dscalars_Percent_holdout_population_mode.dscalar.nii';
-
+%network_dscalar='/home/znahas/shared/projects/PCS/kw_sandbox/derivatives/fmriprep-24.1.1-xcpd-0.10.7/PCS04/PCM/ExpData-fullm/figures/Percent_Holdout-100/ciftis/Mode_of_Shuffled_dscalars_Percent_holdout_population_mode.dscalar.nii';
+%network_dscalar='/home/znahas/shared/projects/PCS/tm_sandbox/derivatives/fmriprep-25.2.3-xcpd-0.12.0/PCS04/PCM/ExpData-fullm/figures/Percent_Holdout-100/ciftis/Mode_of_Shuffled_dscalars_Percent_holdout_population_mode.dscalar.nii';
+network_dscalar='/projects/standard/znahas/shared/projects/PCS/tm_sandbox/PCM/ExpData-fullm/figures/Percent_Holdout-100/ciftis/Mode_of_Shuffled_dscalars_Percent_holdout_population_mode.dscalar.nii';
 %network_dscalar='C:\Users\hermosir\Desktop\TRD_precision_neuromod\Infomap_from_evan_gordon\PCS0001_networks_simple_recolored.dtseries.nii';
-testset=1;
-
-num_stim_paddels = 4;
-%num_stim_paddels = 1;
-
-paddles_list={'44','44_mirror'};
-%paddles_list={'1cm_3x3grid'};
-
 
 %ctscan_placements = [25995 27459 54809 56935]; %[ left medial; left lateral; right medial right lateral];
 %ctscan_placements = [26100 26885 55673 46458]; rough estimates
@@ -94,7 +98,7 @@ paddles_list={'44','44_mirror'};
 
 % potential sites.
 %Llat=[26834 27126 27215 27341 27181 27267 27501 27607 27668 27534 27310 26934];
-plot_model_on_brain=0;
+
 %Llat=[27258]; %paddle1
 %Lmed=[25804]; %paddle2
 %Rlat=[36031]; %paddle3
@@ -124,33 +128,58 @@ plot_model_on_brain=0;
 % Rlat=[56500]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
 % Rmed=[54947]; %Rmed=[55237];% Rmed=[55237]; %paddle4
 
-%PCS-0004 Pre-op planning
-Llat=[26999];% Llat=[16520]; %paddle1
-Lmed=[26159]; %Lmed=[25682];% Lmed=[25959]; %paddle2
-Rlat=[56886]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
-Rmed=[55154]; %Rmed=[55237];% Rmed=[55237]; %paddle4
+% %PCS-0004 Pre-op planning1
+% Llat=[26999];% Llat=[16520]; %paddle1
+% Lmed=[26159]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+% Rlat=[56886]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+% Rmed=[55154]; %Rmed=[55237];% Rmed=[55237]; %paddle4
+%PCS-0004 Pre-op planning2
+%Llat=[26984];% Llat=[16520]; %paddle1
+%Lmed=[25925]; %Lmed=[25887]; %Lmed=[25478]; %Lmed=[25682];% Lmed=[25959]; %paddle2
+%Rlat=[56500]; %Rlat=[46791]; %Rlat=[56454];% Rlat=[56505]; %paddle3
+%Rmed=[55408]; %Rmed=[55408];%Rmed=[55443]; %Rmed=[55237];% Rmed=[55237]; %paddle4
 
+%PCS-0005 Pre-op planning
+Llat=[27171]; %paddle1
+Lmed=[26367]; %paddle2
+Rlat=[46590]; %paddle3
+Rmed=[55837]; %paddle4
 %ctscan_rotations = [-20 -40 80 -45];
-%PCS-0001
-rotations = [-10 45 120 0];
+
+rotations = [0 0 0 0];
+
 %use  60o for 25923 for PCS003
 sulc_depth_threshold = 2.5; %0.1; %typically use 0.35 %larger numbers are more superficial. Recommend to set to 0.15 or greater
 
-
-r=14; % paddle lenth is 28mm, so we set the radius of the sphere to be half be half that length.
+r=14; % paddle length is 28mm, so we set the radius of the sphere to be half be half that length.
 planar_radius=14; %or 14
 usedistweights =0; %generate plane using by eighting points closer to the desired grayordinate
 weightby_sulc_depth_similarity=0; %with above, weight the tangential plane based on the similarity of the sulcal depth of the desired point.
-force_normal_positive=1; %This will ensure that your normal vector points upward.
+force_normal_downward=1; %This will hopefully ensure that your normal vector points downward.
 move_bullseye_to_gray=1;% If set to 0, then the position of center of the paddle will be based on the average x,y,z positions of the sulcus-thresholded grayordinates.  If set to 1, then the paddle will be centered exactly at the grayordinate position
 save_paddle_dscalars =1;% This will save the data as a dscalar.
-num_electrode_contacts = 8;
+num_electrode_contacts = 8; % this is fixed at 8 for the lamitrode 44.
 electrode_sphere_edge_color = 'none';
 electrode_sphere_face_color = [0.7 0.7 0.7];
 electrode_sphere_facealpha = 0.2;
 run_locally =0; % set this to 1, if using Robert's computer.  Set to 0 if if you're running this on a computing cluster.  This variable's purpose is simply to automate dependencies.
 save_all_electrodes_one_color =0; % If this value is set to 1, then the dscalar will have a value of 1.  If set to 0, then the dscalrs will have the network assignments.
 
+plot_l_mesh =1;
+plot_r_mesh =1;
+electrode_sphere_size = 2.3585; %comes from the length of the diagonla of the contact electrode.
+%the following values (caz, cel) come from the view function.  Set hese
+%here so that you don't have to spin the view around every time. e.g. [caz,cel] = view
+caz =-226; %-137.1935; % -158.4424;
+cel =10; %21.8488; %31.8495;
+
+plot_paddles_on_brain=0; %plot the stl models of the paddle on the brain.
+num_stim_paddels = 4;
+paddles_list={'44','44_mirror'};
+%paddles_list={'1cm_3x3grid'};
+testset=1;
+
+%% Start
 placements=[Llat(testset) Lmed(testset) Rlat(testset) Rmed(testset)];
 test_vertex(1,1) = placements(1);
 
@@ -162,14 +191,6 @@ electrode_array_orient(3,1) = rotations(3); %0
 test_vertex(4,1) = placements(4);
 electrode_array_orient(4,1) = rotations(4); %230
 
-%test_vertex = 7998; %try 14533 27078 28155 %39629-Rhemi BA10-28481 BA46:27078:orient 180
-%electrode_array_orient = 70; % rotation in degrees
-
-
-%r=7.5; % paddle lenth is 28mm, so we set the radius of the sphere to be half be half that length.
-
-plot_l_mesh =0;
-plot_r_mesh =0;
 
 if save_all_electrodes_one_color ==1
     all_electrodes_value = 1000;
@@ -177,11 +198,7 @@ if save_all_electrodes_one_color ==1
 else
     multinet='true';
 end
-electrode_sphere_size = 2.3585; %comes from the length of the diagonla of the contact electrode.
-%the following values (caz, cel) come from the view function.  Set hese
-%here so that you don't have to spin the view around every time. e.g. [caz,cel] = view
-caz =-226; %-137.1935; % -158.4424;
-cel =10; %21.8488; %31.8495;
+
 
 if usedistweights ==1
     plandistweight='true'
@@ -262,7 +279,7 @@ if plot_r_mesh ==1
     pdegplot(gm2)
     hold on
 end
-if plot_model_on_brain ==1
+if plot_paddles_on_brain ==1
     model3 = createpde;
     gm3 =importGeometry(model3,paddlestl);
     %translate(gm3,[50,100, 50]);
@@ -413,7 +430,7 @@ for elec = 1:num_stim_paddels
         V_2 = V_2_all{elec};
         p_2 = p_2_all{elec};
     else
-        [n_2,V_2,p_2] = affine_fit(cell2mat(planar_xyzs(elec)),usedistweights,force_normal_positive,weightby_sulc_depth_similarity,thisgray_sulc_depth(elec,1),within_sphere_sulc_dephs{elec,1});
+        [n_2,V_2,p_2] = affine_fit(cell2mat(planar_xyzs(elec)),usedistweights,force_normal_downward,weightby_sulc_depth_similarity,thisgray_sulc_depth(elec,1),within_sphere_sulc_dephs{elec,1});
         if move_bullseye_to_gray ==1
             p_2=[xyz_surface_only(test_vertex(elec,1),1),xyz_surface_only(test_vertex(elec,1),2),xyz_surface_only(test_vertex(elec,1),3)];
             
@@ -734,18 +751,20 @@ for n=1:size(paddles_list,2)
             
             all_origins{n,1}=array_origins;
             
-        if n~=1 %check to make sure that you don't plot multiple array on top of each other.
-            disp('Note: not replotting 3D paddle data over first paddle type (if you are looking for the mirrored 3d plot).')
-        else
+         figure(placefig) % make sure that we're working on the paddel figure.
+         if n~=2 %check to make sure that you don't plot multiple array on top of each other.
+             
+             disp('Note: not replotting 3D paddle data over first paddle type (if you are looking for the mirrored 3d plot).')
+         else
             
-            fill3(X1,Y1,Z1,[0.9 0.9 0.9],'FaceAlpha',0.5)
+            fill3(X1,Y1,Z1,[0.0 0.9 0.0],'FaceAlpha',0.9)% blue for 
             fill3(X2,Y2,Z2,[0.9 0.9 0.9],'FaceAlpha',0.5)
             fill3(X3,Y3,Z3,[0.9 0.9 0.9],'FaceAlpha',0.5)
             fill3(X4,Y4,Z4,[0.9 0.9 0.9],'FaceAlpha',0.5)
             fill3(X5,Y5,Z5,[0.9 0.9 0.9],'FaceAlpha',0.5)
             fill3(X6,Y6,Z6,[0.9 0.9 0.9],'FaceAlpha',0.5)
-            fill3(X7,Y7,Z7,[0.9 0.9 0.9],'FaceAlpha',0.5)
-            fill3(X8,Y8,Z8,[0.9 0.9 0.9],'FaceAlpha',0.5)
+            fill3(X7,Y7,Z7,[0.9 0.9 0.9],'FaceAlpha',0.5) 
+            fill3(X8,Y8,Z8,[0.9 0.0 0.0],'FaceAlpha',0.9) % color the tip, which is number 5 on spec sheet, red.
             %A =plotcube(X,Y,Z);
             
             %show paddle origin
@@ -990,7 +1009,7 @@ end
 save([output_dir filesep outputname_for_cifti_file '_mc-' multinet '_sulc-' num2str(sulc_depth_threshold) '_plan_rad-' num2str(planar_radius) '_plandw' num2str(plandistweight) '_paddle-' lamatrode '_array' num2str(elec) '_gray' num2str(test_vertex(elec,1)) '_rotat' num2str(electrode_array_orient(elec,1)) '_deg.mat'],'n_2_all','V_2_all','p_2_all',...
     'Llat','Lmed','Rlat','Rmed','rotations','sulc_depth_threshold','paddle_coordinates','electrode_coordinates','all_origins',...
     'r','planar_radius','sulc_depth_threshold','usedistweights','weightby_sulc_depth_similarity',...
-    'force_normal_positive','move_bullseye_to_gray','save_paddle_dscalars','num_electrode_contacts',...
+    'force_normal_downward','move_bullseye_to_gray','save_paddle_dscalars','num_electrode_contacts',...
     'electrode_sphere_edge_color','electrode_sphere_face_color','electrode_sphere_facealpha','run_locally','save_all_electrodes_one_color',...
     'path_sulc_dscalar','network_dscalar','paddles_list');
 
